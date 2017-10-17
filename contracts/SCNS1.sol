@@ -9,6 +9,7 @@ contract SCNS1 is ERC20 {
 	function vote(uint256 id, bytes32 option) public returns (bool);
 	function getResultsForOption(uint256 id, bytes32 option) public returns (bool);
 	event PollCreated(address creator, uint256 id, bytes32 question, bytes32[] options, uint256 minimumTokens, uint256 startTime, uint256 endTime);
+	event Voted(uint256 indexed pollId, address voter, uint256 option);
 
 	//Escrow
 	function approveLockedTransfer(address to, address authority, uint256 referenceId, uint256 value, uint256 authorityFee, uint256 expirationTime, bool backIfExpires) public returns (uint256);
