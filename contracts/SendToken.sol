@@ -4,7 +4,7 @@ import 'zeppelin-solidity/contracts/token/StandardToken.sol';
 import './SCNS1.sol';
 
 contract SendToken is StandardToken, SCNS1 {
-
+	/*
 	//Voting
 	function createPoll(uint256 _id, bytes32 _question, bytes32[] _options, uint256 _minimumTokens, uint256 _startTime, uint256 _endTime){
 
@@ -32,10 +32,28 @@ contract SendToken is StandardToken, SCNS1 {
 	function invalidateLockedTransferExpiration(address sender, uint256 referenceId){
 
 	}
-
+	*/
 	//Consensus Network
-	function verifiedTransferFrom(address from, address to, uint256 value, uint256 referenceId, uint256 exchangeRate){
+	function verifiedTransferFrom(address _from, address _to, uint256 _value, uint256 _referenceId, uint256 _exchangeRate, uint256 _fee) public returns (bool) {
+		require(_to != address(0));
 
-	}
+		uint256 total = _value.add(_fee);
+
+		require(total <= balances[_from]);
+		require(total <= allowed[_from][msg.sender]);
+
+		balances[_from] = balances[_from].sub(_value);
+		balances[_to] = balances[_to].add(_value);
+
+		if(_fee >= 0){
+			balances[_from] = balances[_from].sub(_fee);
+			balances[msg.sender] = balances[msg.sender].add(_fee);
+		}
+
+		allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(total);
+		VerifiedTransfer(_from, _to, msg.sender, _value, _referenceId, _exchangeRate);
+
+		return true;
+		}
 
 }
