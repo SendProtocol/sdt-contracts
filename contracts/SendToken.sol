@@ -3,7 +3,7 @@ pragma solidity ^0.4.15;
 import 'zeppelin-solidity/contracts/token/StandardToken.sol';
 import './SCNS1.sol';
 
-contract SendToken is StandardToken, SCNS1 {
+contract SendToken is SCNS1, StandardToken {
 	
 	//Voting
 	struct poll {
@@ -71,20 +71,20 @@ contract SendToken is StandardToken, SCNS1 {
 		balances[msg.sender] = balances[msg.sender].sub(total);
 
 		return true;
-	}/*
-	function executeLockedTransfer(address sender, uint256 referenceId){
-
 	}
-	function rollbackLockedTransfer(address sender, uint256 referenceId){
-
+	function executeLockedTransfer(address sender, uint256 referenceId) public returns (bool){
+		return true;
 	}
-	function claimLockedTransfer(address sender, address authority, uint256 referenceId){
-
+	function rollbackLockedTransfer(address sender, uint256 referenceId) public returns (bool){
+		return true;
 	}
-	function invalidateLockedTransferExpiration(address sender, uint256 referenceId){
-
+	function claimLockedTransfer(address sender, address authority, uint256 referenceId) public returns (bool){
+		return true;
 	}
-	*/
+	function invalidateLockedTransferExpiration(address sender, uint256 referenceId) public returns (bool){
+		return true;
+	}
+	
 	//Consensus Network
 	function verifiedTransferFrom(address _from, address _to, uint256 _value, uint256 _referenceId, uint256 _exchangeRate, uint256 _fee) public returns (bool) {
 		require(isVerified[msg.sender]);
