@@ -29,7 +29,7 @@ contract SendToken is SCNS1, StandardToken {
 
 	function createPoll(uint256 _id, bytes32 _question, bytes32[] _options, uint256 _minimumTokens, uint256 _startTime, uint256 _endTime) public returns (bool){
 		require(isVerified[msg.sender]);
-		require(polls[_id].creator != 0);
+		require(polls[_id].creator == 0);
 
 		polls[_id].creator = msg.sender;
 		polls[_id].question = _question;
