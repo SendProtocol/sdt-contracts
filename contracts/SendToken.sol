@@ -21,7 +21,7 @@ contract SendToken is SCNS1, StandardToken {
 		uint256 expirationTime;
 	}
 
-	mapping (address => uint256) lockedBalances;
+	mapping (address => uint256) internal lockedBalances;
 	mapping (address => mapping(address => mapping(uint256 => lock))) internal lockedAllowed;
 	mapping (uint256 => poll) internal polls;
 	mapping (address => bool) internal isVerified;
