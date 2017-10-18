@@ -19,7 +19,6 @@ contract SendToken is SCNS1, StandardToken {
 		uint256 value;
 		uint256 fee;
 		uint256 expirationTime;
-		bool backIfExpires;
 	}
 
 	mapping (address => uint256) lockedBalances;
@@ -57,31 +56,66 @@ contract SendToken is SCNS1, StandardToken {
 	}
 	
 	//Escrow
-	function approveLockedTransfer(address _authority, uint256 _referenceId, uint256 _value, uint256 _authorityFee, uint256 _expirationTime, bool _backIfExpires) public returns (bool){
+	function approveLockedTransfer(address _authority, uint256 _referenceId, uint256 _value, uint256 _authorityFee, uint256 _expirationTime) public returns (bool){
 		uint256 total = _value + _authorityFee;
 
+		require(lockedAllowed[msg.sender][_authority][_referenceId].value == 0);
 		require(balances[msg.sender] >= total);
 
 		lockedAllowed[msg.sender][_authority][_referenceId].value = _value;
 		lockedAllowed[msg.sender][_authority][_referenceId].fee = _authorityFee;
 		lockedAllowed[msg.sender][_authority][_referenceId].expirationTime = _expirationTime;
-		lockedAllowed[msg.sender][_authority][_referenceId].backIfExpires = _backIfExpires;
 
 		lockedBalances[msg.sender] = lockedBalances[msg.sender].add(total);
 		balances[msg.sender] = balances[msg.sender].sub(total);
 
+		EscrowCreated(msg.sender, _authority, _referenceId);
+
 		return true;
 	}
-	function executeLockedTransfer(address sender, uint256 referenceId) public returns (bool){
+	function executeLockedTransfer(address _sender, address _recipient, uint256 _referenceId, uint256 _exchangeRate) public returns (bool){
+		require(lockedAllowed[_sender][msg.sender][_referenceId].value > 0);
+
+		uint256 _value = lockedAllowed[_sender][msg.sender][_referenceId].value;
+		uint256 _fee = lockedAllowed[_sender][msg.sender][_referenceId].fee;
+
+		if (isVerified[msg.sender]) require(_exchangeRate > 0);
+		else require(_exchangeRate == 0);
+
+		lockedBalances[_sender] = lockedBalances[_sender].sub(_value + _fee);
+		balances[_recipient] = balances[_recipient].add(_value);
+		if(_fee > 0) balances[msg.sender] = balances[msg.sender].add(_fee);
+
+		delete lockedAllowed[_sender][msg.sender][_referenceId];
+
+		EscrowResolved(_sender, msg.sender, _referenceId, msg.sender, _recipient);
+		if(_exchangeRate == 0) {
+			Transfer(_sender, _recipient, _value);
+		} else {
+			VerifiedTransfer(_sender, _recipient, msg.sender, _value, _referenceId, _exchangeRate);
+		}
+		return true;
+
+	}
+	function claimLockedTransfer(address _authority, uint256 _referenceId) public returns (bool){
+		require(lockedAllowed[msg.sender][_authority][_referenceId].value > 0);
+		require(lockedAllowed[msg.sender][_authority][_referenceId].expirationTime < block.timestamp);
+		require(lockedAllowed[msg.sender][_authority][_referenceId].expirationTime != 0);
+
+		uint256 _value = lockedAllowed[msg.sender][_authority][_referenceId].value;
+		uint256 _fee = lockedAllowed[msg.sender][_authority][_referenceId].fee;
+
+		lockedBalances[msg.sender] = lockedBalances[msg.sender].sub(_value.add(_fee));
+		balances[msg.sender] = balances[msg.sender].add(_value.add(_fee));
+
+		delete lockedAllowed[msg.sender][_authority][_referenceId];
+
+		EscrowResolved(msg.sender, _authority, _referenceId, msg.sender, msg.sender);
 		return true;
 	}
-	function rollbackLockedTransfer(address sender, uint256 referenceId) public returns (bool){
-		return true;
-	}
-	function claimLockedTransfer(address sender, address authority, uint256 referenceId) public returns (bool){
-		return true;
-	}
-	function invalidateLockedTransferExpiration(address sender, uint256 referenceId) public returns (bool){
+	function invalidateLockedTransferExpiration(address _sender, uint256 _referenceId) public returns (bool){
+		require(lockedAllowed[_sender][msg.sender][_referenceId].value > 0);
+		lockedAllowed[_sender][msg.sender][_referenceId].expirationTime = 0;
 		return true;
 	}
 	
@@ -95,13 +129,9 @@ contract SendToken is SCNS1, StandardToken {
 		require(total <= balances[_from]);
 		require(total <= allowed[_from][msg.sender]);
 
-		balances[_from] = balances[_from].sub(_value);
+		balances[_from] = balances[_from].sub(total);
 		balances[_to] = balances[_to].add(_value);
-
-		if(_fee >= 0){
-			balances[_from] = balances[_from].sub(_fee);
-			balances[msg.sender] = balances[msg.sender].add(_fee);
-		}
+		if(_fee >= 0) balances[msg.sender] = balances[msg.sender].add(_fee);
 
 		allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(total);
 		VerifiedTransfer(_from, _to, msg.sender, _value, _referenceId, _exchangeRate);

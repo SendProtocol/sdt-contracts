@@ -10,6 +10,6 @@ contract SDT is SendToken {
 	function SDT(uint256 _supply){
 		balances[msg.sender] = _supply;
 		totalSupply = _supply;
-	}
+	}	
 
 }

@@ -11,13 +11,12 @@ contract SCNS1 is ERC20 {
 	event Voted(uint256 indexed pollId, address voter, uint256 option);
 	
 	//Escrow
-	function approveLockedTransfer(address authority, uint256 referenceId, uint256 value, uint256 authorityFee, uint256 expirationTime, bool backIfExpires) public returns (bool);
-	function executeLockedTransfer(address sender, uint256 referenceId) public returns (bool);
-	function rollbackLockedTransfer(address sender, uint256 referenceId) public returns (bool);
-	function claimLockedTransfer(address sender, address authority, uint256 referenceId) public returns (bool);
+	function approveLockedTransfer(address authority, uint256 referenceId, uint256 value, uint256 authorityFee, uint256 expirationTime) public returns (bool);
+	function executeLockedTransfer(address sender, address recipient, uint256 referenceId, uint256 exchangeRate) public returns (bool);
+	function claimLockedTransfer(address authority, uint256 referenceId) public returns (bool);
 	function invalidateLockedTransferExpiration(address sender, uint256 referenceId) public returns (bool);
-	event EscrowCreated(address sender, address recipient, address indexed authority, uint256 referenceId);
-	event EscrowResolved(address sender, address recipient, address indexed authority, uint256 referenceId, address resolver, address sentTo);
+	event EscrowCreated(address indexed sender, address indexed authority, uint256 referenceId);
+	event EscrowResolved(address indexed sender, address indexed authority, uint256 referenceId, address resolver, address sentTo);
 	
 	//Consensus Network
 	function verifiedTransferFrom(address from, address to, uint256 value, uint256 referenceId, uint256 exchangeRate, uint256 fee) public returns (bool);
