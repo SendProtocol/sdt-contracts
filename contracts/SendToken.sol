@@ -46,8 +46,8 @@ contract SendToken is SCNS1, StandardToken {
 		require(polls[_id].creator != 0);
 		require(voted[_id][msg.sender] == false);
 		require(balances[msg.sender] >= polls[_id].minimumTokens);
-		require(polls[_id].startTime >= block.timestamp);
-		require(polls[_id].endTime <= block.timestamp);
+		require(polls[_id].startTime <= block.timestamp);
+		require(polls[_id].endTime >= block.timestamp);
 
 		voted[_id][msg.sender] = true;
 		Voted(_id, msg.sender, _option);
