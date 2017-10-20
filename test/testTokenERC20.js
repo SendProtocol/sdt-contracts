@@ -91,23 +91,24 @@ contract('SDT', function(accounts) {
 		}
 	});
 
-	describe('validating allowance updates to spender', async function() {
+	describe('validating allowance updates to spender', function() {
 		let preApproved;
-		let token = await SDT.new(100);
+		let token;
 
 		it('should start with zero', async function() {
+			token = await SDT.new(100);
 			preApproved = await token.allowance(accounts[0], accounts[1]);
-			assert.equal(preApproved, 0);
-		})
+			assert.equal(preApproved.valueOf(), 0);
+		});
 
 		it('should increase by 50 then decrease by 10', async function() {
 			await token.increaseApproval(accounts[1], 50);
 			let postIncrease = await token.allowance(accounts[0], accounts[1]);
-			preApproved.plus(50).should.be.bignumber.equal(postIncrease);
+			assert.equal(preApproved.plus(50).valueOf(), postIncrease.valueOf());
 			await token.decreaseApproval(accounts[1], 10);
 			let postDecrease = await token.allowance(accounts[0], accounts[1]);
-			postIncrease.minus(10).should.be.bignumber.equal(postDecrease);
-		})
+			assert.equal(postIncrease.minus(10), postDecrease.valueOf());
+		});
 	});
 
 	it('should increase by 50 then set to 0 when decreasing by more than 50', async function() {

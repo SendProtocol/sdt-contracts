@@ -8,8 +8,6 @@ contract SendToken is SCNS1, StandardToken {
 	//Voting
 	struct poll {
 		address creator;
-		bytes32 question;
-		bytes32[] options;
 		uint256 minimumTokens;
 		uint256 startTime;
 		uint256 endTime;
@@ -23,7 +21,7 @@ contract SendToken is SCNS1, StandardToken {
 
 	mapping (address => uint256) internal lockedBalances;
 	mapping (address => mapping(address => mapping(uint256 => lock))) internal lockedAllowed;
-	mapping (uint256 => poll) internal polls;
+	mapping (uint256 => poll) public polls;
 	mapping (address => bool) internal isVerified;
 	mapping (uint256 => mapping(address => bool)) internal voted;
 
@@ -32,8 +30,6 @@ contract SendToken is SCNS1, StandardToken {
 		require(polls[_id].creator == 0);
 
 		polls[_id].creator = msg.sender;
-		polls[_id].question = _question;
-		polls[_id].options = _options;
 		polls[_id].minimumTokens = _minimumTokens;
 		polls[_id].startTime = _startTime;
 		polls[_id].endTime = _endTime;
@@ -42,6 +38,7 @@ contract SendToken is SCNS1, StandardToken {
 
 		return true;
 	}
+
 	function vote(uint256 _id, uint256 _option) public returns (bool){
 		require(polls[_id].creator != 0);
 		require(voted[_id][msg.sender] == false);
