@@ -42,7 +42,7 @@ contract('SDT', function(accounts) {
 	describe('vote', function() {
 		it('should return true if voting user meets condition', async function() {
 			token = await SDT.new(1);
-			await token.createPoll(1, "is this working?", ["yes", "nope"], 1, 0, futureDate);
+			await token.createPoll(1, "is this working?", ["yes", "nope"], 1, 10, futureDate);
 			let response = await token.vote(1,0);
 			assert(response);
 		});

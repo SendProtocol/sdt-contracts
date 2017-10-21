@@ -53,6 +53,11 @@ contract SendToken is SCNS1, StandardToken {
 	}
 	
 	//Escrow
+
+	function lockedBalanceOf(address _owner) public constant returns (uint256){
+		return lockedBalances[_owner];
+	}
+
 	function approveLockedTransfer(address _authority, uint256 _referenceId, uint256 _value, uint256 _authorityFee, uint256 _expirationTime) public returns (bool){
 		uint256 total = _value + _authorityFee;
 

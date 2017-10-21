@@ -11,6 +11,7 @@ contract SCNS1 is ERC20 {
 	event Voted(uint256 indexed pollId, address voter, uint256 option);
 	
 	//Escrow
+	function lockedBalanceOf(address _owner) public constant returns (uint256);
 	function approveLockedTransfer(address authority, uint256 referenceId, uint256 value, uint256 authorityFee, uint256 expirationTime) public returns (bool);
 	function executeLockedTransfer(address sender, address recipient, uint256 referenceId, uint256 exchangeRate) public returns (bool);
 	function claimLockedTransfer(address authority, uint256 referenceId) public returns (bool);
