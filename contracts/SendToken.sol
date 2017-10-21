@@ -91,6 +91,9 @@ contract SendToken is SCNS1, StandardToken {
 		delete lockedAllowed[_sender][msg.sender][_referenceId];
 
 		EscrowResolved(_sender, msg.sender, _referenceId, msg.sender, _recipient);
+
+		if(_sender == _recipient) return true;
+
 		if(_exchangeRate == 0) {
 			Transfer(_sender, _recipient, _value);
 		} else {
