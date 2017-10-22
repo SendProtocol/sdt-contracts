@@ -1,3 +1,5 @@
+'use strict';
+
 const SDT = artifacts.require("./SDT.sol");
 
 contract('SDT', function(accounts) {
