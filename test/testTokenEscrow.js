@@ -107,11 +107,11 @@ contract('SDT', function(accounts) {
 			let locked = await token.lockedBalanceOf(accounts[0]);
 			assert.equal(locked, 0);
 			let balanceSender = await token.balanceOf(accounts[0]);
-			assert.equal(balanceSender, amount(1) - 101);
+			assert.equal(balanceSender, amount(1) - (valueToApprove + fee));
 			let balanceRecipient = await token.balanceOf(accounts[2]);
-			assert.equal(balanceRecipient, 100);
+			assert.equal(balanceRecipient, valueToApprove);
 			let balanceAuthority = await token.balanceOf(accounts[1]);
-			assert.equal(balanceAuthority, 1);
+			assert.equal(balanceAuthority, fee);
 		});	
 
 		it('should fail if exchange rate not set', async function() {
@@ -148,9 +148,9 @@ contract('SDT', function(accounts) {
 			let balanceSender = await token.balanceOf(accounts[2]);
 			assert.equal(balanceSender, 0);
 			let balanceRecipient = await token.balanceOf(accounts[3]);
-			assert.equal(balanceRecipient, 100);
+			assert.equal(balanceRecipient, valueToApprove);
 			let balanceAuthority = await token.balanceOf(accounts[0]);
-			assert.equal(balanceAuthority, amount(1) - 101);
+			assert.equal(balanceAuthority, amount(1) - (valueToApprove + fee));
 		});	
 
 		it('should fail if already resolved', async function() {
@@ -243,6 +243,90 @@ contract('SDT', function(accounts) {
 	});	
 
 	describe('escrow mediate', function() {
+		let referenceId = 1;
+		let referenceIdTwo = 2;
+		let valueToApprove = 100;
+		let fee = 1;
+		let exchangeRate = 0;
+
+		it('should lock amount + fee', async function() {
+			token = await SDT.new(1);
+			await token.approveLockedTransfer(
+				accounts[1], 
+				referenceId, 
+				valueToApprove, 
+				fee, 
+				pastDate
+			);
+			let locked = await token.lockedBalanceOf(accounts[0]);
+			assert.equal(locked, valueToApprove + fee);
+			let balance = await token.balanceOf(accounts[0]);
+			assert.equal(balance, amount(1) - (valueToApprove + fee));
+		});
+
+		it('should should fail if user tries to claim tokens after invalidation', async function() {
+			await token.invalidateLockedTransferExpiration(
+				accounts[0], 
+				referenceId, 
+				{from: accounts[1]});
+
+			try {
+				await token.claimLockedTransfer(accounts[1], referenceId);
+				assert.fail('should have thrown before');
+			} catch(error) {
+				let locked = await token.lockedBalanceOf(accounts[0]);
+				assert.equal(locked, valueToApprove + fee);
+				let balance = await token.balanceOf(accounts[0]);
+				assert.equal(balance, amount(1) - (valueToApprove + fee));
+				assertJump(error);
+			}
+		});
+
+		it('should be able to release tokens', async function() {
+			await token.executeLockedTransfer(
+				accounts[0], 
+				accounts[2], 
+				referenceId, 
+				0, 
+				{from: accounts[1]}
+			);
+			let locked = await token.lockedBalanceOf(accounts[0]);
+			assert.equal(locked, 0);
+			let balanceSender = await token.balanceOf(accounts[0]);
+			assert.equal(balanceSender, amount(1) - (valueToApprove + fee));
+			let balanceRecipient = await token.balanceOf(accounts[2]);
+			assert.equal(balanceRecipient, valueToApprove);
+			let balanceAuthority = await token.balanceOf(accounts[1]);
+			assert.equal(balanceAuthority, 1);
+		});
+
+		it('should be able to unlock tokens', async function() {
+			token = await SDT.new(1);
+			await token.approveLockedTransfer(
+				accounts[1], 
+				referenceId, 
+				valueToApprove, 
+				fee, 
+				pastDate
+			);
+			await token.invalidateLockedTransferExpiration(
+				accounts[0], 
+				referenceId, 
+				{from: accounts[1]});
+			await token.executeLockedTransfer(
+				accounts[0], 
+				accounts[0], 
+				referenceId, 
+				exchangeRate, 
+				{from: accounts[1]}
+			);
+			let locked = await token.lockedBalanceOf(accounts[0]);
+			assert.equal(locked, 0);
+			let senderBalance = await token.balanceOf(accounts[0]);
+			assert.equal(senderBalance, amount(1) - fee);
+			let authorityBalance = await token.balanceOf(accounts[1]);
+			assert.equal(authorityBalance, fee);
+		});	
 
 	});	
 

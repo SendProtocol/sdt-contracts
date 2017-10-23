@@ -76,13 +76,16 @@ contract SendToken is SCNS1, StandardToken {
 		return true;
 	}
 	function executeLockedTransfer(address _sender, address _recipient, uint256 _referenceId, uint256 _exchangeRate) public returns (bool){
-		require(lockedAllowed[_sender][msg.sender][_referenceId].value > 0);
-
 		uint256 _value = lockedAllowed[_sender][msg.sender][_referenceId].value;
 		uint256 _fee = lockedAllowed[_sender][msg.sender][_referenceId].fee;
 
-		if (isVerified[msg.sender]) require(_exchangeRate > 0);
-		else require(_exchangeRate == 0);
+		require(_value > 0);
+		
+		if (isVerified[msg.sender]){
+			require(_exchangeRate > 0);
+		} else {
+			require(_exchangeRate == 0);
+		}
 
 		lockedBalances[_sender] = lockedBalances[_sender].sub(_value + _fee);
 		balances[_recipient] = balances[_recipient].add(_value);
