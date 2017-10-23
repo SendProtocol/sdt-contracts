@@ -4,6 +4,11 @@ import 'zeppelin-solidity/contracts/token/ERC20.sol';
 
 contract SCNS1 is ERC20 {
 
+	//consensus network
+	function isVerified(address _address) public constant returns (bool);
+	function verify(address _address) returns (bool);
+	function unverify(address _address) returns (bool);
+
 	//Voting
 	function createPoll(uint256 id, bytes32 question, bytes32[] options, uint256 minimumTokens, uint256 startTime, uint256 endTime) public returns (bool);
 	function vote(uint256 id, uint256 option) public returns (bool);

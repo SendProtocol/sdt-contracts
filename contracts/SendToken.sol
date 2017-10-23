@@ -5,7 +5,6 @@ import './SCNS1.sol';
 
 contract SendToken is SCNS1, StandardToken {
 	
-	//Voting
 	struct poll {
 		address creator;
 		uint256 minimumTokens;
@@ -19,14 +18,36 @@ contract SendToken is SCNS1, StandardToken {
 		uint256 expirationTime;
 	}
 
-	mapping (address => uint256) internal lockedBalances;
-	mapping (address => mapping(address => mapping(uint256 => lock))) internal lockedAllowed;
+	address public owner;
+
 	mapping (uint256 => poll) public polls;
-	mapping (address => bool) internal isVerified;
+	mapping (address => bool) internal verifiedAddresses;
+	mapping (address => uint256) internal lockedBalances;
 	mapping (uint256 => mapping(address => bool)) internal voted;
+	mapping (address => mapping(address => mapping(uint256 => lock))) internal lockedAllowed;
+
+	function isVerified(address _address) public constant returns (bool){
+		return verifiedAddresses[_address];
+	}
+
+	function lockedBalanceOf(address _owner) public constant returns (uint256){
+		return lockedBalances[_owner];
+	}
+
+	function verify(address _address) returns (bool) {
+		require(msg.sender == owner);
+		verifiedAddresses[_address] = true;
+		return true;
+	}
+
+	function unverify(address _address) returns (bool) {
+		require(msg.sender == owner);
+		verifiedAddresses[_address] = false;
+		return true;
+	}
 
 	function createPoll(uint256 _id, bytes32 _question, bytes32[] _options, uint256 _minimumTokens, uint256 _startTime, uint256 _endTime) public returns (bool){
-		require(isVerified[msg.sender]);
+		require(verifiedAddresses[msg.sender]);
 		require(polls[_id].creator == 0);
 
 		polls[_id].creator = msg.sender;
@@ -51,12 +72,6 @@ contract SendToken is SCNS1, StandardToken {
 
 		return true;
 	}
-	
-	//Escrow
-
-	function lockedBalanceOf(address _owner) public constant returns (uint256){
-		return lockedBalances[_owner];
-	}
 
 	function approveLockedTransfer(address _authority, uint256 _referenceId, uint256 _value, uint256 _authorityFee, uint256 _expirationTime) public returns (bool){
 		uint256 total = _value + _authorityFee;
@@ -75,13 +90,14 @@ contract SendToken is SCNS1, StandardToken {
 
 		return true;
 	}
+
 	function executeLockedTransfer(address _sender, address _recipient, uint256 _referenceId, uint256 _exchangeRate) public returns (bool){
 		uint256 _value = lockedAllowed[_sender][msg.sender][_referenceId].value;
 		uint256 _fee = lockedAllowed[_sender][msg.sender][_referenceId].fee;
 
 		require(_value > 0);
-		
-		if (isVerified[msg.sender]){
+
+		if (verifiedAddresses[msg.sender]){
 			require(_exchangeRate > 0);
 		} else {
 			require(_exchangeRate == 0);
@@ -121,15 +137,15 @@ contract SendToken is SCNS1, StandardToken {
 		EscrowResolved(msg.sender, _authority, _referenceId, msg.sender, msg.sender);
 		return true;
 	}
+
 	function invalidateLockedTransferExpiration(address _sender, uint256 _referenceId) public returns (bool){
 		require(lockedAllowed[_sender][msg.sender][_referenceId].value > 0);
 		lockedAllowed[_sender][msg.sender][_referenceId].expirationTime = 0;
 		return true;
 	}
 	
-	//Consensus Network
 	function verifiedTransferFrom(address _from, address _to, uint256 _value, uint256 _referenceId, uint256 _exchangeRate, uint256 _fee) public returns (bool) {
-		require(isVerified[msg.sender]);
+		require(verifiedAddresses[msg.sender]);
 		require(_to != address(0));
 
 		uint256 total = _value.add(_fee);

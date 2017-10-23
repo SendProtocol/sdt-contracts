@@ -7,14 +7,12 @@ contract SDT is SendToken {
 	string public symbol = "SDT";
 	uint256 public decimals = 18;
 
-	address public owner;
-
 	function SDT(uint256 _supply){
 		uint256 supply = _supply*10**decimals;
 		balances[msg.sender] = supply;
 		totalSupply = supply;
 		owner = msg.sender;
-		isVerified[msg.sender] = true;
+		verifiedAddresses[msg.sender] = true;
 	}	
 
 }
