@@ -1,24 +1,25 @@
 'use strict';
 
-const SDT = artifacts.require("./SDT.sol");
+const SDT = artifacts.require('./SDT.sol');
 const assertJump = require('./helpers/assertJump');
+const math = require('mathjs');
 
 function amount(a){
-	return a*10**18;
+	return a*math.pow(10,18);
 }
 
 contract('SDT', function(accounts) {
 
-	it("should return the correct totalSupply after construction", async function() {
+	it('should return the correct totalSupply after construction', async function() {
 		let token = await SDT.new(1);
 		let totalSupply = await token.totalSupply();
 
 		assert.equal(totalSupply, amount(1));
-	})
+	});
 	
-	it("should return correct balances after transfer", async function(){
+	it('should return correct balances after transfer', async function(){
 		let token = await SDT.new(2);
-		let transfer = await token.transfer(accounts[1], amount(1));
+		await token.transfer(accounts[1], amount(1));
 
 		let firstAccountBalance = await token.balanceOf(accounts[0]);
 		assert.equal(firstAccountBalance, amount(1));
@@ -30,7 +31,7 @@ contract('SDT', function(accounts) {
 	it('should throw an error when trying to transfer more than balance', async function() {
 		let token = await SDT.new(1);
 		try {
-			let transfer = await token.transfer(accounts[1], amount(2));
+			await token.transfer(accounts[1], amount(2));
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -40,7 +41,7 @@ contract('SDT', function(accounts) {
 	it('should throw an error when trying to transfer to 0x0', async function() {
 		let token = await SDT.new(100);
 		try {
-			let transfer = await token.transfer(0x0, amount(1));
+			await token.transfer(0x0, amount(1));
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -124,7 +125,7 @@ contract('SDT', function(accounts) {
 	it('should throw an error when trying to transfer to 0x0', async function() {
 		let token = await SDT.new(100);
 		try {
-			let transfer = await token.transfer(0x0, 100);
+			await token.transfer(0x0, 100);
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -135,7 +136,7 @@ contract('SDT', function(accounts) {
 		let token = await SDT.new(100);
 		await token.approve(accounts[1], 100);
 		try {
-			let transfer = await token.transferFrom(accounts[0], 0x0, 100, {from: accounts[1]});
+			await token.transferFrom(accounts[0], 0x0, 100, {from: accounts[1]});
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -148,7 +149,15 @@ contract('SDT', function(accounts) {
 		let token = await SDT.new(100);
 		await token.verify(accounts[1]);
 		await token.approve(accounts[1], amount(100));
-		await token.verifiedTransferFrom(accounts[0], accounts[2], amount(99), referenceId, exchangeRate, amount(1), {from: accounts[1]});
+		await token.verifiedTransferFrom(
+			accounts[0], 
+			accounts[2], 
+			amount(99), 
+			referenceId, 
+			exchangeRate, 
+			amount(1), 
+			{from: accounts[1]}
+		);
 
 		let balance0 = await token.balanceOf(accounts[0]);
 		assert.equal(balance0, 0);
@@ -168,7 +177,15 @@ contract('SDT', function(accounts) {
 		await token.approve(accounts[1], amount(100));
 
 		try {
-			await token.verifiedTransferFrom(accounts[0], accounts[2], amount(99), referenceId, exchangeRate, amount(1), {from: accounts[1]});
+			await token.verifiedTransferFrom(
+				accounts[0], 
+				accounts[2], 
+				amount(99), 
+				referenceId, 
+				exchangeRate, 
+				amount(1), 
+				{from: accounts[1]}
+			);
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -182,7 +199,15 @@ contract('SDT', function(accounts) {
 		await token.approve(accounts[1], amount(100));
 
 		try {
-			await token.verifiedTransferFrom(accounts[0], accounts[2], amount(99), referenceId, exchangeRate, amount(1), {from: accounts[1]});
+			await token.verifiedTransferFrom(
+				accounts[0], 
+				accounts[2], 
+				amount(99), 
+				referenceId, 
+				exchangeRate, 
+				amount(1), 
+				{from: accounts[1]}
+			);
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);

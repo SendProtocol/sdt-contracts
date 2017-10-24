@@ -2,10 +2,10 @@
 
 const SDT = artifacts.require('./SDT.sol');
 const assertJump = require('./helpers/assertJump');
+const math = require('mathjs');
 
-function amount(_a){
-	let a = _a * (10 ** 18);
-	return a;
+function amount(a){
+	return a*math.pow(10,18);
 }
 
 contract('SDT', function(accounts) {
@@ -87,7 +87,7 @@ contract('SDT', function(accounts) {
 					accounts[0], 
 					accounts[2], 
 					referenceId, 
-					fee, 
+					exchangeRate, 
 					{from: accounts[1]}
 				);
 				assert.fail('should have thrown before');
@@ -141,7 +141,7 @@ contract('SDT', function(accounts) {
 				accounts[2], 
 				accounts[3], 
 				referenceId, 
-				valueToApprove
+				exchangeRate
 			);
 			let locked = await token.lockedBalanceOf(accounts[2]);
 			assert.equal(locked, 0);
@@ -159,7 +159,7 @@ contract('SDT', function(accounts) {
 					accounts[2], 
 					accounts[3], 
 					referenceId, 
-					valueToApprove
+					exchangeRate
 				);
 				assert.fail('should have thrown before');
 			} catch(error) {
@@ -210,10 +210,8 @@ contract('SDT', function(accounts) {
 
 	describe('escrow claim', function() {
 		let referenceId = 1;
-		let referenceIdTwo = 2;
 		let valueToApprove = 100;
 		let fee = 1;
-		let exchangeRate = 0;
 
 		it('should lock amount + fee', async function() {
 			token = await SDT.new(1);
@@ -244,7 +242,6 @@ contract('SDT', function(accounts) {
 
 	describe('escrow mediate', function() {
 		let referenceId = 1;
-		let referenceIdTwo = 2;
 		let valueToApprove = 100;
 		let fee = 1;
 		let exchangeRate = 0;
@@ -330,4 +327,4 @@ contract('SDT', function(accounts) {
 
 	});	
 
-})
+});
