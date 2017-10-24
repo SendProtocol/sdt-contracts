@@ -24,7 +24,7 @@ contract SCNS1 is ERC20 {
 	event EscrowCreated(address indexed sender, address indexed authority, uint256 referenceId);
 	event EscrowResolved(address indexed sender, address indexed authority, uint256 referenceId, address resolver, address sentTo);
 	
-	//Consensus Network
+	//Consensus Network //PENSING TESTS
 	function verifiedTransferFrom(address from, address to, uint256 value, uint256 referenceId, uint256 exchangeRate, uint256 fee) public returns (bool);
 	event VerifiedTransfer(address indexed from, address indexed to, address indexed verifiedAddress, uint256 value, uint256 referenceId, uint256 exchangeRate);
 }

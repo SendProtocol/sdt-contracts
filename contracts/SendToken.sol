@@ -147,6 +147,7 @@ contract SendToken is SCNS1, StandardToken {
 	function verifiedTransferFrom(address _from, address _to, uint256 _value, uint256 _referenceId, uint256 _exchangeRate, uint256 _fee) public returns (bool) {
 		require(verifiedAddresses[msg.sender]);
 		require(_to != address(0));
+		require(_exchangeRate > 0);
 
 		uint256 total = _value.add(_fee);
 

@@ -142,4 +142,51 @@ contract('SDT', function(accounts) {
 		}
 	});
 
+	it('should be possible to sign with exchange rate', async function() {
+		let referenceId = 1;
+		let exchangeRate = 1;
+		let token = await SDT.new(100);
+		await token.verify(accounts[1]);
+		await token.approve(accounts[1], amount(100));
+		await token.verifiedTransferFrom(accounts[0], accounts[2], amount(99), referenceId, exchangeRate, amount(1), {from: accounts[1]});
+
+		let balance0 = await token.balanceOf(accounts[0]);
+		assert.equal(balance0, 0);
+
+		let balance1 = await token.balanceOf(accounts[2]);
+		assert.equal(balance1, amount(99));
+
+		let balance2 = await token.balanceOf(accounts[1]);
+		assert.equal(balance2, amount(1));
+	});
+
+	it('should fail if exchange rate is 0', async function() {
+		let referenceId = 1;
+		let exchangeRate = 0;
+		let token = await SDT.new(100);
+		await token.verify(accounts[1]);
+		await token.approve(accounts[1], amount(100));
+
+		try {
+			await token.verifiedTransferFrom(accounts[0], accounts[2], amount(99), referenceId, exchangeRate, amount(1), {from: accounts[1]});
+			assert.fail('should have thrown before');
+		} catch(error) {
+			assertJump(error);
+		}
+	});
+
+	it('should fail if unverified', async function() {
+		let referenceId = 1;
+		let exchangeRate = 1;
+		let token = await SDT.new(100);
+		await token.approve(accounts[1], amount(100));
+
+		try {
+			await token.verifiedTransferFrom(accounts[0], accounts[2], amount(99), referenceId, exchangeRate, amount(1), {from: accounts[1]});
+			assert.fail('should have thrown before');
+		} catch(error) {
+			assertJump(error);
+		}
+	});
+
 });
