@@ -19,7 +19,7 @@ contract('SDT', function(accounts) {
 		let referenceIdTwo = 2;
 		let valueToApprove = 100;
 		let fee = 1;
-		let exchangeRate = 0;
+		let exchangeRate = 1;
 
 		it('should lock amount + fee', async function() {
 			token = await SDT.new(1);
