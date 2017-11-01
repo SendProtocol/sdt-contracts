@@ -7,7 +7,7 @@ const math = require('mathjs');
 contract('SDT', function(accounts) {
 
     it('contract deploy should put 700M * 10^18 SDT in the first account', async function() {
-        let token = await SDT.deployed();
+        let token = await SDT.new(700*10**6, accounts[0], accounts[1], 100, 0);
         let balance = await token.balanceOf.call(accounts[0]);
         let expectedBalance = 7 * math.pow(10,26);
         assert.equal(balance.valueOf(), expectedBalance, '700M * 10^18 wasn not in the first account');
@@ -17,7 +17,7 @@ contract('SDT', function(accounts) {
 		let token;
 
 		it('should be verified by default', async function() {
-			token = await SDT.new(1);
+			token = await SDT.new(1, accounts[0], accounts[1], 100, 0);
 			assert(await token.isVerified(accounts[0]));
 		});
 

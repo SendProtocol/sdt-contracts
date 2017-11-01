@@ -22,7 +22,7 @@ contract('SDT', function(accounts) {
 		let exchangeRate = 1;
 
 		it('should lock amount + fee', async function() {
-			token = await SDT.new(1);
+			token = await SDT.new(1, accounts[0], accounts[1], 100, 0);
 			await token.approveLockedTransfer(
 				accounts[1], 
 				referenceId, 
@@ -176,7 +176,7 @@ contract('SDT', function(accounts) {
 		let exchangeRate = 0;
 
 		it('should lock amount + fee', async function() {
-			token = await SDT.new(1);
+			token = await SDT.new(1, accounts[0], accounts[1], 100, 0);
 			await token.approveLockedTransfer(
 				accounts[1], 
 				referenceId, 
@@ -214,7 +214,7 @@ contract('SDT', function(accounts) {
 		let fee = 1;
 
 		it('should lock amount + fee', async function() {
-			token = await SDT.new(1);
+			token = await SDT.new(1, accounts[0], accounts[1], 100, 0);
 			await token.approveLockedTransfer(
 				accounts[1], 
 				referenceId, 
@@ -247,7 +247,7 @@ contract('SDT', function(accounts) {
 		let exchangeRate = 0;
 
 		it('should lock amount + fee', async function() {
-			token = await SDT.new(1);
+			token = await SDT.new(1, accounts[0], accounts[1], 100, 0);
 			await token.approveLockedTransfer(
 				accounts[1], 
 				referenceId, 
@@ -298,7 +298,7 @@ contract('SDT', function(accounts) {
 		});
 
 		it('should be able to unlock tokens', async function() {
-			token = await SDT.new(1);
+			token = await SDT.new(1, accounts[0], accounts[1], 100, 0);
 			await token.approveLockedTransfer(
 				accounts[1], 
 				referenceId, 
