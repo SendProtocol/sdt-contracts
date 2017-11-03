@@ -2,7 +2,10 @@ pragma solidity ^0.4.15;
 
 import './SDT.sol';
 
-
+/**
+ * @title Crowdsale contract
+ * @dev see https://send.sd/crowdsale
+ */
 contract TokenSale {
 
 	uint256 public startTime;
@@ -86,6 +89,12 @@ contract TokenSale {
 		saleWallet = _saleWallet;
 	}
 
+	/**
+	 * @dev deploy the token itself
+	 * @notice The owner of this contract is the owner of token's contract
+	 * @param _supply Token total supply
+	 * @param _ownerPool Percentage of tokens the owner assigns to himself
+	 */
 	function deploy (
 		uint256 _supply, 
 		uint8 _ownerPool
@@ -114,6 +123,18 @@ contract TokenSale {
 		return true;
 	}
 
+	/**
+	 * @dev deploy the token itself
+	 * @notice The owner of this contract is the owner of token's contract
+	 * @param _usd amount invested in USD
+	 * @param _eth amount invested in ETH y contribution was made in ETH, 0 otherwise
+	 * @param _btc amount invested in BTC y contribution was made in BTC, 0 otherwise
+	 * @param _address Address to send tokens to
+	 * @param _vesting vesting finish timestamp
+	 * @param _discountBase a multiplier for tokens based on a discount choosen and a vesting time
+	 * @param _purchaseVestingCliff vesting cliff timestamp
+	 * @param _purchaseVestingStarts Vesting start timestamp
+	 */
 	function purchase (
 		uint256 _usd, 
 		uint256 _eth, 
@@ -121,8 +142,8 @@ contract TokenSale {
 		address _address,
 		uint64 _vesting,
 		uint8 _discountBase,
-		uint64 purchaseVestingCliff,
-		uint64 purchaseVestingStarts
+		uint64 _purchaseVestingCliff,
+		uint64 _purchaseVestingStarts
 	) 
 		isActive
 		isOwner
@@ -134,19 +155,19 @@ contract TokenSale {
 		uint256 soldAmount = computeTokens(_usd);
 		soldAmount = computeBonus(soldAmount, _discountBase);
 
-		if (purchaseVestingCliff < cliff){
-			purchaseVestingCliff = cliff;
+		if (_purchaseVestingCliff < cliff){
+			_purchaseVestingCliff = cliff;
 		}
 
-		if (purchaseVestingStarts < startVesting){
-			purchaseVestingStarts = startVesting;
+		if (_purchaseVestingStarts < startVesting){
+			_purchaseVestingStarts = startVesting;
 		}
 
 		grantVestedTokens(
 			_address, 
 			soldAmount, 
-			purchaseVestingStarts, 
-			purchaseVestingCliff, 
+			_purchaseVestingStarts, 
+			_purchaseVestingCliff, 
 			_vesting
 		);
 		updateStats(_usd, soldAmount);
@@ -155,20 +176,30 @@ contract TokenSale {
 		return soldAmount;
 	}
 
+	/**
+	 * @dev Helper function to update collected and allocated tokens stats
+	 */
 	function updateStats(uint256 usd, uint256 tokens) internal {
 		raised = raised + usd;
 		soldTokens = soldTokens + tokens;
 	}
 
-	function computeBonus(uint256 _amount, uint8 discountBase) returns (uint256){
-		require (discountBase >= 80);
-		require (discountBase <= 100);
-		return _amount * 100 / discountBase;
+	/**
+	 * @dev Helper function to compute bonus amount
+	 * @param _amount number of toknes before bonus
+	 * @param _discountBase percentage of price after discount
+	 * @notice 80 <= dicountBase <= 100
+	 * @notice _discountBase is the resultant of (100 - discount) 
+	 */
+	function computeBonus(uint256 _amount, uint8 _discountBase) returns (uint256){
+		require (_discountBase >= 80);
+		require (_discountBase <= 100);
+		return _amount * 100 / _discountBase;
 	}
 
-	/*
-	Number of tokens is given by:
-	70,000,000 ln((7,000,000 + raised + usd) / (7,000,000 + raised))
+	/**
+	* @dev Number of tokens is given by:
+	* 70,000,000 ln((7,000,000 + raised + usd) / (7,000,000 + raised))
 	*/
 	function computeTokens(uint256 usd) constant returns (uint256) {
 		require (usd > 0);
@@ -198,13 +229,13 @@ contract TokenSale {
 		}
 	}
 
-	/*
-	Computes ln(x) with 18 artifical decimal places for input and output
-	- This algotihm uses a logarithm of the form
-	  ln(x) = ln(y * 1.5^k) = k ln(1.5) + ln(y)
-	  where ln(1.5) is a known value and ln(y) is computed with a tayilor series for
-	  1 < y < 1.5 which is within radius of convergence of the Taylor series.
-	  https://en.wikipedia.org/wiki/Natural_logarithm#Derivative.2C_Taylor_series
+	/**
+	* @dev Computes ln(x) with 18 artifical decimal places for input and output
+	* This algotihm uses a logarithm of the form
+	* ln(x) = ln(y * 1.5^k) = k ln(1.5) + ln(y)
+	* where ln(1.5) is a known value and ln(y) is computed with a tayilor series for
+	* 1 < y < 1.5 which is within radius of convergence of the Taylor series.
+	* https://en.wikipedia.org/wiki/Natural_logarithm#Derivative.2C_Taylor_series
 	*/
 	function ln(uint256 x) constant returns (uint256) {
 		uint256 result = 0;
@@ -235,6 +266,15 @@ contract TokenSale {
 		return result;
 	}
 
+	/**
+	 * @dev deploy the token itself
+	 * @notice The owner of this contract is the owner of token's contract
+	 * @param _to Adress to grant vested tokens
+	 * @param _value number of tokens to grant
+	 * @param _start vesting start timestamp
+	 * @param _cliff vesting cliff timestamp
+	 * @param _vesting vesting finish timestamp
+	 */
    function grantVestedTokens(
         address _to,
         uint256 _value,
