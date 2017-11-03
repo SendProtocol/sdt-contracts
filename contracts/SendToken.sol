@@ -5,6 +5,12 @@ import './SCNS1.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 
+/**
+ * @title Send token
+ *
+ * @dev Implementation of Send Consensus network Standard
+ * @dev https://send.sd/token
+ */
 contract SendToken is SCNS1, StandardToken {
     
     struct Poll {
@@ -55,22 +61,53 @@ contract SendToken is SCNS1, StandardToken {
         _;
     }
 
+    /**
+    * @dev Check if an address is whitelisted by SEND
+    * @param _address Address to check
+    * @return bool
+    */
     function isVerified(address _address) public constant returns (bool) {
         return verifiedAddresses[_address];
     }
 
+    /**
+    * @dev Get locked balance of a given address
+    * @param _owner Address to check
+    * @return A uint256 representing the locked amount of tokens
+    */
     function lockedBalanceOf(address _owner) public constant returns (uint256) {
         return lockedBalances[_owner];
     }
 
+    /**
+    * @dev Verify an addres
+    * @notice Only contract owner
+    * @param _address Address to verify
+    */
     function verify(address _address) ownerRestricted {
         verifiedAddresses[_address] = true;
     }
 
+    /**
+    * @dev Remove Verified status of a given address
+    * @notice Only contract owner
+    * @param _address Address to unverify
+    */
     function unverify(address _address) ownerRestricted {
         verifiedAddresses[_address] = false;
     }
 
+    /**
+    * @dev Create a poll
+    * @dev _question and _options parameters are only for logging
+    * @notice Only verified addresses
+    * @param _id Poll ID. Must not exist already.
+    * @param _question An string to be logged on poll creation
+    * @param _options An array of strings to be logged on poll creation
+    * @param _minimumTokens Minimum number of tokens to vote
+    * @param _startTime Poll start time
+    * @param _endTime Poll end time
+    */
     function createPoll (
         uint256 _id, 
         bytes32 _question, 
@@ -99,6 +136,13 @@ contract SendToken is SCNS1, StandardToken {
 
     }
 
+    /**
+    * @dev vote
+    * @dev will fail if doesnt meet minimumTokens requirement on poll dates
+    * @notice Only once per address per poll
+    * @param _id Poll ID. Must not exist already.
+    * @param _option Index of option to vote (first option is 0)
+    */
     function vote(uint256 _id, uint256 _option) public {
         require(polls[_id].creator != 0);
         require(voted[_id][msg.sender] == false);
@@ -110,6 +154,15 @@ contract SendToken is SCNS1, StandardToken {
         Voted(_id, msg.sender, _option);
     }
 
+    /**
+    * @dev Authorize an address to perform a locked transfer
+    * @dev specified amount will be locked on msg.sender
+    * @param _authority Address to be authorized to spend locked funds
+    * @param _referenceId Intenral ID for applications implementing this
+    * @param _value Amount of tokens to lock
+    * @param _authorityFee A fee to be paid to authority (may be 0)
+    * @param _expirationTime After this timestamp, user can claim tokens back.
+    */
     function approveLockedTransfer(
         address _authority, 
         uint256 _referenceId, 
@@ -134,6 +187,15 @@ contract SendToken is SCNS1, StandardToken {
         EscrowCreated(msg.sender, _authority, _referenceId);
     }
 
+    /**
+    * @dev Transfer a locked amount
+    * @notice Only authorized address
+    * @notice Exchange rate has 18 decimal places
+    * @param _sender Address with locked amount
+    * @param _recipient Address to send funds to
+    * @param _referenceId App/user internal associated ID
+    * @param _exchangeRate Rate to be reported to the blockchain
+    */
     function executeLockedTransfer(
         address _sender, 
         address _recipient, 
@@ -185,6 +247,12 @@ contract SendToken is SCNS1, StandardToken {
         }
     }
 
+    /**
+    * @dev claim back locked amount after expiration time
+    * @notice Only works after lock expired
+    * @param _authority Authorized lock address
+    * @param _referenceId reference ID from App/user
+    */
     function claimLockedTransfer(address _authority, uint256 _referenceId) public {
         require(lockedAllowed[msg.sender][_authority][_referenceId].value > 0);
         require(lockedAllowed[msg.sender][_authority][_referenceId].expirationTime < block.timestamp);
@@ -207,11 +275,30 @@ contract SendToken is SCNS1, StandardToken {
         );
     }
 
+    /**
+    * @dev Remove expiration time on a lock
+    * @notice User wont be able to claim tokens back after this is called by authority address
+    * @notice Only authorized address
+    * @param _sender Address with locked amount
+    * @param _referenceId App/user internal associated ID
+    */
     function invalidateLockedTransferExpiration(address _sender, uint256 _referenceId) public {
         require(lockedAllowed[_sender][msg.sender][_referenceId].value > 0);
         lockedAllowed[_sender][msg.sender][_referenceId].expirationTime = 0;
     }
     
+    /**
+    * @dev Transfer from one address to another issuing ane xchange rate
+    * @notice Only verified addresses
+    * @notice Exchange rate has 18 decimal places
+    * @notice Value + fee <= allowance
+    * @param _from address The address which you want to send tokens from
+    * @param _to address The address which you want to transfer to
+    * @param _value uint256 the amount of tokens to be transferred
+    * @param _referenceId internal app/user ID
+    * @param _exchangeRate Exchange rate to sign transaction
+    * @param _fee fee tot ake from sender
+    */
     function verifiedTransferFrom(
         address _from, 
         address _to, 
@@ -246,31 +333,48 @@ contract SendToken is SCNS1, StandardToken {
         );
     }
 
+    /**
+    * @dev Calculate vested claimable tokens on current time
+    * @param _tokens Number of tokens granted
+    * @param _cliff Cliff timestamp
+    * @param _vesting Vesting finish timestamp
+    * @param _start Vesting start timestamp
+    * @param _claimed Number of tokens already claimed
+    */
     function calculateVestedTokens(
-        uint256 tokens,
-        uint256 cliff,
-        uint256 vesting,
-        uint256 start,
-        uint256 claimed
+        uint256 _tokens,
+        uint256 _cliff,
+        uint256 _vesting,
+        uint256 _start,
+        uint256 _claimed
     ) 
         internal constant returns (uint256)
     {
         uint256 time = block.timestamp;
 
-        if (time < cliff) {
+        if (time < _cliff) {
             return 0;
         }
-        if (time >= start + vesting) {
-            return tokens;
+        if (time >= _start + _vesting) {
+            return SafeMath.sub(_tokens, _claimed);
         }
         uint256 vestedTokens = SafeMath.div(
-            SafeMath.mul(tokens, SafeMath.sub(time, start)),
-            SafeMath.sub(vesting, start)
+            SafeMath.mul(_tokens, SafeMath.sub(time, _start)),
+            SafeMath.sub(_vesting, _start)
         );
 
-        return SafeMath.sub(vestedTokens, claimed);
+        return SafeMath.sub(vestedTokens, _claimed);
     }
 
+    /**
+    * @dev Grant vested tokens
+    * @notice Only for ICO contract address
+    * @param _to Addres to grant tokens to.
+    * @param _value Number of tokens granted
+    * @param _cliff Cliff timestamp
+    * @param _vesting Vesting finish timestamp
+    * @param _start Vesting start timestamp
+    */
     function grantVestedTokens(
         address _to,
         uint256 _value,
@@ -295,6 +399,9 @@ contract SendToken is SCNS1, StandardToken {
         NewTokenGrant(_to, _value, _cliff,  _start, _vesting);
     }
 
+    /**
+    * @dev Claim all vested tokens up to current date
+    */
     function claimTokens() public returns (uint256) {
         uint256 numberOfGrants = grants[msg.sender].length;
 
