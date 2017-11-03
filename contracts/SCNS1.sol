@@ -9,7 +9,6 @@ import 'zeppelin-solidity/contracts/token/ERC20.sol';
  */
 contract SCNS1 is ERC20 {
 
-    //consensus network
     function isVerified (
     	address _address
     ) public constant returns (bool);
@@ -22,7 +21,6 @@ contract SCNS1 is ERC20 {
     	address _address
     );
 
-    //Voting
     function createPoll (
     	uint256 id, 
     	bytes32 question, 
@@ -53,7 +51,6 @@ contract SCNS1 is ERC20 {
     	uint256 option
     );
     
-    //Escrow
     function lockedBalanceOf (
     	address _owner
     ) public constant returns (uint256);
@@ -97,7 +94,6 @@ contract SCNS1 is ERC20 {
     	address sentTo
     );
     
-    //Consensus Network
     function verifiedTransferFrom (
     	address from, 
     	address to, 
@@ -115,8 +111,6 @@ contract SCNS1 is ERC20 {
     	uint256 referenceId, 
     	uint256 exchangeRate
     );
-
-    //Vesting   
 
     function claimTokens() public returns (uint256);
 

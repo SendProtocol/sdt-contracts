@@ -27,7 +27,7 @@ contract('TokenSale', function(accounts) {
     it('should fail if not owner', async function() 
     {
 		try {
-			await sale.deploy(700*10**6, accounts[1], 0, 100, {from: accounts[1]});
+			await sale.deploy(700*10**6, 0, {from: accounts[1]});
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -36,7 +36,7 @@ contract('TokenSale', function(accounts) {
 
     it('should be possible to activate crowdsale', async function() 
     {
-        await sale.deploy(700*10**6, accounts[1], 0, 100);
+        await sale.deploy(700*10**6, 0);
         assert (sale.activated.call());
 
     	let _tokenAddress = await sale.token.call();

@@ -88,9 +88,7 @@ contract TokenSale {
 
 	function deploy (
 		uint256 _supply, 
-		address _saleWallet,
-		uint8 _ownerPool,
-		uint8 _salePool
+		uint8 _ownerPool
 	) 
 	isOwner returns (bool) 
 	{
@@ -98,9 +96,8 @@ contract TokenSale {
 		token = new SDT (
 			_supply, 
 			msg.sender, 
-			_saleWallet, 
-			_ownerPool, 
-			_salePool
+			saleWallet, 
+			_ownerPool
 		);
 		activated = true;
 		return true;
