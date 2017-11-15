@@ -402,11 +402,11 @@ contract SendToken is SCNS1, StandardToken {
     /**
     * @dev Claim all vested tokens up to current date
     */
-    function claimTokens() public returns (uint256) {
+    function claimTokens() public {
         uint256 numberOfGrants = grants[msg.sender].length;
 
         if (numberOfGrants == 0) {
-            return 0;
+            return;
         }
 
         uint256 claimable = 0;
@@ -433,6 +433,42 @@ contract SendToken is SCNS1, StandardToken {
         totalSupply += claimable;
 
         NewTokenClaim(msg.sender, claimable);
+    }
+
+    /**
+    * @dev Claim all vested tokens up to current date
+    */
+    function claimTokensFor(address _to) public ownerRestricted {
+        uint256 numberOfGrants = grants[_to].length;
+
+        if (numberOfGrants == 0) {
+            return;
+        }
+
+        uint256 claimable = 0;
+        uint256 claimableFor = 0;
+        for (uint256 i = 0; i < numberOfGrants; i++) {
+            claimableFor = calculateVestedTokens (
+                grants[_to][i].value,
+                grants[_to][i].cliff,
+                grants[_to][i].vesting,
+                grants[_to][i].start,
+                grants[_to][i].claimed
+            );
+            claimable = SafeMath.add (
+                claimable, 
+                claimableFor
+            );
+            grants[_to][i].claimed = SafeMath.add (
+                grants[_to][i].claimed,
+                claimableFor
+            );
+        }
+
+        balances[_to] = balances[_to].add(claimable);
+        totalSupply += claimable;
+
+        NewTokenClaim(_to, claimable);
     }
 
 }
