@@ -17,7 +17,7 @@ contract('TokenSale', function(accounts) {
     {
         sale = await TokenSale.deployed();
 		try {
-			await sale.purchase(10, 0, 0, 0x1, currentDate + 5000, 100, 0, 0);
+			await sale.purchase(10, 0, 0, 0x1, 100, currentDate + 5000, 0);
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -47,7 +47,7 @@ contract('TokenSale', function(accounts) {
     it('should fail if purchasing less than min', async function() 
     {
 		try {
-			await sale.purchase(9, 0, 0, 0x1, currentDate + 5000, 100, 0, 0);
+			await sale.purchase(9, 0, 0, 0x1, 100, currentDate + 5000, 0);
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -57,7 +57,7 @@ contract('TokenSale', function(accounts) {
     it('10 USD at 0.14 - should return the right amount with a maximum error of 0.001%', async function() 
     {
         bought = await sale.computeTokens(10);
-        await sale.purchase(10, 0, 0, 0x1, currentDate + 5000, 100, 0, 0);
+        await sale.purchase(10, 0, 0, 0x1, 100, currentDate + 5000, 0);
         error = math.abs(bought.valueOf() - 10/0.14 * 10**18);
 
         assert(error < bought.valueOf() * maxError);
@@ -66,7 +66,7 @@ contract('TokenSale', function(accounts) {
     it('6M USD at 0.14 - should return right amount with a maximum error of 0.001%', async function() 
     {
     	bought = await sale.computeTokens(6000000);
-        await sale.purchase(6000000, 0, 0, 0x1, currentDate + 5000, 100, 0, 0);
+        await sale.purchase(6000000, 0, 0, 0x1, 100, currentDate + 5000, 0);
         error = math.abs(bought.valueOf() - 6000000/0.14 * 10**18);
 
         assert(error < bought.valueOf() * maxError);
@@ -80,7 +80,7 @@ contract('TokenSale', function(accounts) {
         let val2 = 70000000 * math.log(1.07142928571) * 10 ** 18;
 
     	bought = await sale.computeTokens(2000000);
-        await sale.purchase(2000000, 0, 0, 0x1, currentDate + 5000, 100, 0, 0);
+        await sale.purchase(2000000, 0, 0, 0x1, 100, currentDate + 5000, 0);
 
         error = math.abs(bought.valueOf() - val1 - val2);
 
@@ -93,7 +93,7 @@ contract('TokenSale', function(accounts) {
     	let val1 = 70000000 * math.log(1.46666635556) * 10 ** 18;
 
     	bought = await sale.computeTokens(7000000);
-        await sale.purchase(7000000, 0, 0, 0x1, currentDate + 5000, 100, 0, 0);
+        await sale.purchase(7000000, 0, 0, 0x1, 100, currentDate + 5000, 0);
         error = math.abs(bought.valueOf() - val1);
 
         assert(error < bought.valueOf() * maxError);

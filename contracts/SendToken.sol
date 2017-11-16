@@ -29,7 +29,6 @@ contract SendToken is SCNS1, StandardToken {
     struct TokenGrant {
         uint256 value;
         uint256 claimed;
-        uint64 cliff;
         uint64 vesting;
         uint64 start;
     }
@@ -336,14 +335,12 @@ contract SendToken is SCNS1, StandardToken {
     /**
     * @dev Calculate vested claimable tokens on current time
     * @param _tokens Number of tokens granted
-    * @param _cliff Cliff timestamp
     * @param _vesting Vesting finish timestamp
     * @param _start Vesting start timestamp
     * @param _claimed Number of tokens already claimed
     */
     function calculateVestedTokens(
         uint256 _tokens,
-        uint256 _cliff,
         uint256 _vesting,
         uint256 _start,
         uint256 _claimed
@@ -352,7 +349,7 @@ contract SendToken is SCNS1, StandardToken {
     {
         uint256 time = block.timestamp;
 
-        if (time < _cliff) {
+        if (time < _start) {
             return 0;
         }
         if (time >= _start + _vesting) {
@@ -371,7 +368,6 @@ contract SendToken is SCNS1, StandardToken {
     * @notice Only for ICO contract address
     * @param _to Addres to grant tokens to.
     * @param _value Number of tokens granted
-    * @param _cliff Cliff timestamp
     * @param _vesting Vesting finish timestamp
     * @param _start Vesting start timestamp
     */
@@ -379,24 +375,21 @@ contract SendToken is SCNS1, StandardToken {
         address _to,
         uint256 _value,
         uint64 _start,
-        uint64 _cliff,
         uint64 _vesting
     ) 
         icoResticted
         public 
     {   
         require (_value > 0);
-        require (_cliff > _start);
         require (_vesting > _start);
-        require (_vesting > _cliff);
         require (grants[_to].length < 10);
 
-        TokenGrant memory grant = TokenGrant(_value, 0, _cliff, _vesting, _start);
+        TokenGrant memory grant = TokenGrant(_value, 0, _vesting, _start);
         grants[_to].push(grant);
 
         balances[saleWallet] = balances[saleWallet].sub(_value);
         
-        NewTokenGrant(_to, _value, _cliff,  _start, _vesting);
+        NewTokenGrant(_to, _value, _start, _vesting);
     }
 
     /**
@@ -414,7 +407,6 @@ contract SendToken is SCNS1, StandardToken {
         for (uint256 i = 0; i < numberOfGrants; i++) {
             claimableFor = calculateVestedTokens (
                 grants[msg.sender][i].value,
-                grants[msg.sender][i].cliff,
                 grants[msg.sender][i].vesting,
                 grants[msg.sender][i].start,
                 grants[msg.sender][i].claimed
@@ -450,7 +442,6 @@ contract SendToken is SCNS1, StandardToken {
         for (uint256 i = 0; i < numberOfGrants; i++) {
             claimableFor = calculateVestedTokens (
                 grants[_to][i].value,
-                grants[_to][i].cliff,
                 grants[_to][i].vesting,
                 grants[_to][i].start,
                 grants[_to][i].claimed

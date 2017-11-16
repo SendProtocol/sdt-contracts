@@ -118,7 +118,6 @@ contract SCNS1 is ERC20 {
 
     function calculateVestedTokens(
         uint256 tokens,
-        uint256 cliff,
         uint256 vesting,
         uint256 start,
         uint256 claimed
@@ -128,7 +127,6 @@ contract SCNS1 is ERC20 {
         address _to,
         uint256 _value,
         uint64 _start,
-        uint64 _cliff,
         uint64 _vesting
     ) public;
 
@@ -136,7 +134,6 @@ contract SCNS1 is ERC20 {
         address indexed to, 
         uint256 value, 
         uint64 start, 
-        uint64 cliff, 
         uint64 vesting
     );
 

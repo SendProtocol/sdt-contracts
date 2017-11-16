@@ -17,7 +17,6 @@ contract TokenSale {
 	address public teamWallet;
 	address public saleWallet;
 
-	uint64 public cliff;
 	uint64 public startVesting;
 
 	uint256 public soldTokens = 0;
@@ -63,7 +62,6 @@ contract TokenSale {
 		address _rewardWallet,
 		address _teamWallet,
 		address _saleWallet,
-		uint64 _cliff,
 		uint64 _startVesting
 	) 
 		validAddress(_foundationWallet)
@@ -74,10 +72,8 @@ contract TokenSale {
 	{
 		require(_startTime > block.timestamp - 60);
 		require(_endTime > startTime);
-		require(_cliff > startTime);
 		require(_startVesting > startTime);
 
-		cliff = _cliff;
 		startVesting = _startVesting;
 		startTime = _startTime;
 		endTime = _endTime;
@@ -132,7 +128,6 @@ contract TokenSale {
 	 * @param _address Address to send tokens to
 	 * @param _vesting vesting finish timestamp
 	 * @param _discountBase a multiplier for tokens based on a discount choosen and a vesting time
-	 * @param _purchaseVestingCliff vesting cliff timestamp
 	 * @param _purchaseVestingStarts Vesting start timestamp
 	 */
 	function purchase (
@@ -140,9 +135,8 @@ contract TokenSale {
 		uint256 _eth, 
 		uint256 _btc, 
 		address _address,
-		uint64 _vesting,
 		uint8 _discountBase,
-		uint64 _purchaseVestingCliff,
+		uint64 _vesting,
 		uint64 _purchaseVestingStarts
 	) 
 		isActive
@@ -155,10 +149,6 @@ contract TokenSale {
 		uint256 soldAmount = computeTokens(_usd);
 		soldAmount = computeBonus(soldAmount, _discountBase);
 
-		if (_purchaseVestingCliff < cliff){
-			_purchaseVestingCliff = cliff;
-		}
-
 		if (_purchaseVestingStarts < startVesting){
 			_purchaseVestingStarts = startVesting;
 		}
@@ -167,7 +157,6 @@ contract TokenSale {
 			_address, 
 			soldAmount, 
 			_purchaseVestingStarts, 
-			_purchaseVestingCliff, 
 			_vesting
 		);
 		updateStats(_usd, soldAmount);
@@ -272,14 +261,12 @@ contract TokenSale {
 	 * @param _to Adress to grant vested tokens
 	 * @param _value number of tokens to grant
 	 * @param _start vesting start timestamp
-	 * @param _cliff vesting cliff timestamp
 	 * @param _vesting vesting finish timestamp
 	 */
    function grantVestedTokens(
         address _to,
         uint256 _value,
         uint64 _start,
-        uint64 _cliff,
         uint64 _vesting
     ) 
         internal
@@ -288,7 +275,6 @@ contract TokenSale {
 	        _to,
 	        _value,
 	        _start,
-	        _cliff,
 	        _vesting
         );
     }
