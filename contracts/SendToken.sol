@@ -1,4 +1,4 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.18;
 
 import 'zeppelin-solidity/contracts/token/StandardToken.sol';
 import './SCNS1.sol';
@@ -83,7 +83,7 @@ contract SendToken is SCNS1, StandardToken {
     * @notice Only contract owner
     * @param _address Address to verify
     */
-    function verify(address _address) ownerRestricted {
+    function verify(address _address) public ownerRestricted {
         verifiedAddresses[_address] = true;
     }
 
@@ -92,7 +92,7 @@ contract SendToken is SCNS1, StandardToken {
     * @notice Only contract owner
     * @param _address Address to unverify
     */
-    function unverify(address _address) ownerRestricted {
+    function unverify(address _address) public ownerRestricted {
         verifiedAddresses[_address] = false;
     }
 
@@ -115,7 +115,7 @@ contract SendToken is SCNS1, StandardToken {
         uint256 _startTime, 
         uint256 _endTime
     ) 
-        verifiedResticted
+        public verifiedResticted
     {
         require(polls[_id].creator == 0);
 
@@ -306,7 +306,7 @@ contract SendToken is SCNS1, StandardToken {
         uint256 _exchangeRate, 
         uint256 _fee
     ) 
-    verifiedResticted 
+    public verifiedResticted 
     {
         require(_to != address(0));
         require(_exchangeRate > 0);

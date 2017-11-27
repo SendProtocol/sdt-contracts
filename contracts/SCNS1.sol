@@ -1,4 +1,4 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.18;
 
 import 'zeppelin-solidity/contracts/token/ERC20.sol';
 
@@ -15,11 +15,11 @@ contract SCNS1 is ERC20 {
     
     function verify (
         address _address
-    );
+    ) public;
     
     function unverify (
         address _address
-    );
+    ) public;
 
     function createPoll (
         uint256 id, 

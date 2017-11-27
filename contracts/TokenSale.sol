@@ -1,4 +1,4 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.18;
 
 import './SDT.sol';
 
@@ -64,6 +64,7 @@ contract TokenSale {
 		address _saleWallet,
 		uint64 _startVesting
 	) 
+	    public
 		validAddress(_foundationWallet)
 		validAddress(_corporationWallet)
 		validAddress(_rewardWallet)
@@ -95,7 +96,7 @@ contract TokenSale {
 		uint256 _supply, 
 		uint8 _ownerPool
 	) 
-	isOwner returns (bool) 
+	public isOwner returns (bool) 
 	{
 		require(!activated);
 		token = new SDT (
@@ -108,12 +109,12 @@ contract TokenSale {
 		return true;
 	}
 
-	function stop() isOwner isActive returns (bool) {
+	function stop() public isOwner isActive returns (bool) {
 		isStopped = true;
 		return true;
 	}
 
-	function resume() isOwner returns (bool) {
+	function resume() public isOwner returns (bool) {
 		require(isStopped);
 		isStopped = false;
 		return true;
@@ -139,6 +140,7 @@ contract TokenSale {
 		uint64 _vesting,
 		uint64 _purchaseVestingStarts
 	) 
+		public
 		isActive
 		isOwner
 		validAddress(_address)
@@ -180,7 +182,7 @@ contract TokenSale {
 	 * @notice 80 <= dicountBase <= 100
 	 * @notice _discountBase is the resultant of (100 - discount) 
 	 */
-	function computeBonus(uint256 _amount, uint8 _discountBase) returns (uint256){
+	function computeBonus(uint256 _amount, uint8 _discountBase) internal pure returns (uint256){
 		require (_discountBase >= 80);
 		require (_discountBase <= 100);
 		return _amount * 100 / _discountBase;
@@ -190,7 +192,7 @@ contract TokenSale {
 	* @dev Number of tokens is given by:
 	* 70,000,000 ln((7,000,000 + raised + usd) / (7,000,000 + raised))
 	*/
-	function computeTokens(uint256 usd) constant returns (uint256) {
+	function computeTokens(uint256 usd) public constant returns (uint256) {
 		require (usd > 0);
 
 		uint256 _numerator;
@@ -226,7 +228,7 @@ contract TokenSale {
 	* 1 < y < 1.5 which is within radius of convergence of the Taylor series.
 	* https://en.wikipedia.org/wiki/Natural_logarithm#Derivative.2C_Taylor_series
 	*/
-	function ln(uint256 x) constant returns (uint256) {
+	function ln(uint256 x) internal pure returns (uint256) {
 		uint256 result = 0;
 		uint16 k = 0;
 		uint8 n = 1;

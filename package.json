@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "mathjs": "^3.16.5",
-    "zeppelin-solidity": "^1.3.0"
+    "zeppelin-solidity": "^1.4.0"
   },
   "devDependencies": {},
   "scripts": {
