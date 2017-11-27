@@ -32,7 +32,7 @@ contract SDT is SendToken {
         uint256 _supply,
         address _owner,
         address _sale,
-        uint8 _ownerPool
+        uint256 _ownerPool
     )
         public
         validAddress(_owner)

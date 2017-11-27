@@ -17,7 +17,7 @@ contract TokenSale {
 	address public teamWallet;
 	address public saleWallet;
 
-	uint64 public startVesting;
+	uint256 public startVesting;
 
 	uint256 public soldTokens = 0;
 	uint256 public raised = 0;
@@ -62,7 +62,7 @@ contract TokenSale {
 		address _rewardWallet,
 		address _teamWallet,
 		address _saleWallet,
-		uint64 _startVesting
+		uint256 _startVesting
 	) 
 	    public
 		validAddress(_foundationWallet)
@@ -94,7 +94,7 @@ contract TokenSale {
 	 */
 	function deploy (
 		uint256 _supply, 
-		uint8 _ownerPool
+		uint256 _ownerPool
 	) 
 	public isOwner returns (bool) 
 	{
@@ -136,9 +136,9 @@ contract TokenSale {
 		uint256 _eth, 
 		uint256 _btc, 
 		address _address,
-		uint8 _discountBase,
-		uint64 _vesting,
-		uint64 _purchaseVestingStarts
+		uint256 _discountBase,
+		uint256 _vesting,
+		uint256 _purchaseVestingStarts
 	) 
 		public
 		isActive
@@ -182,7 +182,7 @@ contract TokenSale {
 	 * @notice 80 <= dicountBase <= 100
 	 * @notice _discountBase is the resultant of (100 - discount) 
 	 */
-	function computeBonus(uint256 _amount, uint8 _discountBase) internal pure returns (uint256){
+	function computeBonus(uint256 _amount, uint256 _discountBase) internal pure returns (uint256){
 		require (_discountBase >= 80);
 		require (_discountBase <= 100);
 		return _amount * 100 / _discountBase;
@@ -230,8 +230,8 @@ contract TokenSale {
 	*/
 	function ln(uint256 x) internal pure returns (uint256) {
 		uint256 result = 0;
-		uint16 k = 0;
-		uint8 n = 1;
+		uint256 k = 0;
+		uint256 n = 1;
 
 		uint256 powY;
 		uint256 y;
@@ -268,8 +268,8 @@ contract TokenSale {
    function grantVestedTokens(
         address _to,
         uint256 _value,
-        uint64 _start,
-        uint64 _vesting
+        uint256 _start,
+        uint256 _vesting
     ) 
         internal
     {

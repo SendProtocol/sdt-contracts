@@ -29,8 +29,8 @@ contract SendToken is SCNS1, StandardToken {
     struct TokenGrant {
         uint256 value;
         uint256 claimed;
-        uint64 vesting;
-        uint64 start;
+        uint256 vesting;
+        uint256 start;
     }
 
     address public owner;
@@ -374,8 +374,8 @@ contract SendToken is SCNS1, StandardToken {
     function grantVestedTokens(
         address _to,
         uint256 _value,
-        uint64 _start,
-        uint64 _vesting
+        uint256 _start,
+        uint256 _vesting
     ) 
         icoResticted
         public 
