@@ -10,7 +10,9 @@
     "mathjs": "^3.16.5",
     "zeppelin-solidity": "^1.4.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "solidity-coverage": "^0.4.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

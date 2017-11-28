@@ -2,11 +2,13 @@
 
 const TokenSale = artifacts.require('./TokenSale.sol');
 const SDT = artifacts.require('./SDT.sol');
+const TokenVesting = artifacts.require('./TokenVesting.sol');
 const assertJump = require('./helpers/assertJump');
 const math = require('mathjs');
 
 contract('TokenSale', function(accounts) {
 	let sale;
+    let vesting;
 	let token;
 	let bought;
 	let error;
@@ -16,6 +18,7 @@ contract('TokenSale', function(accounts) {
     it('should fail if not active', async function() 
     {
         sale = await TokenSale.deployed();
+        vesting = await TokenVesting.deployed();
 		try {
 			await sale.purchase(10, 0, 0, 0x1, 100, currentDate + 5000, 0);
 			assert.fail('should have thrown before');
@@ -27,7 +30,7 @@ contract('TokenSale', function(accounts) {
     it('should fail if not owner', async function() 
     {
 		try {
-			await sale.deploy(700*10**6, 0, {from: accounts[1]});
+			await sale.deploy(700*10**6, 0, 0x20, {from: accounts[1]});
 			assert.fail('should have thrown before');
 		} catch(error) {
 			assertJump(error);
@@ -36,12 +39,15 @@ contract('TokenSale', function(accounts) {
 
     it('should be possible to activate crowdsale', async function() 
     {
-        await sale.deploy(700*10**6, 0);
+        await sale.deploy(700*10**6, 0, vesting.address);
         assert (sale.activated.call());
 
     	let _tokenAddress = await sale.token.call();
     	token = await SDT.at(_tokenAddress);
-    	assert.equal(await token.balanceOf.call(accounts[1]), 700 * 10 ** 24);
+
+        vesting.init(_tokenAddress, sale.address)
+
+    	assert.equal(await token.balanceOf.call(sale.address), 700 * 10 ** 24);
     });
 
     it('should fail if purchasing less than min', async function() 

@@ -1,6 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './SDT.sol';
+import './TokenVesting.sol';
 
 /**
  * @title Crowdsale contract
@@ -15,7 +16,6 @@ contract TokenSale {
 	address public corpotationWallet;
 	address public rewardWallet;
 	address public teamWallet;
-	address public saleWallet;
 
 	uint256 public startVesting;
 
@@ -26,6 +26,7 @@ contract TokenSale {
 	bool public isFinalized = false;
 
 	SDT public token;
+	TokenVesting public vesting;
 
     event NewBuyer(
     	address indexed holder, 
@@ -61,7 +62,6 @@ contract TokenSale {
 		address _corporationWallet,
 		address _rewardWallet,
 		address _teamWallet,
-		address _saleWallet,
 		uint256 _startVesting
 	) 
 	    public
@@ -69,7 +69,6 @@ contract TokenSale {
 		validAddress(_corporationWallet)
 		validAddress(_rewardWallet)
 		validAddress(_teamWallet)
-		validAddress(_saleWallet)
 	{
 		require(_startTime > block.timestamp - 60);
 		require(_endTime > startTime);
@@ -83,7 +82,6 @@ contract TokenSale {
 		corpotationWallet = _corporationWallet;
 		rewardWallet = _rewardWallet;
 		teamWallet = _teamWallet;
-		saleWallet = _saleWallet;
 	}
 
 	/**
@@ -94,7 +92,8 @@ contract TokenSale {
 	 */
 	function deploy (
 		uint256 _supply, 
-		uint256 _ownerPool
+		uint256 _ownerPool,
+		address _vestingContract
 	) 
 	public isOwner returns (bool) 
 	{
@@ -102,9 +101,10 @@ contract TokenSale {
 		token = new SDT (
 			_supply, 
 			msg.sender, 
-			saleWallet, 
+			this,
 			_ownerPool
 		);
+		vesting = TokenVesting(_vestingContract);
 		activated = true;
 		return true;
 	}
@@ -273,7 +273,8 @@ contract TokenSale {
     ) 
         internal
     {
-        token.grantVestedTokens(
+    	token.transfer(vesting, _value);
+        vesting.grantVestedTokens(
 	        _to,
 	        _value,
 	        _start,

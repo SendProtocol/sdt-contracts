@@ -111,34 +111,4 @@ contract SCNS1 is ERC20 {
         uint256 referenceId, 
         uint256 exchangeRate
     );
-
-    function claimTokens() public;
-
-    function claimTokensFor(address to) public;
-
-    function calculateVestedTokens(
-        uint256 tokens,
-        uint256 vesting,
-        uint256 start,
-        uint256 claimed
-    ) internal constant returns (uint256);
-
-    function grantVestedTokens(
-        address _to,
-        uint256 _value,
-        uint256 _start,
-        uint256 _vesting
-    ) public;
-
-    event NewTokenGrant (
-        address indexed to, 
-        uint256 value, 
-        uint256 start, 
-        uint256 vesting
-    );
-
-    event NewTokenClaim (
-        address indexed holder, 
-        uint256 value
-    );
 }

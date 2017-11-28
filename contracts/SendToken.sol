@@ -26,19 +26,11 @@ contract SendToken is SCNS1, StandardToken {
         uint256 expirationTime;
     }
 
-    struct TokenGrant {
-        uint256 value;
-        uint256 claimed;
-        uint256 vesting;
-        uint256 start;
-    }
-
     address public owner;
     address public ico;
     address public saleWallet;
     uint256 public maxSupply;
 
-    mapping (address => TokenGrant[]) public grants;
     mapping (uint256 => Poll) public polls;
     mapping (address => bool) internal verifiedAddresses;
     mapping (address => uint256) internal lockedBalances;
@@ -331,135 +323,4 @@ contract SendToken is SCNS1, StandardToken {
             _exchangeRate
         );
     }
-
-    /**
-    * @dev Calculate vested claimable tokens on current time
-    * @param _tokens Number of tokens granted
-    * @param _vesting Vesting finish timestamp
-    * @param _start Vesting start timestamp
-    * @param _claimed Number of tokens already claimed
-    */
-    function calculateVestedTokens(
-        uint256 _tokens,
-        uint256 _vesting,
-        uint256 _start,
-        uint256 _claimed
-    ) 
-        internal constant returns (uint256)
-    {
-        uint256 time = block.timestamp;
-
-        if (time < _start) {
-            return 0;
-        }
-        if (time >= _start + _vesting) {
-            return SafeMath.sub(_tokens, _claimed);
-        }
-        uint256 vestedTokens = SafeMath.div(
-            SafeMath.mul(_tokens, SafeMath.sub(time, _start)),
-            SafeMath.sub(_vesting, _start)
-        );
-
-        return SafeMath.sub(vestedTokens, _claimed);
-    }
-
-    /**
-    * @dev Grant vested tokens
-    * @notice Only for ICO contract address
-    * @param _to Addres to grant tokens to.
-    * @param _value Number of tokens granted
-    * @param _vesting Vesting finish timestamp
-    * @param _start Vesting start timestamp
-    */
-    function grantVestedTokens(
-        address _to,
-        uint256 _value,
-        uint256 _start,
-        uint256 _vesting
-    ) 
-        icoResticted
-        public 
-    {   
-        require (_value > 0);
-        require (_vesting > _start);
-        require (grants[_to].length < 10);
-
-        TokenGrant memory grant = TokenGrant(_value, 0, _vesting, _start);
-        grants[_to].push(grant);
-
-        balances[saleWallet] = balances[saleWallet].sub(_value);
-        
-        NewTokenGrant(_to, _value, _start, _vesting);
-    }
-
-    /**
-    * @dev Claim all vested tokens up to current date
-    */
-    function claimTokens() public {
-        uint256 numberOfGrants = grants[msg.sender].length;
-
-        if (numberOfGrants == 0) {
-            return;
-        }
-
-        uint256 claimable = 0;
-        uint256 claimableFor = 0;
-        for (uint256 i = 0; i < numberOfGrants; i++) {
-            claimableFor = calculateVestedTokens (
-                grants[msg.sender][i].value,
-                grants[msg.sender][i].vesting,
-                grants[msg.sender][i].start,
-                grants[msg.sender][i].claimed
-            );
-            claimable = SafeMath.add (
-                claimable, 
-                claimableFor
-            );
-            grants[msg.sender][i].claimed = SafeMath.add (
-                grants[msg.sender][i].claimed,
-                claimableFor
-            );
-        }
-
-        balances[msg.sender] = balances[msg.sender].add(claimable);
-        totalSupply += claimable;
-
-        NewTokenClaim(msg.sender, claimable);
-    }
-
-    /**
-    * @dev Claim all vested tokens up to current date
-    */
-    function claimTokensFor(address _to) public ownerRestricted {
-        uint256 numberOfGrants = grants[_to].length;
-
-        if (numberOfGrants == 0) {
-            return;
-        }
-
-        uint256 claimable = 0;
-        uint256 claimableFor = 0;
-        for (uint256 i = 0; i < numberOfGrants; i++) {
-            claimableFor = calculateVestedTokens (
-                grants[_to][i].value,
-                grants[_to][i].vesting,
-                grants[_to][i].start,
-                grants[_to][i].claimed
-            );
-            claimable = SafeMath.add (
-                claimable, 
-                claimableFor
-            );
-            grants[_to][i].claimed = SafeMath.add (
-                grants[_to][i].claimed,
-                claimableFor
-            );
-        }
-
-        balances[_to] = balances[_to].add(claimable);
-        totalSupply += claimable;
-
-        NewTokenClaim(_to, claimable);
-    }
-
 }
