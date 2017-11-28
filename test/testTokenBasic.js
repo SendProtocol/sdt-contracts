@@ -25,7 +25,7 @@ contract("SDT", function(accounts) {
     });
 
     it("should be unverified by default", async function() {
-      assert(!await token.isVerified(accounts[1]));
+      assert(!await token.isVerified.call(accounts[1]));
     });
 
     it("should possible to verify", async function() {

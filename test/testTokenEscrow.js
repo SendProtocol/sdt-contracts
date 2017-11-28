@@ -29,9 +29,9 @@ contract("SDT", function(accounts) {
         fee,
         futureDate
       );
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, valueToApprove + fee);
-      let balance = await token.balanceOf(accounts[0]);
+      let balance = await token.balanceOf.call(accounts[0]);
       assert.equal(balance, amount(1) - (valueToApprove + fee));
     });
 
@@ -103,13 +103,13 @@ contract("SDT", function(accounts) {
         0,
         { from: accounts[1] }
       );
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, 0);
-      let balanceSender = await token.balanceOf(accounts[0]);
+      let balanceSender = await token.balanceOf.call(accounts[0]);
       assert.equal(balanceSender, amount(1) - (valueToApprove + fee));
-      let balanceRecipient = await token.balanceOf(accounts[2]);
+      let balanceRecipient = await token.balanceOf.call(accounts[2]);
       assert.equal(balanceRecipient, valueToApprove);
-      let balanceAuthority = await token.balanceOf(accounts[1]);
+      let balanceAuthority = await token.balanceOf.call(accounts[1]);
       assert.equal(balanceAuthority, fee);
     });
 
@@ -142,13 +142,13 @@ contract("SDT", function(accounts) {
         referenceId,
         exchangeRate
       );
-      let locked = await token.lockedBalanceOf(accounts[2]);
+      let locked = await token.lockedBalanceOf.call(accounts[2]);
       assert.equal(locked, 0);
-      let balanceSender = await token.balanceOf(accounts[2]);
+      let balanceSender = await token.balanceOf.call(accounts[2]);
       assert.equal(balanceSender, 0);
-      let balanceRecipient = await token.balanceOf(accounts[3]);
+      let balanceRecipient = await token.balanceOf.call(accounts[3]);
       assert.equal(balanceRecipient, valueToApprove);
-      let balanceAuthority = await token.balanceOf(accounts[0]);
+      let balanceAuthority = await token.balanceOf.call(accounts[0]);
       assert.equal(balanceAuthority, amount(1) - (valueToApprove + fee));
     });
 
@@ -182,9 +182,9 @@ contract("SDT", function(accounts) {
         fee,
         futureDate
       );
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, valueToApprove + fee);
-      let balance = await token.balanceOf(accounts[0]);
+      let balance = await token.balanceOf.call(accounts[0]);
       assert.equal(balance, amount(1) - (valueToApprove + fee));
     });
 
@@ -196,11 +196,11 @@ contract("SDT", function(accounts) {
         exchangeRate,
         { from: accounts[1] }
       );
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, 0);
-      let senderBalance = await token.balanceOf(accounts[0]);
+      let senderBalance = await token.balanceOf.call(accounts[0]);
       assert.equal(senderBalance, amount(1) - fee);
-      let authorityBalance = await token.balanceOf(accounts[1]);
+      let authorityBalance = await token.balanceOf.call(accounts[1]);
       assert.equal(authorityBalance, fee);
     });
   });
@@ -219,19 +219,19 @@ contract("SDT", function(accounts) {
         fee,
         pastDate
       );
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, valueToApprove + fee);
-      let balance = await token.balanceOf(accounts[0]);
+      let balance = await token.balanceOf.call(accounts[0]);
       assert.equal(balance, amount(1) - (valueToApprove + fee));
     });
 
     it("should allow user to get tokens back on an expired lock", async function() {
       await token.claimLockedTransfer(accounts[1], referenceId);
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, 0);
-      let senderBalance = await token.balanceOf(accounts[0]);
+      let senderBalance = await token.balanceOf.call(accounts[0]);
       assert.equal(senderBalance, amount(1));
-      let authorityBalance = await token.balanceOf(accounts[1]);
+      let authorityBalance = await token.balanceOf.call(accounts[1]);
       assert.equal(authorityBalance, 0);
     });
   });
@@ -251,9 +251,9 @@ contract("SDT", function(accounts) {
         fee,
         pastDate
       );
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, valueToApprove + fee);
-      let balance = await token.balanceOf(accounts[0]);
+      let balance = await token.balanceOf.call(accounts[0]);
       assert.equal(balance, amount(1) - (valueToApprove + fee));
     });
 
@@ -266,9 +266,9 @@ contract("SDT", function(accounts) {
         await token.claimLockedTransfer(accounts[1], referenceId);
         assert.fail("should have thrown before");
       } catch (error) {
-        let locked = await token.lockedBalanceOf(accounts[0]);
+        let locked = await token.lockedBalanceOf.call(accounts[0]);
         assert.equal(locked, valueToApprove + fee);
-        let balance = await token.balanceOf(accounts[0]);
+        let balance = await token.balanceOf.call(accounts[0]);
         assert.equal(balance, amount(1) - (valueToApprove + fee));
         assertJump(error);
       }
@@ -282,13 +282,13 @@ contract("SDT", function(accounts) {
         0,
         { from: accounts[1] }
       );
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, 0);
-      let balanceSender = await token.balanceOf(accounts[0]);
+      let balanceSender = await token.balanceOf.call(accounts[0]);
       assert.equal(balanceSender, amount(1) - (valueToApprove + fee));
-      let balanceRecipient = await token.balanceOf(accounts[2]);
+      let balanceRecipient = await token.balanceOf.call(accounts[2]);
       assert.equal(balanceRecipient, valueToApprove);
-      let balanceAuthority = await token.balanceOf(accounts[1]);
+      let balanceAuthority = await token.balanceOf.call(accounts[1]);
       assert.equal(balanceAuthority, 1);
     });
 
@@ -311,11 +311,11 @@ contract("SDT", function(accounts) {
         exchangeRate,
         { from: accounts[1] }
       );
-      let locked = await token.lockedBalanceOf(accounts[0]);
+      let locked = await token.lockedBalanceOf.call(accounts[0]);
       assert.equal(locked, 0);
-      let senderBalance = await token.balanceOf(accounts[0]);
+      let senderBalance = await token.balanceOf.call(accounts[0]);
       assert.equal(senderBalance, amount(1) - fee);
-      let authorityBalance = await token.balanceOf(accounts[1]);
+      let authorityBalance = await token.balanceOf.call(accounts[1]);
       assert.equal(authorityBalance, fee);
     });
   });
