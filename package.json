@@ -8,13 +8,20 @@
   },
   "dependencies": {
     "mathjs": "^3.16.5",
+    "truffle": "^4.0.1",
     "zeppelin-solidity": "^1.4.0"
   },
   "devDependencies": {
+    "coveralls": "^3.0.0",
+    "ethereumjs-testrpc": "^6.0.3",
+    "prettier": "^1.8.2",
     "solidity-coverage": "^0.4.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "truffle compile",
+    "deploy": "truffle migrate",
+    "test": "bash scripts/test.sh",
+    "coverage": "bash scripts/coverage.sh"
   },
   "repository": {
     "type": "git",
