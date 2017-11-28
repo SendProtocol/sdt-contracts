@@ -37,14 +37,21 @@ contract("TokenSale", function(accounts) {
 
   it("should be possible to activate crowdsale", async function() {
     await sale.deploy(700 * 10 ** 6, 0, vesting.address);
-    assert(sale.activated.call());
 
     let _tokenAddress = await sale.token.call();
     token = await SDT.at(_tokenAddress);
 
-    vesting.init(_tokenAddress, sale.address);
-
+    assert(sale.activated.call());
     assert.equal(await token.balanceOf.call(sale.address), 700 * 10 ** 24);
+  });
+
+  it("should be possible to activate vesting contract", async function() {
+    vesting.init(token.address, sale.address);
+    assert(await vesting.initialized.call());
+    assert(await vesting.active.call());
+    assert.equal(await vesting.owner.call(), accounts[0]);
+    assert.equal(await vesting.ico.call(), sale.address);
+    assert.equal(await vesting.token.call(), await sale.token.call());
   });
 
   it("should fail if purchasing less than min", async function() {
@@ -57,11 +64,25 @@ contract("TokenSale", function(accounts) {
   });
 
   it("10 USD at 0.14 - should return the right amount with a maximum error of 0.001%", async function() {
+    //Calculate tokens
     bought = await sale.computeTokens.call(10);
-    await sale.purchase(10, 0, 0, 0x1, 100, currentDate + 5000, 0);
     error = math.abs(bought.valueOf() - 10 / 0.14 * 10 ** 18);
 
+    //execute purchase
+    let circulatingSupply = await vesting.circulatingSupply.call();
+    let saleBalance = await token.balanceOf.call(sale.address);
+    await sale.purchase(10, 10, 0, accounts[9], 100, currentDate + 5000, 0);
+    let newCirculatingSupply = await vesting.circulatingSupply.call();
+    let newSaleBalance = await token.balanceOf.call(sale.address);
+
+    let granted = await vesting.totalVestedTokens.call({from: accounts[9]});
+
     assert(error < bought.valueOf() * maxError);
+    assert.equal(granted.valueOf(), bought.valueOf());
+    assert.equal(newSaleBalance, saleBalance - granted);
+    assert.equal(newCirculatingSupply.valueOf(), circulatingSupply.valueOf());
+    assert.equal(await sale.raised.call(), 10);
+    assert.equal(await sale.soldTokens.call(), granted.valueOf());
   });
 
   it("6M USD at 0.14 - should return right amount with a maximum error of 0.001%", async function() {
