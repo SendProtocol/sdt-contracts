@@ -11,6 +11,7 @@
     "zeppelin-solidity": "^1.4.0"
   },
   "devDependencies": {
+    "prettier": "^1.8.2",
     "solidity-coverage": "^0.4.2"
   },
   "scripts": {
