@@ -228,29 +228,25 @@ contract TokenSale {
     * for 1 < y < 1.5 which is within radius of convergence of the Taylor series.
     * https://en.wikipedia.org/wiki/Natural_logarithm#Derivative.2C_Taylor_series
     */
-  function ln(uint256 x) internal pure returns(uint256) {
-    uint256 result = 0;
-    uint256 k = 0;
+  function ln(uint256 x) internal pure returns(uint256 result) {
     uint256 n = 1;
-    uint256 powY;
     uint256 y;
 
     while (x >= 1500000000000000000) {
-      k += 1;
+      result = result + 405465108108164000; // ln(1.5) = 0.405465108108164
       x = x * 2 / 3; // same as x / 1.5
     }
 
-    result = k * 405465000000000000;
-    y = x - 1000000000000000000;
-    powY = y;
+    x = x - 1000000000000000000;
+    y = x;
 
     while (n < 10) {
-      result = result + (powY / n);
+      result = result + (y / n);
       n = n + 1;
-      powY = powY * y / 1000000000000000000;
-      result = result - (powY / n);
+      y = y * x / 1000000000000000000;
+      result = result - (y / n);
       n = n + 1;
-      powY = powY * y / 1000000000000000000;
+      y = y * x / 1000000000000000000;
     }
   }
 
