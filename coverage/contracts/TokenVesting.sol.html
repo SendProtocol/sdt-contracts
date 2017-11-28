@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/TokenVesting.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> TokenVesting.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">36.84% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>14/38</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">26.92% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>7/26</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">41.67% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>5/12</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">39.53% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>17/43</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.18;
+&nbsp;
+import './SendToken.sol';
+&nbsp;
+/**
+ * @title Vesting contract for SDT
+ * @dev see https://send.sd/token
+ */
+contract TokenVesting {
+  address public owner;
+  address public ico;
+  bool public initialized;
+  bool public active;
+  SendToken public token;
+  mapping (address =&gt; TokenGrant[]) public grants;
+&nbsp;
+  struct TokenGrant {
+    uint256 value;
+    uint256 claimed;
+    uint256 vesting;
+    uint256 start;
+  }
+&nbsp;
+  event NewTokenGrant (
+    address indexed to,
+    uint256 value,
+    uint256 start,
+    uint256 vesting
+  );
+&nbsp;
+  event NewTokenClaim (
+    address indexed holder,
+    uint256 value
+  );
+&nbsp;
+  modifier ownerRestricted() {
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == owner);
+    _;
+  }
+&nbsp;
+  modifier icoResticted() {
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == ico);
+    _;
+  }
+&nbsp;
+<span class="fstat-no" title="function not covered" >  modifier isActive()</span>{
+<span class="cstat-no" title="statement not covered" >    require(active)</span>;
+    _;
+  }
+&nbsp;
+  function TokenVesting() public {
+    owner = msg.sender;
+    active = false;
+  }
+&nbsp;
+  function init(address _token, address _ico) public ownerRestricted {
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(!active);
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(!initialized);
+    token = SendToken(_token);
+    ico = _ico;
+    active = true;
+  }
+&nbsp;
+<span class="fstat-no" title="function not covered" >  function stop() public isActive ownerRestricted </span>{
+<span class="cstat-no" title="statement not covered" >    active = false</span>;
+  }
+&nbsp;
+<span class="fstat-no" title="function not covered" >  function resume() public isActive ownerRestricted </span>{
+<span class="cstat-no" title="statement not covered" >    require(!active)</span>;
+<span class="cstat-no" title="statement not covered" >    require(initialized)</span>;
+<span class="cstat-no" title="statement not covered" >    active = true</span>;
+  }
+&nbsp;
+  /**
+  * @dev Grant vested tokens.
+  * @notice Only for ICO contract address.
+  * @param _to Addres to grant tokens to.
+  * @param _value Number of tokens granted.
+  * @param _vesting Vesting finish timestamp.
+  * @param _start Vesting start timestamp.
+  */
+  function grantVestedTokens(
+      address _to,
+      uint256 _value,
+      uint256 _start,
+      uint256 _vesting
+  ) public icoResticted {
+    <span class="missing-if-branch" title="else path not taken" >E</span>require (_value &gt; 0);
+    <span class="missing-if-branch" title="else path not taken" >E</span>require (_vesting &gt; _start);
+    <span class="missing-if-branch" title="else path not taken" >E</span>require (grants[_to].length &lt; 10);
+&nbsp;
+    TokenGrant memory grant = TokenGrant(_value, 0, _vesting, _start);
+    grants[_to].push(grant);
+&nbsp;
+    NewTokenGrant(_to, _value, _start, _vesting);
+  }
+&nbsp;
+  /**
+  * @dev Calculate vested claimable tokens on current time
+  * @param _tokens Number of tokens granted
+  * @param _vesting Vesting finish timestamp
+  * @param _start Vesting start timestamp
+  * @param _claimed Number of tokens already claimed
+  */
+<span class="fstat-no" title="function not covered" >  function calculateVestedTokens(</span>
+      uint256 _tokens,
+      uint256 _vesting,
+      uint256 _start,
+      uint256 _claimed
+  ) internal constant returns (uint256) {
+<span class="cstat-no" title="statement not covered" >    uint256 time = block.timestamp</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (time &lt; _start) {</span>
+<span class="cstat-no" title="statement not covered" >      return 0;</span>
+    }
+<span class="cstat-no" title="statement not covered" >    if (time &gt;= _start + _vesting) {</span>
+<span class="cstat-no" title="statement not covered" >      return SafeMath.sub(_tokens, _claimed);</span>
+    }
+<span class="cstat-no" title="statement not covered" >    uint256 vestedTokens = SafeMath.div(</span>
+      SafeMath.mul(_tokens, SafeMath.sub(time, _start)),
+      SafeMath.sub(_vesting, _start)
+    );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return SafeMath.sub(vestedTokens, _claimed);</span>
+  }
+&nbsp;
+  /**
+  * @dev Claim all vested tokens up to current date for myself
+  */
+<span class="fstat-no" title="function not covered" >  function claimTokens() public </span>{
+<span class="cstat-no" title="statement not covered" >    claimTokensFor(msg.sender)</span>;
+  }
+&nbsp;
+  /**
+  * @dev Claim all vested tokens up to current date in behaviour of an user
+  */
+<span class="fstat-no" title="function not covered" >  function claimTokensFor(address _to) public ownerRestricted </span>{
+<span class="cstat-no" title="statement not covered" >    claimTokensFor(_to)</span>;
+  }
+&nbsp;
+  /**
+  * @dev Claim all vested tokens up to current date
+  */
+<span class="fstat-no" title="function not covered" >  function claim(address _to) internal </span>{
+<span class="cstat-no" title="statement not covered" >    uint256 numberOfGrants = grants[_to].length</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (numberOfGrants == 0) {</span>
+<span class="cstat-no" title="statement not covered" >      return;</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    uint256 claimable = 0</span>;
+<span class="cstat-no" title="statement not covered" >    uint256 claimableFor = 0</span>;
+<span class="cstat-no" title="statement not covered" >    for (uint256 i = 0; i &lt; numberOfGrants; i++) {</span>
+<span class="cstat-no" title="statement not covered" >      claimableFor = calculateVestedTokens (</span>
+        grants[_to][i].value,
+        grants[_to][i].vesting,
+        grants[_to][i].start,
+        grants[_to][i].claimed
+      );
+<span class="cstat-no" title="statement not covered" >      claimable = SafeMath.add (</span>
+        claimable,
+        claimableFor
+      );
+<span class="cstat-no" title="statement not covered" >      grants[_to][i].claimed = SafeMath.add (</span>
+        grants[_to][i].claimed,
+        claimableFor
+      );
+    }
+&nbsp;
+    token.transfer(_to, claimable);
+    //totalSupply += claimable;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    NewTokenClaim(_to, claimable)</span>;
+  }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Nov 28 2017 17:45:08 GMT+1300 (NZDT)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
