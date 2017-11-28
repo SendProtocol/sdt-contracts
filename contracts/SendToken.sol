@@ -27,8 +27,6 @@ contract SendToken is SCNS1, StandardToken {
 
   address public owner;
   address public ico;
-  address public saleWallet;
-  uint256 public maxSupply;
 
   mapping (uint256 => Poll) public polls;
   mapping (address => bool) internal verifiedAddresses;

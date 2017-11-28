@@ -14,6 +14,8 @@ contract TokenVesting {
   SendToken public token;
   mapping (address => TokenGrant[]) public grants;
 
+  uint256 circulatingSupply = 0;
+
   struct TokenGrant {
     uint256 value;
     uint256 claimed;
@@ -168,7 +170,7 @@ contract TokenVesting {
     }
 
     token.transfer(_to, claimable);
-    //totalSupply += claimable;
+    circulatingSupply += claimable;
 
     NewTokenClaim(_to, claimable);
   }

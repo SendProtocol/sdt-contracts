@@ -35,17 +35,14 @@ contract SDT is SendToken {
       uint256 _ownerPool
   ) public validAddress(_owner) validAddress(_sale) {
     require(_ownerPool <= 100);
-    maxSupply = _supply * 10**decimals;
+
+    totalSupply = _supply * 10**decimals;
 
     owner = _owner;
-    ico = msg.sender;
-    saleWallet = _sale;
 
-    verifiedAddresses[msg.sender] = true;
+    verifiedAddresses[owner] = true;
 
-    balances[_owner] = maxSupply * _ownerPool / 100;
-    balances[_sale] = maxSupply * (100 - _ownerPool) / 100;
-
-    totalSupply = balances[_owner];
+    balances[_owner] = totalSupply * _ownerPool / 100;
+    balances[_sale] = totalSupply * (100 - _ownerPool) / 100;
   }
 }
