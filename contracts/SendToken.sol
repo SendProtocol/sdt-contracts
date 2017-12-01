@@ -19,15 +19,18 @@ contract SendToken is SCNS1, StandardToken {
     uint256 minimumTokens;
     uint256 startTime;
     uint256 endTime;
+    uint256 block;
   }
 
   address public owner;
-
+  bool public activePoll;
+  Poll public poll;
   Escrow public escrow;
 
   mapping (uint256 => Poll) public polls;
   mapping (address => bool) internal verifiedAddresses;
   mapping (uint256 => mapping(address => bool)) internal voted;
+  mapping (address => mapping(uint256 => uint256)) internal snapshots;
 
   modifier ownerRestricted(){
     require(msg.sender == owner);
@@ -78,6 +81,31 @@ contract SendToken is SCNS1, StandardToken {
    */
   function setEscrow(address _address) public ownerRestricted {
     escrow = Escrow(_address);
+  }
+
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    if (activePoll) {
+      if (snapshots[msg.sender][poll.block] == 0) {
+        snapshots[msg.sender][poll.block] = balanceOf(msg.sender);
+      }
+      if (snapshots[_to][poll.block] == 0) {
+        snapshots[_to][poll.block] = balanceOf(_to);
+      }
+    }
+    return BasicToken.transfer(_to, _value);
+
+  }
+
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    if (activePoll) {
+      if (snapshots[_from][poll.block] == 0) {
+        snapshots[_from][poll.block] = balanceOf(_from);
+      }
+      if (snapshots[_to][poll.block] == 0) {
+        snapshots[_to][poll.block] = balanceOf(_to);
+      }
+    }
+    return StandardToken.transferFrom(_from, _to, _value);
   }
 
   /**
@@ -155,20 +183,11 @@ contract SendToken is SCNS1, StandardToken {
       uint256 _exchangeRate,
       uint256 _fee
   ) public verifiedResticted {
-    require(_to != address(0));
     require(_exchangeRate > 0);
 
-    uint256 total = _value.add(_fee);
+    transferFrom(_from, _to, _value);
+    transferFrom(_from, msg.sender, _fee);
 
-    require(total <= balances[_from]);
-    require(total <= allowed[_from][msg.sender]);
-
-    balances[_from] = balances[_from].sub(total);
-    balances[_to] = balances[_to].add(_value);
-    if (_fee >= 0) {
-      balances[msg.sender] = balances[msg.sender].add(_fee);
-    }
-    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(total);
     VerifiedTransfer(
       _from,
       _to,
