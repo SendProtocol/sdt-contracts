@@ -1,8 +1,9 @@
 pragma solidity ^0.4.18;
 
 import 'zeppelin-solidity/contracts/token/StandardToken.sol';
-import './SCNS1.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import './SCNS1.sol';
+import './Escrow.sol';
 
 
 /**
@@ -12,6 +13,7 @@ import 'zeppelin-solidity/contracts/math/SafeMath.sol';
  * @dev https://send.sd/token
  */
 contract SendToken is SCNS1, StandardToken {
+
   struct Poll {
     address creator;
     uint256 minimumTokens;
@@ -19,20 +21,13 @@ contract SendToken is SCNS1, StandardToken {
     uint256 endTime;
   }
 
-  struct Lock {
-    uint256 value;
-    uint256 fee;
-    uint256 expirationTime;
-  }
-
   address public owner;
-  address public ico;
+
+  Escrow public escrow;
 
   mapping (uint256 => Poll) public polls;
   mapping (address => bool) internal verifiedAddresses;
-  mapping (address => uint256) internal lockedBalances;
   mapping (uint256 => mapping(address => bool)) internal voted;
-  mapping (address => mapping(address => mapping(uint256 => Lock))) internal lockedAllowed;
 
   modifier ownerRestricted(){
     require(msg.sender == owner);
@@ -44,8 +39,8 @@ contract SendToken is SCNS1, StandardToken {
     _;
   }
 
-  modifier icoResticted(){
-    require(msg.sender == ico);
+  modifier escrowResticted(){
+    require(msg.sender == address(escrow));
     _;
   }
 
@@ -56,15 +51,6 @@ contract SendToken is SCNS1, StandardToken {
    */
   function isVerified(address _address) public constant returns(bool) {
     return verifiedAddresses[_address];
-  }
-
-  /**
-   * @dev Get locked balance of a given address
-   * @param _owner Address to check
-   * @return A uint256 representing the locked amount of tokens
-   */
-  function lockedBalanceOf(address _owner) public constant returns(uint256) {
-    return lockedBalances[_owner];
   }
 
   /**
@@ -83,6 +69,15 @@ contract SendToken is SCNS1, StandardToken {
    */
   function unverify(address _address) public ownerRestricted {
     verifiedAddresses[_address] = false;
+  }
+
+  /**
+   * @dev Remove Verified status of a given address
+   * @notice Only contract owner
+   * @param _address Address to unverify
+   */
+  function setEscrow(address _address) public ownerRestricted {
+    escrow = Escrow(_address);
   }
 
   /**
@@ -141,135 +136,6 @@ contract SendToken is SCNS1, StandardToken {
   }
 
   /**
-   * @dev Authorize an address to perform a locked transfer
-   * @dev specified amount will be locked on msg.sender
-   * @param _authority Address to be authorized to spend locked funds
-   * @param _referenceId Intenral ID for applications implementing this
-   * @param _value Amount of tokens to lock
-   * @param _authorityFee A fee to be paid to authority (may be 0)
-   * @param _expirationTime After this timestamp, user can claim tokens back.
-   */
-  function approveLockedTransfer(
-      address _authority,
-      uint256 _referenceId,
-      uint256 _value,
-      uint256 _authorityFee,
-      uint256 _expirationTime
-  ) public {
-    uint256 total = _value + _authorityFee;
-
-    require(lockedAllowed[msg.sender][_authority][_referenceId].value == 0);
-    require(balances[msg.sender] >= total);
-
-    lockedAllowed[msg.sender][_authority][_referenceId].value = _value;
-    lockedAllowed[msg.sender][_authority][_referenceId].fee = _authorityFee;
-    lockedAllowed[msg.sender][_authority][_referenceId].expirationTime = _expirationTime;
-
-    lockedBalances[msg.sender] = lockedBalances[msg.sender].add(total);
-    balances[msg.sender] = balances[msg.sender].sub(total);
-
-    EscrowCreated(msg.sender, _authority, _referenceId);
-  }
-
-  /**
-   * @dev Transfer a locked amount
-   * @notice Only authorized address
-   * @notice Exchange rate has 18 decimal places
-   * @param _sender Address with locked amount
-   * @param _recipient Address to send funds to
-   * @param _referenceId App/user internal associated ID
-   * @param _exchangeRate Rate to be reported to the blockchain
-   */
-  function executeLockedTransfer(
-      address _sender,
-      address _recipient,
-      uint256 _referenceId,
-      uint256 _exchangeRate
-  ) public {
-    uint256 _value = lockedAllowed[_sender][msg.sender][_referenceId].value;
-    uint256 _fee = lockedAllowed[_sender][msg.sender][_referenceId].fee;
-
-    require(_value > 0);
-
-    if (verifiedAddresses[msg.sender]) {
-      require(_exchangeRate > 0);
-    } else {
-      require(_exchangeRate == 0);
-    }
-
-    lockedBalances[_sender] = lockedBalances[_sender].sub(_value + _fee);
-    balances[_recipient] = balances[_recipient].add(_value);
-    if (_fee > 0) {
-      balances[msg.sender] = balances[msg.sender].add(_fee);
-    }
-    delete lockedAllowed[_sender][msg.sender][_referenceId];
-
-    EscrowResolved(_sender, msg.sender, _referenceId, msg.sender, _recipient);
-
-    if (_sender == _recipient) {
-      return;
-    }
-    if (_exchangeRate == 0) {
-      Transfer(_sender, _recipient, _value);
-    } else {
-      VerifiedTransfer(
-        _sender,
-        _recipient,
-        msg.sender,
-        _value,
-        _referenceId,
-        _exchangeRate
-      );
-    }
-  }
-
-  /**
-   * @dev claim back locked amount after expiration time
-   * @notice Only works after lock expired
-   * @param _authority Authorized lock address
-   * @param _referenceId reference ID from App/user
-   */
-  function claimLockedTransfer(
-      address _authority,
-      uint256 _referenceId
-  ) public {
-    require(lockedAllowed[msg.sender][_authority][_referenceId].value > 0);
-    require(lockedAllowed[msg.sender][_authority][_referenceId].expirationTime < block.timestamp);
-    require(lockedAllowed[msg.sender][_authority][_referenceId].expirationTime != 0);
-
-    uint256 _value = lockedAllowed[msg.sender][_authority][_referenceId].value;
-    uint256 _fee = lockedAllowed[msg.sender][_authority][_referenceId].fee;
-
-    lockedBalances[msg.sender] = lockedBalances[msg.sender].sub(_value.add(_fee));
-    balances[msg.sender] = balances[msg.sender].add(_value.add(_fee));
-
-    delete lockedAllowed[msg.sender][_authority][_referenceId];
-
-    EscrowResolved(
-      msg.sender,
-      _authority,
-      _referenceId,
-      msg.sender,
-      msg.sender
-    );
-  }
-
-  /**
-   * @dev Remove expiration time on a lock
-   * @notice User wont be able to claim tokens back after this is called by authority address
-   * @notice Only authorized address
-   * @param _sender Address with locked amount
-   * @param _referenceId App/user internal associated ID
-   */
-  function invalidateLockedTransferExpiration(
-      address _sender,
-      uint256 _referenceId
-  ) public {
-    require(lockedAllowed[_sender][msg.sender][_referenceId].value > 0);
-    lockedAllowed[_sender][msg.sender][_referenceId].expirationTime = 0;
-  }
-
-  /**
    * @dev Transfer from one address to another issuing ane xchange rate
    * @notice Only verified addresses
    * @notice Exchange rate has 18 decimal places
@@ -311,5 +177,64 @@ contract SendToken is SCNS1, StandardToken {
       _referenceId,
       _exchangeRate
     );
+  }
+
+  /**
+   * @dev execute an escrow transfer
+   * @dev specified amount will be locked on escrow contract
+   * @param _authority Address authorized to approve/reject transaction
+   * @param _reference Intenral ID for applications implementing this
+   * @param _tokens Amount of tokens to lock
+   * @param _fee A fee to be paid to authority (may be 0)
+   * @param _expiration After this timestamp, user can claim tokens back.
+   */
+  function escrowTransfer(
+      address _authority,
+      uint256 _reference,
+      uint256 _tokens,
+      uint256 _fee,
+      uint256 _expiration
+  ) public {
+
+    uint256 total = _tokens + _fee;
+    transfer(escrow, total);
+
+    escrow.escrowTransfer(
+      msg.sender,
+      _authority,
+      _reference,
+      _tokens,
+      _fee,
+      _expiration
+    );
+  }
+
+  /**
+   * @dev Issue exchange rates from escrow contract
+   */
+  function issueExchangeRate(
+      address _from,
+      address _to,
+      address _verifiedAddress,
+      uint256 _value,
+      uint256 _referenceId,
+      uint256 _exchangeRate
+  ) public escrowResticted {
+    require(_exchangeRate >= 0);
+    bool v = isVerified(_verifiedAddress);
+    bool noRate = (_exchangeRate == 0);
+    if (v){
+      require(!noRate);
+      VerifiedTransfer(
+        _from,
+        _to,
+        _verifiedAddress,
+        _value,
+        _referenceId,
+        _exchangeRate
+      );
+    } else {
+      require(noRate);
+    }
   }
 }

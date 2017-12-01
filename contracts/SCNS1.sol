@@ -41,47 +41,6 @@ contract SCNS1 is ERC20 {
       uint256 option
   );
 
-  function lockedBalanceOf(address _owner) public constant returns(uint256);
-
-  function approveLockedTransfer(
-      address authority,
-      uint256 referenceId,
-      uint256 value,
-      uint256 authorityFee,
-      uint256 expirationTime
-  ) public;
-
-  function executeLockedTransfer(
-      address sender,
-      address recipient,
-      uint256 referenceId,
-      uint256 exchangeRate
-  ) public;
-
-  function claimLockedTransfer(
-      address authority,
-      uint256 referenceId
-  ) public;
-
-  function invalidateLockedTransferExpiration(
-      address sender,
-      uint256 referenceId
-  ) public;
-
-  event EscrowCreated(
-      address indexed sender,
-      address indexed authority,
-      uint256 referenceId
-  );
-
-  event EscrowResolved(
-      address indexed sender,
-      address indexed authority,
-      uint256 referenceId,
-      address resolver,
-      address sentTo
-  );
-
   function verifiedTransferFrom(
       address from,
       address to,
