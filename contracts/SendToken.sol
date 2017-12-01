@@ -15,11 +15,9 @@ import './Escrow.sol';
 contract SendToken is SCNS1, StandardToken {
 
   struct Poll {
-    address creator;
-    uint256 minimumTokens;
-    uint256 startTime;
-    uint256 endTime;
     uint256 block;
+    uint256 minimumTokens;
+    uint256 endTime;
   }
 
   address public owner;
@@ -27,9 +25,10 @@ contract SendToken is SCNS1, StandardToken {
   Poll public poll;
   Escrow public escrow;
 
-  mapping (uint256 => Poll) public polls;
   mapping (address => bool) internal verifiedAddresses;
+
   mapping (uint256 => mapping(address => bool)) internal voted;
+  mapping (uint256 => mapping(uint256 => uint256)) internal votes;
   mapping (address => mapping(uint256 => uint256)) internal snapshots;
 
   modifier ownerRestricted(){
@@ -112,35 +111,28 @@ contract SendToken is SCNS1, StandardToken {
    * @dev Create a poll
    * @dev _question and _options parameters are only for logging
    * @notice Only verified addresses
-   * @param _id Poll ID. Must not exist already.
    * @param _question An string to be logged on poll creation
    * @param _options An array of strings to be logged on poll creation
    * @param _minimumTokens Minimum number of tokens to vote
-   * @param _startTime Poll start time
    * @param _endTime Poll end time
    */
   function createPoll(
-      uint256 _id,
       bytes32 _question,
       bytes32[] _options,
       uint256 _minimumTokens,
-      uint256 _startTime,
       uint256 _endTime
-  ) public verifiedResticted {
-    require(polls[_id].creator == 0);
+  ) public ownerRestricted {
+    poll.block = block.number;
+    poll.minimumTokens = _minimumTokens;
+    poll.endTime = _endTime;
 
-    polls[_id].creator = msg.sender;
-    polls[_id].minimumTokens = _minimumTokens;
-    polls[_id].startTime = _startTime;
-    polls[_id].endTime = _endTime;
+    activePoll = true;
 
     PollCreated(
-      msg.sender,
-      _id,
+      block.number,
       _question,
       _options,
       _minimumTokens,
-      _startTime,
       _endTime
     );
   }
@@ -149,18 +141,17 @@ contract SendToken is SCNS1, StandardToken {
    * @dev vote
    * @dev will fail if doesnt meet minimumTokens requirement on poll dates
    * @notice Only once per address per poll
-   * @param _id Poll ID. Must not exist already.
    * @param _option Index of option to vote (first option is 0)
    */
-  function vote(uint256 _id, uint256 _option) public {
-    require(polls[_id].creator != 0);
-    require(voted[_id][msg.sender] == false);
-    require(balances[msg.sender] >= polls[_id].minimumTokens);
-    require(polls[_id].startTime <= block.timestamp);
-    require(polls[_id].endTime >= block.timestamp);
+  function vote(uint256 _option) public {
+    require(activePoll);
+    require(voted[poll.block][msg.sender] == false);
+    require(balanceOf(msg.sender) >= poll.minimumTokens);
+    require(poll.endTime >= block.timestamp);
 
-    voted[_id][msg.sender] = true;
-    Voted(_id, msg.sender, _option);
+    voted[poll.block][msg.sender] = true;
+    votes[poll.block][_option] += balanceOf(msg.sender);
+    Voted(poll.block, msg.sender, _option);
   }
 
   /**
