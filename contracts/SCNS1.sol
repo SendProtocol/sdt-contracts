@@ -32,9 +32,10 @@ contract SCNS1 is ERC20 {
   );
 
   event Voted(
-      uint256 indexedpoll,
+      uint256 indexed poll,
       address indexed voter,
-      uint256 option
+      uint256 option,
+      uint256 weight
   );
 
   function verifiedTransferFrom(

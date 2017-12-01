@@ -14,22 +14,20 @@ import './Escrow.sol';
  */
 contract SendToken is SCNS1, StandardToken {
 
-  struct Poll {
-    uint256 block;
-    uint256 minimumTokens;
-    uint256 endTime;
-  }
-
   address public owner;
   bool public activePoll;
   Poll public poll;
   Escrow public escrow;
 
   mapping (address => bool) internal verifiedAddresses;
-
   mapping (uint256 => mapping(address => bool)) internal voted;
-  mapping (uint256 => mapping(uint256 => uint256)) internal votes;
   mapping (address => mapping(uint256 => uint256)) internal snapshots;
+
+  struct Poll {
+    uint256 block;
+    uint256 minimumTokens;
+    uint256 endTime;
+  }
 
   modifier ownerRestricted(){
     require(msg.sender == owner);
@@ -82,6 +80,11 @@ contract SendToken is SCNS1, StandardToken {
     escrow = Escrow(_address);
   }
 
+  /**
+   * @dev Extend OpenZeppelin's BasicToken transfer function to store snapshot
+   * @param _to The address to transfer to.
+   * @param _value The amount to be transferred.
+   */
   function transfer(address _to, uint256 _value) public returns (bool) {
     if (activePoll) {
       if (snapshots[msg.sender][poll.block] == 0) {
@@ -95,6 +98,12 @@ contract SendToken is SCNS1, StandardToken {
 
   }
 
+  /**
+   * @dev Extend OpenZeppelin's StandardToken transferFrom function to store snapshot
+   * @param _from address The address which you want to send tokens from
+   * @param _to address The address which you want to transfer to
+   * @param _value uint256 the amount of tokens to be transferred
+   */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
     if (activePoll) {
       if (snapshots[_from][poll.block] == 0) {
@@ -149,9 +158,12 @@ contract SendToken is SCNS1, StandardToken {
     require(balanceOf(msg.sender) >= poll.minimumTokens);
     require(poll.endTime >= block.timestamp);
 
+    if (snapshots[msg.sender][poll.block] == 0) {
+      snapshots[msg.sender][poll.block] = balanceOf(msg.sender);
+    }
+
     voted[poll.block][msg.sender] = true;
-    votes[poll.block][_option] += balanceOf(msg.sender);
-    Voted(poll.block, msg.sender, _option);
+    Voted(poll.block, msg.sender, _option, balanceOf(msg.sender));
   }
 
   /**
