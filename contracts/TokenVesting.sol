@@ -116,7 +116,7 @@ contract TokenVesting {
     if (time < _start) {
       return 0;
     }
-    if (time >= _start + _vesting) {
+    if (time >= _vesting) {
       return SafeMath.sub(_tokens, _claimed);
     }
     uint256 vestedTokens = SafeMath.div(
