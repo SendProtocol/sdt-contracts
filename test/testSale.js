@@ -78,7 +78,7 @@ contract("TokenSale", function(accounts) {
     let newCirculatingSupply = await vesting.circulatingSupply.call();
     let newSaleBalance = await token.balanceOf.call(sale.address);
 
-    let granted = await vesting.totalVestedTokens.call({from: accounts[9]});
+    let granted = await vesting.totalVestedTokens.call({ from: accounts[9] });
 
     allocated = granted;
     collected = 10;
@@ -103,7 +103,7 @@ contract("TokenSale", function(accounts) {
     let newCirculatingSupply = await vesting.circulatingSupply.call();
     let newSaleBalance = await token.balanceOf.call(sale.address);
 
-    let granted = await vesting.totalVestedTokens.call({from: accounts[9]});
+    let granted = await vesting.totalVestedTokens.call({ from: accounts[9] });
 
     allocated = allocated.plus(bought);
     collected += 6000000;
@@ -132,11 +132,19 @@ contract("TokenSale", function(accounts) {
       //execute purchase
       let circulatingSupply = await vesting.circulatingSupply.call();
       let saleBalance = await token.balanceOf.call(sale.address);
-      await sale.purchase(2000000, 0, 0, accounts[9], 100, currentDate + 5000, 0);
+      await sale.purchase(
+        2000000,
+        0,
+        0,
+        accounts[9],
+        100,
+        currentDate + 5000,
+        0
+      );
       let newCirculatingSupply = await vesting.circulatingSupply.call();
       let newSaleBalance = await token.balanceOf.call(sale.address);
 
-      let granted = await vesting.totalVestedTokens.call({from: accounts[9]});
+      let granted = await vesting.totalVestedTokens.call({ from: accounts[9] });
 
       allocated = allocated.plus(bought);
       collected += 2000000;
@@ -162,11 +170,19 @@ contract("TokenSale", function(accounts) {
       //execute purchase
       let circulatingSupply = await vesting.circulatingSupply.call();
       let saleBalance = await token.balanceOf.call(sale.address);
-      await sale.purchase(7000000, 0, 0, accounts[9], 100, currentDate + 5000, 0);
+      await sale.purchase(
+        7000000,
+        0,
+        0,
+        accounts[9],
+        100,
+        currentDate + 5000,
+        0
+      );
       let newCirculatingSupply = await vesting.circulatingSupply.call();
       let newSaleBalance = await token.balanceOf.call(sale.address);
 
-      let granted = await vesting.totalVestedTokens.call({from: accounts[9]});
+      let granted = await vesting.totalVestedTokens.call({ from: accounts[9] });
 
       allocated = allocated.plus(bought);
       collected += 7000000;

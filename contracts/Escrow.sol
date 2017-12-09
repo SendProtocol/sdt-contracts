@@ -7,10 +7,9 @@ import './SendToken.sol';
  * @dev see https://send.sd/token
  */
 contract Escrow {
-
   address public tokenAddress;
   SendToken public token;
-  
+
   struct Lock {
     uint256 value;
     uint256 fee;
@@ -89,7 +88,7 @@ contract Escrow {
       uint256 _reference,
       uint256 _exchangeRate
   ) public {
-    
+
     uint256 value = escrows[_sender][msg.sender][_reference].value;
     uint256 fee = escrows[_sender][msg.sender][_reference].fee;
 
@@ -160,5 +159,4 @@ contract Escrow {
     escrows[_sender][msg.sender][_reference].expiration = 0;
     EscrowMediation(_sender, msg.sender, _reference);
   }
-
 }

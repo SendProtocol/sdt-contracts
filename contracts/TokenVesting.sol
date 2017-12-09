@@ -180,7 +180,7 @@ contract TokenVesting {
   function claimableTokens() public constant returns (uint256) {
     address _to = msg.sender;
     uint256 numberOfGrants = grants[_to].length;
-  
+
     if (numberOfGrants == 0) {
       return 0;
     }
@@ -219,5 +219,4 @@ contract TokenVesting {
     }
     return claimable;
   }
-
 }

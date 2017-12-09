@@ -1,9 +1,9 @@
 "use strict";
 
-const SDT = artifacts.require('./SDT.sol');
-const Escrow = artifacts.require('./Escrow.sol');
-const assertJump = require('./helpers/assertJump');
-const math = require('mathjs');
+const SDT = artifacts.require("./SDT.sol");
+const Escrow = artifacts.require("./Escrow.sol");
+const assertJump = require("./helpers/assertJump");
+const math = require("mathjs");
 
 let accountBalanceBefore;
 let accountBalanceAfter;
@@ -50,8 +50,20 @@ contract("SDT", function(accounts) {
       accountBalanceAfter = await token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.add(tokens).add(fee).valueOf());
-      assert.equal(accountBalanceAfter.valueOf(), accountBalanceBefore.sub(tokens).sub(fee).valueOf());
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .add(tokens)
+          .add(fee)
+          .valueOf()
+      );
+      assert.equal(
+        accountBalanceAfter.valueOf(),
+        accountBalanceBefore
+          .sub(tokens)
+          .sub(fee)
+          .valueOf()
+      );
     });
 
     it("should fail if trying to use the same keys", async function() {
@@ -115,7 +127,6 @@ contract("SDT", function(accounts) {
     });
 
     it("should be possible to spend locked balance", async function() {
-
       accountBalanceBefore = await token.balanceOf.call(accounts[0]);
       authBalanceBefore = await token.balanceOf.call(accounts[1]);
       destBalanceBefore = await token.balanceOf.call(accounts[2]);
@@ -134,15 +145,28 @@ contract("SDT", function(accounts) {
       destBalanceAfter = await token.balanceOf.call(accounts[2]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(accountBalanceBefore.valueOf(), accountBalanceAfter.valueOf());
-      assert.equal(authBalanceAfter.valueOf(), authBalanceBefore.add(fee).valueOf());
-      assert.equal(destBalanceAfter.valueOf(), destBalanceBefore.add(tokens).valueOf());
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.sub(fee).sub(tokens).valueOf());
-
+      assert.equal(
+        accountBalanceBefore.valueOf(),
+        accountBalanceAfter.valueOf()
+      );
+      assert.equal(
+        authBalanceAfter.valueOf(),
+        authBalanceBefore.add(fee).valueOf()
+      );
+      assert.equal(
+        destBalanceAfter.valueOf(),
+        destBalanceBefore.add(tokens).valueOf()
+      );
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .sub(fee)
+          .sub(tokens)
+          .valueOf()
+      );
     });
 
     it("should fail if exchange rate not set", async function() {
-
       await token.escrowTransfer(
         accounts[0],
         reference,
@@ -182,11 +206,19 @@ contract("SDT", function(accounts) {
       destBalanceAfter = await token.balanceOf.call(accounts[3]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(accountBalanceBefore.valueOf(), accountBalanceAfter.valueOf());
+      assert.equal(
+        accountBalanceBefore.valueOf(),
+        accountBalanceAfter.valueOf()
+      );
       assert.equal(authBalanceAfter.valueOf(), authBalanceBefore.valueOf());
-      assert.equal(destBalanceAfter.valueOf(), destBalanceBefore.add(tokens).valueOf());
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.sub(tokens).valueOf());
-      
+      assert.equal(
+        destBalanceAfter.valueOf(),
+        destBalanceBefore.add(tokens).valueOf()
+      );
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore.sub(tokens).valueOf()
+      );
     });
 
     it("should fail if already resolved", async function() {
@@ -229,8 +261,20 @@ contract("SDT", function(accounts) {
       accountBalanceAfter = await token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.add(tokens).add(fee).valueOf());
-      assert.equal(accountBalanceAfter.valueOf(), accountBalanceBefore.sub(tokens).sub(fee).valueOf());
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .add(tokens)
+          .add(fee)
+          .valueOf()
+      );
+      assert.equal(
+        accountBalanceAfter.valueOf(),
+        accountBalanceBefore
+          .sub(tokens)
+          .sub(fee)
+          .valueOf()
+      );
     });
 
     it("should return tokens to owner except fee", async function() {
@@ -252,12 +296,22 @@ contract("SDT", function(accounts) {
       destBalanceAfter = await token.balanceOf.call(accounts[2]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(accountBalanceBefore.add(tokens).valueOf(), accountBalanceAfter.valueOf());
-      assert.equal(authBalanceAfter.valueOf(), authBalanceBefore.add(fee).valueOf());
+      assert.equal(
+        accountBalanceBefore.add(tokens).valueOf(),
+        accountBalanceAfter.valueOf()
+      );
+      assert.equal(
+        authBalanceAfter.valueOf(),
+        authBalanceBefore.add(fee).valueOf()
+      );
       assert.equal(destBalanceAfter.valueOf(), destBalanceBefore.valueOf());
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.sub(fee).sub(tokens).valueOf());
-      
-      
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .sub(fee)
+          .sub(tokens)
+          .valueOf()
+      );
     });
   });
 
@@ -274,23 +328,28 @@ contract("SDT", function(accounts) {
       accountBalanceBefore = await token.balanceOf.call(accounts[0]);
       escrowBalanceBefore = await token.balanceOf.call(escrow.address);
 
-      await token.escrowTransfer(
-        accounts[1],
-        reference,
-        tokens,
-        fee,
-        pastDate
-      );
+      await token.escrowTransfer(accounts[1], reference, tokens, fee, pastDate);
 
       accountBalanceAfter = await token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.add(tokens).add(fee).valueOf());
-      assert.equal(accountBalanceAfter.valueOf(), accountBalanceBefore.sub(tokens).sub(fee).valueOf());
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .add(tokens)
+          .add(fee)
+          .valueOf()
+      );
+      assert.equal(
+        accountBalanceAfter.valueOf(),
+        accountBalanceBefore
+          .sub(tokens)
+          .sub(fee)
+          .valueOf()
+      );
     });
 
     it("should allow user to get tokens back on an expired lock", async function() {
-
       accountBalanceBefore = await token.balanceOf.call(accounts[0]);
       authBalanceBefore = await token.balanceOf.call(accounts[1]);
       destBalanceBefore = await token.balanceOf.call(accounts[2]);
@@ -303,11 +362,22 @@ contract("SDT", function(accounts) {
       destBalanceAfter = await token.balanceOf.call(accounts[2]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(accountBalanceBefore.add(tokens).add(fee).valueOf(), accountBalanceAfter.valueOf());
+      assert.equal(
+        accountBalanceBefore
+          .add(tokens)
+          .add(fee)
+          .valueOf(),
+        accountBalanceAfter.valueOf()
+      );
       assert.equal(authBalanceAfter.valueOf(), authBalanceBefore.valueOf());
       assert.equal(destBalanceAfter.valueOf(), destBalanceBefore.valueOf());
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.sub(fee).sub(tokens).valueOf());
-
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .sub(fee)
+          .sub(tokens)
+          .valueOf()
+      );
     });
   });
 
@@ -325,19 +395,25 @@ contract("SDT", function(accounts) {
       accountBalanceBefore = await token.balanceOf.call(accounts[0]);
       escrowBalanceBefore = await token.balanceOf.call(escrow.address);
 
-      await token.escrowTransfer(
-        accounts[1],
-        reference,
-        tokens,
-        fee,
-        pastDate
-      );
+      await token.escrowTransfer(accounts[1], reference, tokens, fee, pastDate);
 
       accountBalanceAfter = await token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.add(tokens).add(fee).valueOf());
-      assert.equal(accountBalanceAfter.valueOf(), accountBalanceBefore.sub(tokens).sub(fee).valueOf());
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .add(tokens)
+          .add(fee)
+          .valueOf()
+      );
+      assert.equal(
+        accountBalanceAfter.valueOf(),
+        accountBalanceBefore
+          .sub(tokens)
+          .sub(fee)
+          .valueOf()
+      );
     });
 
     it("should should fail if user tries to claim tokens after invalidation", async function() {
@@ -354,7 +430,6 @@ contract("SDT", function(accounts) {
     });
 
     it("should be able to release tokens", async function() {
-
       accountBalanceBefore = await token.balanceOf.call(accounts[0]);
       authBalanceBefore = await token.balanceOf.call(accounts[1]);
       destBalanceBefore = await token.balanceOf.call(accounts[2]);
@@ -373,11 +448,25 @@ contract("SDT", function(accounts) {
       destBalanceAfter = await token.balanceOf.call(accounts[2]);
       escrowBalanceAfter = await token.balanceOf.call(escrow.address);
 
-      assert.equal(accountBalanceBefore.valueOf(), accountBalanceAfter.valueOf());
-      assert.equal(authBalanceAfter.valueOf(), authBalanceBefore.add(fee).valueOf());
-      assert.equal(destBalanceAfter.valueOf(), destBalanceBefore.add(tokens).valueOf());
-      assert.equal(escrowBalanceAfter.valueOf(), escrowBalanceBefore.sub(fee).sub(tokens).valueOf());
-
+      assert.equal(
+        accountBalanceBefore.valueOf(),
+        accountBalanceAfter.valueOf()
+      );
+      assert.equal(
+        authBalanceAfter.valueOf(),
+        authBalanceBefore.add(fee).valueOf()
+      );
+      assert.equal(
+        destBalanceAfter.valueOf(),
+        destBalanceBefore.add(tokens).valueOf()
+      );
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .sub(fee)
+          .sub(tokens)
+          .valueOf()
+      );
     });
   });
 });
