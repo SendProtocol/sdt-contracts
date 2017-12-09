@@ -1,9 +1,8 @@
 pragma solidity ^0.4.18;
 
-import 'zeppelin-solidity/contracts/token/StandardToken.sol';
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 import './SCNS1.sol';
 import './Escrow.sol';
+import './SnapshotToken.sol';
 
 
 /**
@@ -12,27 +11,10 @@ import './Escrow.sol';
  * @dev Implementation of Send Consensus network Standard
  * @dev https://send.sd/token
  */
-contract SendToken is SCNS1, StandardToken {
-
-  address public owner;
-  bool public activePoll;
-  Poll public poll;
+contract SendToken is SnapshotToken, SCNS1 {
   Escrow public escrow;
 
   mapping (address => bool) internal verifiedAddresses;
-  mapping (uint256 => mapping(address => bool)) internal voted;
-  mapping (address => mapping(uint256 => uint256)) internal snapshots;
-
-  struct Poll {
-    uint256 block;
-    uint256 minimumTokens;
-    uint256 endTime;
-  }
-
-  modifier ownerRestricted(){
-    require(msg.sender == owner);
-    _;
-  }
 
   modifier verifiedResticted(){
     require(verifiedAddresses[msg.sender]);
@@ -49,7 +31,7 @@ contract SendToken is SCNS1, StandardToken {
    * @param _address Address to check
    * @return bool
    */
-  function isVerified(address _address) public constant returns(bool) {
+  function isVerified(address _address) public view returns(bool) {
     return verifiedAddresses[_address];
   }
 
@@ -58,7 +40,7 @@ contract SendToken is SCNS1, StandardToken {
    * @notice Only contract owner
    * @param _address Address to verify
    */
-  function verify(address _address) public ownerRestricted {
+  function verify(address _address) public onlyOwner {
     verifiedAddresses[_address] = true;
   }
 
@@ -67,7 +49,7 @@ contract SendToken is SCNS1, StandardToken {
    * @notice Only contract owner
    * @param _address Address to unverify
    */
-  function unverify(address _address) public ownerRestricted {
+  function unverify(address _address) public onlyOwner {
     verifiedAddresses[_address] = false;
   }
 
@@ -76,94 +58,8 @@ contract SendToken is SCNS1, StandardToken {
    * @notice Only contract owner
    * @param _address Address to unverify
    */
-  function setEscrow(address _address) public ownerRestricted {
+  function setEscrow(address _address) public onlyOwner {
     escrow = Escrow(_address);
-  }
-
-  /**
-   * @dev Extend OpenZeppelin's BasicToken transfer function to store snapshot
-   * @param _to The address to transfer to.
-   * @param _value The amount to be transferred.
-   */
-  function transfer(address _to, uint256 _value) public returns (bool) {
-    if (activePoll) {
-      if (snapshots[msg.sender][poll.block] == 0) {
-        snapshots[msg.sender][poll.block] = balanceOf(msg.sender);
-      }
-      if (snapshots[_to][poll.block] == 0) {
-        snapshots[_to][poll.block] = balanceOf(_to);
-      }
-    }
-    return BasicToken.transfer(_to, _value);
-
-  }
-
-  /**
-   * @dev Extend OpenZeppelin's StandardToken transferFrom function to store snapshot
-   * @param _from address The address which you want to send tokens from
-   * @param _to address The address which you want to transfer to
-   * @param _value uint256 the amount of tokens to be transferred
-   */
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    if (activePoll) {
-      if (snapshots[_from][poll.block] == 0) {
-        snapshots[_from][poll.block] = balanceOf(_from);
-      }
-      if (snapshots[_to][poll.block] == 0) {
-        snapshots[_to][poll.block] = balanceOf(_to);
-      }
-    }
-    return StandardToken.transferFrom(_from, _to, _value);
-  }
-
-  /**
-   * @dev Create a poll
-   * @dev _question and _options parameters are only for logging
-   * @notice Only verified addresses
-   * @param _question An string to be logged on poll creation
-   * @param _options An array of strings to be logged on poll creation
-   * @param _minimumTokens Minimum number of tokens to vote
-   * @param _endTime Poll end time
-   */
-  function createPoll(
-      bytes32 _question,
-      bytes32[] _options,
-      uint256 _minimumTokens,
-      uint256 _endTime
-  ) public ownerRestricted {
-    poll.block = block.number;
-    poll.minimumTokens = _minimumTokens;
-    poll.endTime = _endTime;
-
-    activePoll = true;
-
-    PollCreated(
-      block.number,
-      _question,
-      _options,
-      _minimumTokens,
-      _endTime
-    );
-  }
-
-  /**
-   * @dev vote
-   * @dev will fail if doesnt meet minimumTokens requirement on poll dates
-   * @notice Only once per address per poll
-   * @param _option Index of option to vote (first option is 0)
-   */
-  function vote(uint256 _option) public {
-    require(activePoll);
-    require(voted[poll.block][msg.sender] == false);
-    require(balanceOf(msg.sender) >= poll.minimumTokens);
-    require(poll.endTime >= block.timestamp);
-
-    if (snapshots[msg.sender][poll.block] == 0) {
-      snapshots[msg.sender][poll.block] = balanceOf(msg.sender);
-    }
-
-    voted[poll.block][msg.sender] = true;
-    Voted(poll.block, msg.sender, _option, balanceOf(msg.sender));
   }
 
   /**
@@ -217,7 +113,6 @@ contract SendToken is SCNS1, StandardToken {
       uint256 _fee,
       uint256 _expiration
   ) public {
-
     uint256 total = _tokens + _fee;
     transfer(escrow, total);
 

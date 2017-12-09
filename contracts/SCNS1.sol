@@ -14,30 +14,6 @@ contract SCNS1 is ERC20 {
 
   function unverify(address _address) public;
 
-  function createPoll(
-      bytes32 question,
-      bytes32[] options,
-      uint256 minimumTokens,
-      uint256 endTime
-  ) public;
-
-  function vote(uint256 option) public;
-
-  event PollCreated(
-      uint256 block,
-      bytes32 question,
-      bytes32[] options,
-      uint256 minimumTokens,
-      uint256 endTime
-  );
-
-  event Voted(
-      uint256 indexed poll,
-      address indexed voter,
-      uint256 option,
-      uint256 weight
-  );
-
   function verifiedTransferFrom(
       address from,
       address to,
