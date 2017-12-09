@@ -1,13 +1,11 @@
 pragma solidity ^0.4.18;
 
-import 'zeppelin-solidity/contracts/token/ERC20.sol';
-
 /**
  * @title SCNS1 (Send Consensus Network Standard v1) interface
  * @dev token interface built on top of ERC20 standard interface
  * @dev see https://send.sd/token
  */
-contract SCNS1 is ERC20 {
+contract SCNS1 {
   function isVerified(address _address) public constant returns(bool);
 
   function verify(address _address) public;

@@ -137,10 +137,8 @@ contract SendToken is SnapshotToken, SCNS1 {
       uint256 _referenceId,
       uint256 _exchangeRate
   ) public escrowResticted {
-    require(_exchangeRate >= 0);
-    bool v = isVerified(_verifiedAddress);
     bool noRate = (_exchangeRate == 0);
-    if (v){
+    if (isVerified(_verifiedAddress)) {
       require(!noRate);
       VerifiedTransfer(
         _from,
