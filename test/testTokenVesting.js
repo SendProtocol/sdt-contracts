@@ -8,6 +8,8 @@ const assertJump = require('./helpers/assertJump');
 
 const BigNumber = web3.BigNumber;
 
+const error = 1 * 10 ** 11;
+
 contract('TokenVesting', function (accounts) {
 
   before(async function () {
@@ -21,11 +23,11 @@ contract('TokenVesting', function (accounts) {
 
     this.start = latestTime() + duration.minutes(1);
     this.end = this.start + duration.years(1);
-
     this.vesting = await TokenVesting.new();
-    this.token = await SDT.new(1, this.owner, this.tokenHolder, 0);
+    this.token = await SDT.new(10, this.owner, this.tokenHolder, 0);
 
     await this.vesting.init(this.token.address, this.tokenHolder);
+    await this.token.transfer(this.vesting.address, this.amount, {from: this.tokenHolder});
     await this.vesting.grantVestedTokens(
       this.tokenRecipient, 
       this.amount, 
@@ -54,21 +56,153 @@ contract('TokenVesting', function (accounts) {
     await increaseTimeTo(this.start + ((this.end - this.start)/2));
     let claimable = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
     let expected =  new BigNumber(String(this.amount / 2));
-    assert(claimable.sub(expected.abs()) < 1)
+    assert(claimable.sub(expected).abs() < error);
   });
 
-  it("Claimable amount should increase linearly - 1 hour", async function() {
+  it("Claimable amount should increase linearly - 1 hour after start", async function() {
     await increaseTimeTo(this.start + duration.hours(1));
     let claimable = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
     let expected =  new BigNumber(String(this.amount * duration.hours(1) / (this.end - this.start)));
-    assert(claimable.sub(expected.abs()) < 1)
+    assert(claimable.sub(expected).abs() < error);
   });
 
-  it("Claimable amount should increase linearly - 1 hour to finish", async function() {
+  it("Claimable amount should increase linearly - 1 hour before end", async function() {
     await increaseTimeTo(this.end - duration.hours(1));
     let claimable = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
     let expected =  new BigNumber(String(this.amount * (this.end - this.start - duration.hours(1)) / (this.end - this.start)));
-    assert(claimable.sub(expected.abs()) < 1)
+    assert(claimable.sub(expected).abs() < error);
+  });
+
+  it("User can claim tokens for himself", async function() {
+    await increaseTimeTo(this.end - duration.hours(1));
+
+    let claimable = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
+    let rest = this.amount - claimable;
+
+    await this.vesting.claimTokens({from: this.tokenRecipient});
+
+    let claimableAfter = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
+    let vestingBalance = await this.token.balanceOf.call(this.vesting.address);
+    let recipientBalance = await this.token.balanceOf.call(this.tokenRecipient);
+
+    assert(vestingBalance.sub(rest).abs() < error);
+    assert(recipientBalance.sub(claimable).abs() < error);
+    assert(claimableAfter < claimable);
+  });
+
+  it("Owner can claim tokens in behalf of an user", async function() {
+    await increaseTimeTo(this.end - duration.hours(1));
+
+    let claimable = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
+    let rest = this.amount - claimable;
+
+    await this.vesting.claimTokensFor(this.tokenRecipient);
+
+    let claimableAfter = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
+    let vestingBalance = await this.token.balanceOf.call(this.vesting.address);
+    let recipientBalance = await this.token.balanceOf.call(this.tokenRecipient);
+
+    assert(vestingBalance.sub(rest).abs() < error);
+    assert(recipientBalance.sub(claimable).abs() < error);
+    assert(claimableAfter < claimable);
+  });
+
+  it("Should fail if not owner", async function() {
+    await increaseTimeTo(this.end - duration.hours(1));
+    try {
+      await this.vesting.claimTokensFor(this.tokenRecipient, {from: this.tokenHolder});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("Should be possible to stop receiving grants", async function() {
+    await this.vesting.stop();
+    try {
+      await this.vesting.grantVestedTokens(
+        this.tokenRecipient, 
+        this.amount, 
+        this.start, 
+        this.end, 
+        {from: this.tokenHolder}
+      );
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("Should fail if not owner", async function() {
+    try {
+      await this.vesting.stop({from: this.tokenHolder});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("Should be possible to resume an stopped contract", async function() {
+    await this.vesting.stop();
+    await this.vesting.resume();
+    await this.vesting.grantVestedTokens(
+      this.tokenRecipient, 
+      this.amount, 
+      this.start, 
+      this.end, 
+      {from: this.tokenHolder}
+    );
+    this.totalVested = await this.vesting.totalVestedTokens.call({from: this.tokenRecipient});
+    assert.equal(this.totalVested.valueOf(), this.amount.mul(2).valueOf());
+  });
+
+  it("Should fail if not owner", async function() {
+    await this.vesting.stop();
+    try {
+      await this.vesting.resume({from: this.tokenHolder});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("Should fail if not stopped", async function() {
+    try {
+      await this.vesting.resume();
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("should fail if not initialized", async function() {
+    try {
+      await this.vesting.resume();
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("should fail if not initialized", async function() {
+    let vesting = await TokenVesting.new();
+    try {
+      await vesting.resume();
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("should fail if not owner", async function() {
+    let vesting = await TokenVesting.new();
+
+    try {
+      await vesting.init(this.token.address, this.tokenHolder, {from: this.tokenRecipient});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
   });
 
 });

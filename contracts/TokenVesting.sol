@@ -56,8 +56,6 @@ contract TokenVesting {
   }
 
   function init(address _token, address _ico) public ownerRestricted {
-    require(!active);
-    require(!initialized);
     token = SendToken(_token);
     ico = _ico;
     initialized = true;
@@ -68,7 +66,7 @@ contract TokenVesting {
     active = false;
   }
 
-  function resume() public isActive ownerRestricted {
+  function resume() public ownerRestricted {
     require(!active);
     require(initialized);
     active = true;
@@ -87,7 +85,7 @@ contract TokenVesting {
       uint256 _value,
       uint256 _start,
       uint256 _vesting
-  ) public icoResticted {
+  ) public icoResticted isActive {
     require (_value > 0);
     require (_vesting > _start);
     require (grants[_to].length < 10);
@@ -131,14 +129,14 @@ contract TokenVesting {
   * @dev Claim all vested tokens up to current date for myself
   */
   function claimTokens() public {
-    claimTokensFor(msg.sender);
+    claim(msg.sender);
   }
 
   /**
   * @dev Claim all vested tokens up to current date in behaviour of an user
   */
   function claimTokensFor(address _to) public ownerRestricted {
-    claimTokensFor(_to);
+    claim(_to);
   }
 
   /**
