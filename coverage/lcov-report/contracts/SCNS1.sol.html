@@ -75,147 +75,7 @@
 30
 31
 32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+33</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -249,87 +109,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.18;
 &nbsp;
-import 'zeppelin-solidity/contracts/token/ERC20.sol';
-&nbsp;
 /**
  * @title SCNS1 (Send Consensus Network Standard v1) interface
  * @dev token interface built on top of ERC20 standard interface
  * @dev see https://send.sd/token
  */
-contract SCNS1 is ERC20 {
+contract SCNS1 {
   function isVerified(address _address) public constant returns(bool);
 &nbsp;
   function verify(address _address) public;
 &nbsp;
   function unverify(address _address) public;
-&nbsp;
-  function createPoll(
-      uint256 id,
-      bytes32 question,
-      bytes32[] options,
-      uint256 minimumTokens,
-      uint256 startTime,
-      uint256 endTime
-  ) public;
-&nbsp;
-  function vote(uint256 id, uint256 option) public;
-&nbsp;
-  event PollCreated(
-      address creator,
-      uint256 id,
-      bytes32 question,
-      bytes32[] options,
-      uint256 minimumTokens,
-      uint256 startTime,
-      uint256 endTime
-  );
-&nbsp;
-  event Voted(
-      uint256 indexed pollId,
-      address voter,
-      uint256 option
-  );
-&nbsp;
-  function lockedBalanceOf(address _owner) public constant returns(uint256);
-&nbsp;
-  function approveLockedTransfer(
-      address authority,
-      uint256 referenceId,
-      uint256 value,
-      uint256 authorityFee,
-      uint256 expirationTime
-  ) public;
-&nbsp;
-  function executeLockedTransfer(
-      address sender,
-      address recipient,
-      uint256 referenceId,
-      uint256 exchangeRate
-  ) public;
-&nbsp;
-  function claimLockedTransfer(
-      address authority,
-      uint256 referenceId
-  ) public;
-&nbsp;
-  function invalidateLockedTransferExpiration(
-      address sender,
-      uint256 referenceId
-  ) public;
-&nbsp;
-  event EscrowCreated(
-      address indexed sender,
-      address indexed authority,
-      uint256 referenceId
-  );
-&nbsp;
-  event EscrowResolved(
-      address indexed sender,
-      address indexed authority,
-      uint256 referenceId,
-      address resolver,
-      address sentTo
-  );
 &nbsp;
   function verifiedTransferFrom(
       address from,
@@ -355,7 +145,7 @@ contract SCNS1 is ERC20 {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Nov 28 2017 17:45:08 GMT+1300 (NZDT)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Dec 09 2017 19:15:16 GMT+1300 (NZDT)
 </div>
 </div>
 <script src="../prettify.js"></script>
