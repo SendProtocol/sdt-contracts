@@ -31,15 +31,17 @@ contract("SDT", function(accounts) {
     let fee = 1;
     let exchangeRate = 1;
 
+    before(async function () {
+      this.token = await SDT.new(1, accounts[0], accounts[1], 100);
+      this.escrow = await Escrow.new(this.token.address);
+      this.token.setEscrow(this.escrow.address);
+    });
+
     it("should lock amount + fee", async function() {
-      token = await SDT.new(1, accounts[0], accounts[1], 100);
-      escrow = await Escrow.new(token.address);
-      token.setEscrow(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      accountBalanceBefore = await token.balanceOf.call(accounts[0]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
-
-      await token.escrowTransfer(
+      await this.token.escrowTransfer(
         accounts[1],
         reference,
         tokens,
@@ -47,8 +49,8 @@ contract("SDT", function(accounts) {
         futureDate
       );
 
-      accountBalanceAfter = await token.balanceOf.call(accounts[0]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         escrowBalanceAfter.valueOf(),
@@ -68,7 +70,7 @@ contract("SDT", function(accounts) {
 
     it("should fail if trying to use the same keys", async function() {
       try {
-        await token.escrowTransfer(
+        await this.token.escrowTransfer(
           accounts[1],
           reference,
           tokens,
@@ -83,7 +85,7 @@ contract("SDT", function(accounts) {
 
     it("should fail if trying to use more than balance", async function() {
       try {
-        await token.escrowTransfer(
+        await this.token.escrowTransfer(
           accounts[1],
           referenceTwo,
           amount(1),
@@ -98,7 +100,7 @@ contract("SDT", function(accounts) {
 
     it("should fail if not enough balance to pay fee", async function() {
       try {
-        await token.escrowTransfer(
+        await this.token.escrowTransfer(
           accounts[1],
           referenceTwo,
           amount(1) - (tokens + fee),
@@ -113,7 +115,7 @@ contract("SDT", function(accounts) {
 
     it("should fail if no verified sets an exchange rate", async function() {
       try {
-        await escrow.executeEscrowTransfer(
+        await this.escrow.executeEscrowTransfer(
           accounts[0],
           accounts[2],
           reference,
@@ -127,12 +129,12 @@ contract("SDT", function(accounts) {
     });
 
     it("should be possible to spend locked balance", async function() {
-      accountBalanceBefore = await token.balanceOf.call(accounts[0]);
-      authBalanceBefore = await token.balanceOf.call(accounts[1]);
-      destBalanceBefore = await token.balanceOf.call(accounts[2]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
+      destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      await escrow.executeEscrowTransfer(
+      await this.escrow.executeEscrowTransfer(
         accounts[0],
         accounts[2],
         reference,
@@ -140,10 +142,10 @@ contract("SDT", function(accounts) {
         { from: accounts[1] }
       );
 
-      accountBalanceAfter = await token.balanceOf.call(accounts[0]);
-      authBalanceAfter = await token.balanceOf.call(accounts[1]);
-      destBalanceAfter = await token.balanceOf.call(accounts[2]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      authBalanceAfter = await this.token.balanceOf.call(accounts[1]);
+      destBalanceAfter = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         accountBalanceBefore.valueOf(),
@@ -167,7 +169,7 @@ contract("SDT", function(accounts) {
     });
 
     it("should fail if exchange rate not set", async function() {
-      await token.escrowTransfer(
+      await this.token.escrowTransfer(
         accounts[0],
         reference,
         tokens,
@@ -176,7 +178,7 @@ contract("SDT", function(accounts) {
         { from: accounts[2] }
       );
       try {
-        await escrow.executeEscrowTransfer(
+        await this.escrow.executeEscrowTransfer(
           accounts[2],
           accounts[3],
           reference,
@@ -189,22 +191,22 @@ contract("SDT", function(accounts) {
     });
 
     it("should be possible to set exchange rate if verified", async function() {
-      accountBalanceBefore = await token.balanceOf.call(accounts[2]);
-      authBalanceBefore = await token.balanceOf.call(accounts[0]);
-      destBalanceBefore = await token.balanceOf.call(accounts[3]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[2]);
+      authBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      destBalanceBefore = await this.token.balanceOf.call(accounts[3]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      await escrow.executeEscrowTransfer(
+      await this.escrow.executeEscrowTransfer(
         accounts[2],
         accounts[3],
         reference,
         exchangeRate
       );
 
-      accountBalanceAfter = await token.balanceOf.call(accounts[2]);
-      authBalanceAfter = await token.balanceOf.call(accounts[0]);
-      destBalanceAfter = await token.balanceOf.call(accounts[3]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[2]);
+      authBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      destBalanceAfter = await this.token.balanceOf.call(accounts[3]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         accountBalanceBefore.valueOf(),
@@ -223,7 +225,7 @@ contract("SDT", function(accounts) {
 
     it("should fail if already resolved", async function() {
       try {
-        await escrow.executeEscrowTransfer(
+        await this.escrow.executeEscrowTransfer(
           accounts[2],
           accounts[3],
           reference,
@@ -242,15 +244,17 @@ contract("SDT", function(accounts) {
     let fee = 1;
     let exchangeRate = 0;
 
+    before(async function () {
+      this.token = await SDT.new(1, accounts[0], accounts[1], 100);
+      this.escrow = await Escrow.new(this.token.address);
+      this.token.setEscrow(this.escrow.address);
+    });
+
     it("should lock amount + fee", async function() {
-      token = await SDT.new(1, accounts[0], accounts[1], 100);
-      escrow = await Escrow.new(token.address);
-      token.setEscrow(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      accountBalanceBefore = await token.balanceOf.call(accounts[0]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
-
-      await token.escrowTransfer(
+      await this.token.escrowTransfer(
         accounts[1],
         reference,
         tokens,
@@ -258,8 +262,8 @@ contract("SDT", function(accounts) {
         futureDate
       );
 
-      accountBalanceAfter = await token.balanceOf.call(accounts[0]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         escrowBalanceAfter.valueOf(),
@@ -278,12 +282,12 @@ contract("SDT", function(accounts) {
     });
 
     it("should return tokens to owner except fee", async function() {
-      accountBalanceBefore = await token.balanceOf.call(accounts[0]);
-      authBalanceBefore = await token.balanceOf.call(accounts[1]);
-      destBalanceBefore = await token.balanceOf.call(accounts[2]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
+      destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      await escrow.executeEscrowTransfer(
+      await this.escrow.executeEscrowTransfer(
         accounts[0],
         accounts[0],
         reference,
@@ -291,10 +295,10 @@ contract("SDT", function(accounts) {
         { from: accounts[1] }
       );
 
-      accountBalanceAfter = await token.balanceOf.call(accounts[0]);
-      authBalanceAfter = await token.balanceOf.call(accounts[1]);
-      destBalanceAfter = await token.balanceOf.call(accounts[2]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      authBalanceAfter = await this.token.balanceOf.call(accounts[1]);
+      destBalanceAfter = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         accountBalanceBefore.add(tokens).valueOf(),
@@ -320,18 +324,20 @@ contract("SDT", function(accounts) {
     let tokens = 100;
     let fee = 1;
 
+    before(async function () {
+      this.token = await SDT.new(1, accounts[0], accounts[1], 100);
+      this.escrow = await Escrow.new(this.token.address);
+      this.token.setEscrow(this.escrow.address);
+    });
+
     it("should lock amount + fee", async function() {
-      token = await SDT.new(1, accounts[0], accounts[1], 100);
-      escrow = await Escrow.new(token.address);
-      token.setEscrow(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      accountBalanceBefore = await token.balanceOf.call(accounts[0]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
+      await this.token.escrowTransfer(accounts[1], reference, tokens, fee, pastDate);
 
-      await token.escrowTransfer(accounts[1], reference, tokens, fee, pastDate);
-
-      accountBalanceAfter = await token.balanceOf.call(accounts[0]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         escrowBalanceAfter.valueOf(),
@@ -350,17 +356,17 @@ contract("SDT", function(accounts) {
     });
 
     it("should allow user to get tokens back on an expired lock", async function() {
-      accountBalanceBefore = await token.balanceOf.call(accounts[0]);
-      authBalanceBefore = await token.balanceOf.call(accounts[1]);
-      destBalanceBefore = await token.balanceOf.call(accounts[2]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
+      destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      await escrow.claimEscrowTransfer(accounts[1], reference);
+      await this.escrow.claimEscrowTransfer(accounts[1], reference);
 
-      accountBalanceAfter = await token.balanceOf.call(accounts[0]);
-      authBalanceAfter = await token.balanceOf.call(accounts[1]);
-      destBalanceAfter = await token.balanceOf.call(accounts[2]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      authBalanceAfter = await this.token.balanceOf.call(accounts[1]);
+      destBalanceAfter = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         accountBalanceBefore
@@ -387,18 +393,24 @@ contract("SDT", function(accounts) {
     let fee = 1;
     let exchangeRate = 0;
 
+    before(async function () {
+      this.token = await SDT.new(1, accounts[0], accounts[1], 100);
+      this.escrow = await Escrow.new(this.token.address);
+      this.token.setEscrow(this.escrow.address);
+    });
+
     it("should lock amount + fee", async function() {
       token = await SDT.new(1, accounts[0], accounts[1], 100);
-      escrow = await Escrow.new(token.address);
-      token.setEscrow(escrow.address);
+      escrow = await Escrow.new(this.token.address);
+      this.token.setEscrow(this.escrow.address);
 
-      accountBalanceBefore = await token.balanceOf.call(accounts[0]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      await token.escrowTransfer(accounts[1], reference, tokens, fee, pastDate);
+      await this.token.escrowTransfer(accounts[1], reference, tokens, fee, pastDate);
 
-      accountBalanceAfter = await token.balanceOf.call(accounts[0]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         escrowBalanceAfter.valueOf(),
@@ -417,12 +429,12 @@ contract("SDT", function(accounts) {
     });
 
     it("should should fail if user tries to claim tokens after invalidation", async function() {
-      await escrow.invalidateEscrowTransferExpiration(accounts[0], reference, {
+      await this.escrow.invalidateEscrowTransferExpiration(accounts[0], reference, {
         from: accounts[1]
       });
 
       try {
-        await escrow.claimEscrowTransfer(accounts[1], reference);
+        await this.escrow.claimEscrowTransfer(accounts[1], reference);
         assert.fail("should have thrown before");
       } catch (error) {
         assertJump(error);
@@ -430,12 +442,12 @@ contract("SDT", function(accounts) {
     });
 
     it("should be able to release tokens", async function() {
-      accountBalanceBefore = await token.balanceOf.call(accounts[0]);
-      authBalanceBefore = await token.balanceOf.call(accounts[1]);
-      destBalanceBefore = await token.balanceOf.call(accounts[2]);
-      escrowBalanceBefore = await token.balanceOf.call(escrow.address);
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
+      destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
 
-      await escrow.executeEscrowTransfer(
+      await this.escrow.executeEscrowTransfer(
         accounts[0],
         accounts[2],
         reference,
@@ -443,10 +455,10 @@ contract("SDT", function(accounts) {
         { from: accounts[1] }
       );
 
-      accountBalanceAfter = await token.balanceOf.call(accounts[0]);
-      authBalanceAfter = await token.balanceOf.call(accounts[1]);
-      destBalanceAfter = await token.balanceOf.call(accounts[2]);
-      escrowBalanceAfter = await token.balanceOf.call(escrow.address);
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      authBalanceAfter = await this.token.balanceOf.call(accounts[1]);
+      destBalanceAfter = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
         accountBalanceBefore.valueOf(),
