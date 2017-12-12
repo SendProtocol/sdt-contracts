@@ -5,9 +5,9 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import './ISnapshotToken.sol';
 
 /**
- * @title Send token
+ * @title Snapshot Token
  *
- * @dev Implementation of Send Consensus network Standard
+ * @dev Snapshot Token implementtion, part of SEND Consensus Network Standard
  * @dev https://send.sd/token
  */
 contract SnapshotToken is Ownable, StandardToken, ISnapshotToken {

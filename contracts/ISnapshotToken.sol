@@ -1,9 +1,9 @@
 pragma solidity ^0.4.18;
 
 /**
- * @title Send token
+ * @title Snapshot Token
  *
- * @dev Implementation of Send Consensus network Standard
+ * @dev Snapshot Token interface, part of SEND Consensus Network Standard
  * @dev https://send.sd/token
  */
 contract ISnapshotToken {

@@ -74,6 +74,7 @@ contract('TokenVesting', function (accounts) {
   });
 
   it("User can claim tokens for himself", async function() {
+    await this.vesting.allow(this.tokenRecipient);
     await increaseTimeTo(this.end - duration.hours(1));
 
     let claimable = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
@@ -91,6 +92,8 @@ contract('TokenVesting', function (accounts) {
   });
 
   it("Owner can claim tokens in behalf of an user", async function() {
+    await this.vesting.allow(this.tokenRecipient);
+
     await increaseTimeTo(this.end - duration.hours(1));
 
     let claimable = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
@@ -106,6 +109,39 @@ contract('TokenVesting', function (accounts) {
     assert(recipientBalance.sub(claimable).abs() < error);
     assert(claimableAfter < claimable);
   });
+
+  it("Should fail if not whitelisted", async function() {
+    await increaseTimeTo(this.end - duration.hours(1));
+    try {
+      await this.vesting.claimTokens({from: this.tokenRecipient});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("Should fail if not whitelisted", async function() {
+    await increaseTimeTo(this.end - duration.hours(1));
+    try {
+      await this.vesting.claimTokensFor(this.tokenRecipient);
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("Should be possible to revoke whitelisted status", async function() {
+    await this.vesting.allow(this.tokenRecipient);
+    await this.vesting.revoke(this.tokenRecipient);
+    await increaseTimeTo(this.end - duration.hours(1));
+    try {
+      await this.vesting.claimTokens({from: this.tokenRecipient});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
 
   it("Should fail if not owner", async function() {
     await increaseTimeTo(this.end - duration.hours(1));

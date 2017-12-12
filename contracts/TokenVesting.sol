@@ -1,18 +1,19 @@
 pragma solidity ^0.4.18;
 
+import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import './SendToken.sol';
 
 /**
  * @title Vesting contract for SDT
  * @dev see https://send.sd/token
  */
-contract TokenVesting {
-  address public owner;
+contract TokenVesting is Ownable{
   address public ico;
   bool public initialized;
   bool public active;
   SendToken public token;
   mapping (address => TokenGrant[]) public grants;
+  mapping (address => bool) public allowed;
 
   uint256 public circulatingSupply = 0;
 
@@ -35,11 +36,6 @@ contract TokenVesting {
     uint256 value
   );
 
-  modifier ownerRestricted() {
-    require(msg.sender == owner);
-    _;
-  }
-
   modifier icoResticted() {
     require(msg.sender == ico);
     _;
@@ -51,25 +47,32 @@ contract TokenVesting {
   }
 
   function TokenVesting() public {
-    owner = msg.sender;
     active = false;
   }
 
-  function init(address _token, address _ico) public ownerRestricted {
+  function init(address _token, address _ico) public onlyOwner {
     token = SendToken(_token);
     ico = _ico;
     initialized = true;
     active = true;
   }
 
-  function stop() public isActive ownerRestricted {
+  function stop() public isActive onlyOwner {
     active = false;
   }
 
-  function resume() public ownerRestricted {
+  function resume() public onlyOwner {
     require(!active);
     require(initialized);
     active = true;
+  }
+
+  function allow(address _address) public onlyOwner {
+    allowed[_address] = true;
+  }
+
+  function revoke(address _address) public onlyOwner {
+    allowed[_address] = false;
   }
 
   /**
@@ -135,7 +138,7 @@ contract TokenVesting {
   /**
   * @dev Claim all vested tokens up to current date in behaviour of an user
   */
-  function claimTokensFor(address _to) public ownerRestricted {
+  function claimTokensFor(address _to) public onlyOwner {
     claim(_to);
   }
 
@@ -143,6 +146,8 @@ contract TokenVesting {
   * @dev Claim all vested tokens up to current date
   */
   function claim(address _to) internal {
+    require(allowed[_to]);
+
     uint256 numberOfGrants = grants[_to].length;
 
     if (numberOfGrants == 0) {

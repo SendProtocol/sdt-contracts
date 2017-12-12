@@ -2,15 +2,16 @@ pragma solidity ^0.4.18;
 
 import './SDT.sol';
 import './TokenVesting.sol';
+import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 /**
  * @title Crowdsale contract
  * @dev see https://send.sd/crowdsale
  */
-contract TokenSale {
+contract TokenSale is Ownable {
   uint256 public startTime;
   uint256 public endTime;
-  address public ownerWallet;
+  address public owner;
   address public foundationWallet;
   address public corpotationWallet;
   address public rewardWallet;
@@ -49,11 +50,6 @@ contract TokenSale {
     _;
   }
 
-  modifier isOwner(){
-    require(msg.sender == ownerWallet);
-    _;
-  }
-
   function TokenSale(
       uint256 _startTime,
       uint256 _endTime,
@@ -76,7 +72,7 @@ contract TokenSale {
     startVesting = _startVesting;
     startTime = _startTime;
     endTime = _endTime;
-    ownerWallet = msg.sender;
+    owner = msg.sender;
     foundationWallet = _foundationWallet;
     corpotationWallet = _corporationWallet;
     rewardWallet = _rewardWallet;
@@ -93,7 +89,7 @@ contract TokenSale {
       uint256 _supply,
       uint256 _ownerPool,
       address _vestingContract
-  ) public isOwner returns(bool) {
+  ) public onlyOwner returns(bool) {
     require(!activated);
     token = new SDT(
       _supply,
@@ -106,12 +102,12 @@ contract TokenSale {
     return true;
   }
 
-  function stop() public isOwner isActive returns(bool) {
+  function stop() public onlyOwner isActive returns(bool) {
     isStopped = true;
     return true;
   }
 
-  function resume() public isOwner returns(bool) {
+  function resume() public onlyOwner returns(bool) {
     require(isStopped);
     isStopped = false;
     return true;
@@ -139,7 +135,7 @@ contract TokenSale {
   )
       public
       isActive
-      isOwner
+      onlyOwner
       validAddress(_address)
       returns(uint256)
   {
