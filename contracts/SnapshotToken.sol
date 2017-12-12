@@ -7,7 +7,7 @@ import './ISnapshotToken.sol';
 /**
  * @title Snapshot Token
  *
- * @dev Snapshot Token implementtion, part of SEND Consensus Network Standard
+ * @dev Snapshot Token implementtion
  * @dev https://send.sd/token
  */
 contract SnapshotToken is Ownable, StandardToken, ISnapshotToken {

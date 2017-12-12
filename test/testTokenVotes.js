@@ -4,7 +4,7 @@ const SDT = artifacts.require("./SDT.sol");
 const Polls = artifacts.require("./Polls.sol");
 const assertJump = require("./helpers/assertJump");
 
-contract("SDT", function(accounts) {
+contract("Polls", function(accounts) {
   let poll;
   let token;
   let polls;
@@ -34,7 +34,7 @@ contract("SDT", function(accounts) {
       assert.equal(poll[2].valueOf(), futureDate);
     });
 
-    it("should fail if another user user tries create a poll", async function() {
+    it("should fail if another user user tries to create a poll", async function() {
       try {
         await polls.createPoll(
           "is this working?",
