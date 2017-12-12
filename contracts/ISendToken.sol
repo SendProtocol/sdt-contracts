@@ -1,11 +1,11 @@
 pragma solidity ^0.4.18;
 
 /**
- * @title SCNS1 (Send Consensus Network Standard v1) interface
+ * @title ISendToken - Send Consensus Network Token interface
  * @dev token interface built on top of ERC20 standard interface
  * @dev see https://send.sd/token
  */
-contract SCNS1 {
+contract ISendToken {
   function isVerified(address _address) public constant returns(bool);
 
   function verify(address _address) public;
