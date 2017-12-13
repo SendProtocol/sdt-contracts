@@ -201,4 +201,36 @@ contract("TokenSale", function(accounts) {
       assert.equal(await this.sale.soldTokens.call(), granted.valueOf());
     }
   );
+
+  it( "Should be possible to stop the sale", async function() {
+    this.sale.stop();
+    try {
+      await this.sale.purchase(
+        7000000,
+        0,
+        0,
+        accounts[9],
+        100,
+        this.currentDate + 5000,
+        0
+      );
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it( "Should be possible to resume the sale", async function() {
+    this.sale.resume();
+    await this.sale.purchase(
+      7000000,
+      0,
+      0,
+      accounts[9],
+      100,
+      this.currentDate + 5000,
+      0
+    );
+  });
+
 });

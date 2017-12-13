@@ -46,6 +46,13 @@ contract('TokenVesting', function (accounts) {
     assert.equal(claimable, 0);
   });
 
+  it("Claimable amount if no grants should be 0", async function() {
+    let claimable = await this.vesting.claimableTokens.call({from: this.tokenHolder});
+    let totalVested = await this.vesting.totalVestedTokens.call({from: this.tokenHolder});
+    assert.equal(totalVested, 0)
+    assert.equal(claimable, 0);
+  });
+
   it("Claimable amount after end date should equal granted amount", async function() {
     await increaseTimeTo(this.end + duration.weeks(1));
     let claimable = await this.vesting.claimableTokens.call({from: this.tokenRecipient});
@@ -89,6 +96,17 @@ contract('TokenVesting', function (accounts) {
     assert(vestingBalance.sub(rest).abs() < error);
     assert(recipientBalance.sub(claimable).abs() < error);
     assert(claimableAfter < claimable);
+  });
+
+  it("claiming tokens with no grants should mnot change balance", async function() {
+    await this.vesting.allow(this.tokenHolder);
+    await increaseTimeTo(this.end - duration.hours(1));
+
+    let balanceBefore = await this.token.balanceOf.call(this.tokenHolder);
+    await this.vesting.claimTokens({from: this.tokenHolder});
+    let balanceAfter = await this.token.balanceOf.call(this.tokenHolder);
+
+    assert.equal(balanceBefore.valueOf(), balanceAfter.valueOf());
   });
 
   it("Owner can claim tokens in behalf of an user", async function() {

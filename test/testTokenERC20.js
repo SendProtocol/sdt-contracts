@@ -174,6 +174,31 @@ contract("SDT", function(accounts) {
     assert.equal(balance2, amount(1));
   });
 
+    it("should be possible to unverify account", async function() {
+    let referenceId = 1;
+    let exchangeRate = 1;
+    let token = await SDT.new(100, accounts[0], accounts[1], 100);
+    await token.verify(accounts[1]);
+    await token.unverify(accounts[1])
+    await token.approve(accounts[1], amount(100));
+
+    try {
+      await token.verifiedTransferFrom(
+        accounts[0],
+        accounts[2],
+        amount(99),
+        referenceId,
+        exchangeRate,
+        amount(1),
+        { from: accounts[1] }
+      );
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+
+  });
+
   it("should fail if exchange rate is 0", async function() {
     let referenceId = 1;
     let exchangeRate = 0;
