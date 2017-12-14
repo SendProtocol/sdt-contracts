@@ -17,10 +17,7 @@ contract("TokenSale", function(accounts) {
     this.sale = await TokenSale.new(
       this.currentDate - 1, 
       this.currentDate + 1000, 
-      accounts[5], 
-      accounts[4], 
-      accounts[3], 
-      accounts[2], 
+      accounts[5],
       this.currentDate + 100
     );
     this.vesting = await TokenVesting.new();
@@ -30,7 +27,7 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if not active", async function() {
     try {
-      await this.sale.purchase(10, 0, 0, 0x1, 100, this.currentDate + 5000, 0);
+      await this.sale.btcPurchase(10, 0, 0x1, 100, this.currentDate + 5000, 0);
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
@@ -65,7 +62,7 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if purchasing less than min", async function() {
     try {
-      await this.sale.purchase(9, 0, 0, 0x1, 100, this.currentDate + 5000, 0);
+      await this.sale.btcPurchase(9, 0, 0x1, 100, this.currentDate + 5000, 0);
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
@@ -80,7 +77,7 @@ contract("TokenSale", function(accounts) {
     //execute purchase
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
-    await this.sale.purchase(10, 10, 0, accounts[9], 100, this.currentDate + 5000, 0);
+    await this.sale.btcPurchase(10, 10, accounts[9], 100, this.currentDate + 5000, 0);
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -105,7 +102,7 @@ contract("TokenSale", function(accounts) {
     //execute purchase
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
-    await this.sale.purchase(6000000, 0, 0, accounts[9], 100, this.currentDate + 5000, 0);
+    await this.sale.btcPurchase(6000000, 0, accounts[9], 100, this.currentDate + 5000, 0);
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -138,9 +135,8 @@ contract("TokenSale", function(accounts) {
       //execute purchase
       let circulatingSupply = await this.vesting.circulatingSupply.call();
       let saleBalance = await this.token.balanceOf.call(this.sale.address);
-      await this.sale.purchase(
+      await this.sale.btcPurchase(
         2000000,
-        0,
         0,
         accounts[9],
         100,
@@ -176,9 +172,8 @@ contract("TokenSale", function(accounts) {
       //execute purchase
       let circulatingSupply = await this.vesting.circulatingSupply.call();
       let saleBalance = await this.token.balanceOf.call(this.sale.address);
-      await this.sale.purchase(
+      await this.sale.btcPurchase(
         7000000,
-        0,
         0,
         accounts[9],
         100,
@@ -205,9 +200,8 @@ contract("TokenSale", function(accounts) {
   it( "Should be possible to stop the sale", async function() {
     this.sale.stop();
     try {
-      await this.sale.purchase(
+      await this.sale.btcPurchase(
         7000000,
-        0,
         0,
         accounts[9],
         100,
@@ -222,9 +216,8 @@ contract("TokenSale", function(accounts) {
 
   it( "Should be possible to resume the sale", async function() {
     this.sale.resume();
-    await this.sale.purchase(
+    await this.sale.btcPurchase(
       7000000,
-      0,
       0,
       accounts[9],
       100,

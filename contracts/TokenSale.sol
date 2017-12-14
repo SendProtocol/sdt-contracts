@@ -2,25 +2,26 @@ pragma solidity ^0.4.18;
 
 import './SDT.sol';
 import './TokenVesting.sol';
+import './ITokenSale.sol';
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 /**
  * @title Crowdsale contract
  * @dev see https://send.sd/crowdsale
  */
-contract TokenSale is Ownable {
+contract TokenSale is Ownable, ITokenSale {
   uint256 public startTime;
   uint256 public endTime;
   address public owner;
-  address public foundationWallet;
-  address public corpotationWallet;
-  address public rewardWallet;
-  address public teamWallet;
+  address public wallet;
 
-  uint256 public startVesting;
+  uint256 public vestingStarts;
+  uint256 public weiUsdRate;
 
   uint256 public soldTokens = 0;
   uint256 public raised = 0;
+
   bool public activated = false;
   bool public isStopped = false;
   bool public isFinalized = false;
@@ -53,30 +54,21 @@ contract TokenSale is Ownable {
   function TokenSale(
       uint256 _startTime,
       uint256 _endTime,
-      address _foundationWallet,
-      address _corporationWallet,
-      address _rewardWallet,
-      address _teamWallet,
-      uint256 _startVesting
+      address _wallet,
+      uint256 _vestingStarts
   )
       public
-      validAddress(_foundationWallet)
-      validAddress(_corporationWallet)
-      validAddress(_rewardWallet)
-      validAddress(_teamWallet)
+      validAddress(_wallet)
   {
     require(_startTime > block.timestamp - 60);
     require(_endTime > startTime);
-    require(_startVesting > startTime);
+    require(_vestingStarts > startTime);
 
-    startVesting = _startVesting;
+    vestingStarts = _vestingStarts;
     startTime = _startTime;
     endTime = _endTime;
     owner = msg.sender;
-    foundationWallet = _foundationWallet;
-    corpotationWallet = _corporationWallet;
-    rewardWallet = _rewardWallet;
-    teamWallet = _teamWallet;
+    wallet = _wallet;
   }
 
   /**
@@ -113,8 +105,42 @@ contract TokenSale is Ownable {
     return true;
   }
 
+  function forwardFunds() internal {
+    wallet.transfer(msg.value);
+  }
+
+
+  function ethPurchase (address _beneficiary, uint256 _vestingTime, uint256 _discountBase) public payable {
+    require(_beneficiary != address(0));
+
+    uint256 usd = SafeMath.div(
+      SafeMath.add(msg.value, weiUsdRate),
+      weiUsdRate
+    );
+
+    uint256 vestingEnds = SafeMath.add(vestingStarts, _vestingTime);
+
+    doPurchase(usd, msg.value, 0, _beneficiary, _discountBase, vestingEnds, vestingStarts);
+    forwardFunds();
+  }
+
+  function btcPurchase(
+      uint256 _usd,
+      uint256 _btc,
+      address _address,
+      uint256 _discountBase,
+      uint256 _vesting,
+      uint256 _purchaseVestingStarts
+  )
+      public
+      onlyOwner
+      validAddress(_address)
+      returns(uint256)
+  {
+    return doPurchase(_usd, 0, _btc, _address, _discountBase, _vesting, _purchaseVestingStarts);
+  }
+
   /**
-   * @dev deploy the token itself
    * @notice The owner of this contract is the owner of token's contract
    * @param _usd amount invested in USD
    * @param _eth amount invested in ETH y contribution was made in ETH, 0 otherwise
@@ -124,7 +150,7 @@ contract TokenSale is Ownable {
    * @param _discountBase a multiplier for tokens based on a discount choosen and a vesting time
    * @param _purchaseVestingStarts Vesting start timestamp
    */
-  function purchase(
+  function doPurchase(
       uint256 _usd,
       uint256 _eth,
       uint256 _btc,
@@ -133,10 +159,8 @@ contract TokenSale is Ownable {
       uint256 _vesting,
       uint256 _purchaseVestingStarts
   )
-      public
+      internal
       isActive
-      onlyOwner
-      validAddress(_address)
       returns(uint256)
   {
     require(_usd >= 10);
@@ -144,17 +168,16 @@ contract TokenSale is Ownable {
     uint256 soldAmount = computeTokens(_usd);
     soldAmount = computeBonus(soldAmount, _discountBase);
 
-    if (_purchaseVestingStarts < startVesting){
-      _purchaseVestingStarts = startVesting;
+    if (_purchaseVestingStarts < vestingStarts){
+      _purchaseVestingStarts = vestingStarts;
     }
-
+    updateStats(_usd, soldAmount);
     grantVestedTokens(
       _address,
       soldAmount,
       _purchaseVestingStarts,
       _vesting
     );
-    updateStats(_usd, soldAmount);
     NewBuyer(_address, soldAmount, _usd, _eth, _btc);
 
     return soldAmount;
