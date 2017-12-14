@@ -29,6 +29,8 @@ contract TokenSale is Ownable, ITokenSale {
   SDT public token;
   TokenVesting public vesting;
 
+  mapping (address => bool) internal proxies;
+
   event NewBuyer(
     address indexed holder,
     uint256 sndAmount,
@@ -105,12 +107,16 @@ contract TokenSale is Ownable, ITokenSale {
     return true;
   }
 
+  function addProxyContract(address _address) public onlyOwner {
+    proxies[_address] = true;
+  }
+
   function forwardFunds() internal {
     wallet.transfer(msg.value);
   }
 
-
   function ethPurchase (address _beneficiary, uint256 _vestingTime, uint256 _discountBase) public payable {
+    require(proxies[msg.sender]);
     require(_beneficiary != address(0));
 
     uint256 usd = SafeMath.div(
@@ -168,6 +174,7 @@ contract TokenSale is Ownable, ITokenSale {
     if (vestingStarts < vestingStarts){
       vestingStarts = vestingStarts;
     }
+
     updateStats(_usd, soldAmount);
     grantVestedTokens(_address, soldAmount, vestingStarts, _vestingEnds);
     NewBuyer(_address, soldAmount, _usd, _eth, _btc);
