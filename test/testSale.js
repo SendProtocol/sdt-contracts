@@ -27,7 +27,7 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if not active", async function() {
     try {
-      await this.sale.btcPurchase(10, 0, 0x1, 100, this.currentDate + 5000, 0);
+      await this.sale.btcPurchase(10, 0, 0x1, 100, this.currentDate + 5000);
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
@@ -62,7 +62,7 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if purchasing less than min", async function() {
     try {
-      await this.sale.btcPurchase(9, 0, 0x1, 100, this.currentDate + 5000, 0);
+      await this.sale.btcPurchase(9, 0, 0x1, 100, this.currentDate + 5000);
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
@@ -77,7 +77,7 @@ contract("TokenSale", function(accounts) {
     //execute purchase
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
-    await this.sale.btcPurchase(10, 10, accounts[9], 100, this.currentDate + 5000, 0);
+    await this.sale.btcPurchase(10, 10, accounts[9], 100, this.currentDate + 5000);
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -102,7 +102,7 @@ contract("TokenSale", function(accounts) {
     //execute purchase
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
-    await this.sale.btcPurchase(6000000, 0, accounts[9], 100, this.currentDate + 5000, 0);
+    await this.sale.btcPurchase(6000000, 0, accounts[9], 100, this.currentDate + 5000);
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -140,8 +140,7 @@ contract("TokenSale", function(accounts) {
         0,
         accounts[9],
         100,
-        this.currentDate + 5000,
-        0
+        this.currentDate + 5000
       );
       let newCirculatingSupply = await this.vesting.circulatingSupply.call();
       let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
@@ -177,8 +176,7 @@ contract("TokenSale", function(accounts) {
         0,
         accounts[9],
         100,
-        this.currentDate + 5000,
-        0
+        this.currentDate + 5000
       );
       let newCirculatingSupply = await this.vesting.circulatingSupply.call();
       let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
@@ -205,8 +203,7 @@ contract("TokenSale", function(accounts) {
         0,
         accounts[9],
         100,
-        this.currentDate + 5000,
-        0
+        this.currentDate + 5000
       );
       assert.fail("should have thrown before");
     } catch (error) {
@@ -221,8 +218,7 @@ contract("TokenSale", function(accounts) {
       0,
       accounts[9],
       100,
-      this.currentDate + 5000,
-      0
+      this.currentDate + 5000
     );
   });
 

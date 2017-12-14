@@ -120,7 +120,7 @@ contract TokenSale is Ownable, ITokenSale {
 
     uint256 vestingEnds = SafeMath.add(vestingStarts, _vestingTime);
 
-    doPurchase(usd, msg.value, 0, _beneficiary, _discountBase, vestingEnds, vestingStarts);
+    doPurchase(usd, msg.value, 0, _beneficiary, _discountBase, vestingEnds);
     forwardFunds();
   }
 
@@ -129,15 +129,14 @@ contract TokenSale is Ownable, ITokenSale {
       uint256 _btc,
       address _address,
       uint256 _discountBase,
-      uint256 _vesting,
-      uint256 _purchaseVestingStarts
+      uint256 _vestingEnds
   )
       public
       onlyOwner
       validAddress(_address)
       returns(uint256)
   {
-    return doPurchase(_usd, 0, _btc, _address, _discountBase, _vesting, _purchaseVestingStarts);
+    return doPurchase(_usd, 0, _btc, _address, _discountBase, _vestingEnds);
   }
 
   /**
@@ -146,9 +145,8 @@ contract TokenSale is Ownable, ITokenSale {
    * @param _eth amount invested in ETH y contribution was made in ETH, 0 otherwise
    * @param _btc amount invested in BTC y contribution was made in BTC, 0 otherwise
    * @param _address Address to send tokens to
-   * @param _vesting vesting finish timestamp
+   * @param _vestingEnds vesting finish timestamp
    * @param _discountBase a multiplier for tokens based on a discount choosen and a vesting time
-   * @param _purchaseVestingStarts Vesting start timestamp
    */
   function doPurchase(
       uint256 _usd,
@@ -156,8 +154,7 @@ contract TokenSale is Ownable, ITokenSale {
       uint256 _btc,
       address _address,
       uint256 _discountBase,
-      uint256 _vesting,
-      uint256 _purchaseVestingStarts
+      uint256 _vestingEnds
   )
       internal
       isActive
@@ -168,16 +165,11 @@ contract TokenSale is Ownable, ITokenSale {
     uint256 soldAmount = computeTokens(_usd);
     soldAmount = computeBonus(soldAmount, _discountBase);
 
-    if (_purchaseVestingStarts < vestingStarts){
-      _purchaseVestingStarts = vestingStarts;
+    if (vestingStarts < vestingStarts){
+      vestingStarts = vestingStarts;
     }
     updateStats(_usd, soldAmount);
-    grantVestedTokens(
-      _address,
-      soldAmount,
-      _purchaseVestingStarts,
-      _vesting
-    );
+    grantVestedTokens(_address, soldAmount, vestingStarts, _vestingEnds);
     NewBuyer(_address, soldAmount, _usd, _eth, _btc);
 
     return soldAmount;
