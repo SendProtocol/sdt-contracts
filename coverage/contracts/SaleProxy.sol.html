@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Code coverage report for contracts/ISnapshotToken.sol</title>
+    <title>Code coverage report for contracts/SaleProxy.sol</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -16,32 +16,32 @@
 <div class='wrapper'>
   <div class='pad1'>
     <h1>
-      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> ISnapshotToken.sol
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> SaleProxy.sol
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>1/1</span>
+        <span class='fraction'>0/3</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/2</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>1/1</span>
+        <span class='fraction'>0/2</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">100% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>2/2</span>
+        <span class='fraction'>0/4</span>
       </div>
     </div>
   </div>
-  <div class='status-line high'></div>
+  <div class='status-line low'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -62,7 +62,8 @@
 17
 18
 19
-20</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+20
+21</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -72,33 +73,35 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3×</span>
-<span class="cline-any cline-yes">3×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.18;
 &nbsp;
-/**
- * @title Snapshot Token
- *
- * @dev Snapshot Token interface
- * @dev https://send.sd/token
- */
-contract ISnapshotToken {
-  address public polls;
+import './ITokenSale.sol';
 &nbsp;
-  modifier pollsResticted() {
-    <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == address(polls));
-    _;
+contract SaleProxy {
+  uint256 public discounBase;
+  uint256 public vestingTime;
+  ITokenSale public saleContract;
+&nbsp;
+<span class="fstat-no" title="function not covered" >  function SaleProxy(address _saleContract, uint256 _vestingTime, uint256 _discountBase) public </span>{
+<span class="cstat-no" title="statement not covered" >  	saleContract = ITokenSale(_saleContract)</span>;
+<span class="cstat-no" title="statement not covered" >  	vestingTime = _vestingTime</span>;
+<span class="cstat-no" title="statement not covered" >  	discounBase = _discountBase</span>;
   }
 &nbsp;
-  function requestSnapshots(uint256 _blockNumber) public;
-  function takeSnapshot(address _owner) public returns(uint256);
+<span class="fstat-no" title="function not covered" >  function () external payable </span>{
+    saleContract.ethPurchase.value(msg.value)(msg.sender, vestingTime, discounBase);
+  }
+&nbsp;
 }
 &nbsp;</pre></td></tr>
 </table></pre>

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Code coverage report for contracts/ISnapshotToken.sol</title>
+    <title>Code coverage report for contracts/ITokenSale.sol</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -16,28 +16,28 @@
 <div class='wrapper'>
   <div class='pad1'>
     <h1>
-      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> ISnapshotToken.sol
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> ITokenSale.sol
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>1/1</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/2</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>1/1</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>2/2</span>
+        <span class='fraction'>0/0</span>
       </div>
     </div>
   </div>
@@ -52,30 +52,10 @@
 7
 8
 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+10</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3×</span>
-<span class="cline-any cline-yes">3×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -84,21 +64,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.18;
 &nbsp;
 /**
- * @title Snapshot Token
- *
- * @dev Snapshot Token interface
- * @dev https://send.sd/token
+ * @title Crowdsale contract Interface for Receiver contracts
+ * @dev see https://send.sd/crowdsale
  */
-contract ISnapshotToken {
-  address public polls;
-&nbsp;
-  modifier pollsResticted() {
-    <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == address(polls));
-    _;
-  }
-&nbsp;
-  function requestSnapshots(uint256 _blockNumber) public;
-  function takeSnapshot(address _owner) public returns(uint256);
+contract ITokenSale{
+  function ethPurchase (address _beneficiary, uint256 _vestingTime, uint256 _discountBase) public payable;
 }
 &nbsp;</pre></td></tr>
 </table></pre>
