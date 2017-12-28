@@ -1,19 +1,21 @@
 pragma solidity ^0.4.18;
 
-import './SDT.sol';
-import './TokenVesting.sol';
-import './ITokenSale.sol';
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import "./SDT.sol";
+import "./TokenVesting.sol";
+import "./ITokenSale.sol";
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
+
 
 /**
  * @title Crowdsale contract
  * @dev see https://send.sd/crowdsale
  */
 contract TokenSale is Ownable, ITokenSale {
+  using SafeMath for uint256;
+
   uint256 public startTime;
   uint256 public endTime;
-  address public owner;
   address public wallet;
 
   uint256 public vestingStarts;
@@ -39,12 +41,12 @@ contract TokenSale is Ownable, ITokenSale {
     uint256 btcAmount
   );
 
-  modifier validAddress(address _address){
+  modifier validAddress(address _address) {
     require(_address != address(0x0));
     _;
   }
 
-  modifier isActive(){
+  modifier isActive() {
     require(activated == true);
     require(isStopped == false);
     require(isFinalized == false);
@@ -58,10 +60,7 @@ contract TokenSale is Ownable, ITokenSale {
       uint256 _endTime,
       address _wallet,
       uint256 _vestingStarts
-  )
-      public
-      validAddress(_wallet)
-  {
+  ) public validAddress(_wallet) {
     require(_startTime > block.timestamp - 60);
     require(_endTime > startTime);
     require(_vestingStarts > startTime);
@@ -69,7 +68,6 @@ contract TokenSale is Ownable, ITokenSale {
     vestingStarts = _vestingStarts;
     startTime = _startTime;
     endTime = _endTime;
-    owner = msg.sender;
     wallet = _wallet;
   }
 
@@ -111,20 +109,17 @@ contract TokenSale is Ownable, ITokenSale {
     proxies[_address] = true;
   }
 
-  function forwardFunds() internal {
-    wallet.transfer(msg.value);
-  }
-
-  function ethPurchase (address _beneficiary, uint256 _vestingTime, uint256 _discountBase) public payable {
+  function ethPurchase(
+    address _beneficiary,
+    uint256 _vestingTime,
+    uint256 _discountBase
+  ) public payable {
     require(proxies[msg.sender]);
     require(_beneficiary != address(0));
 
-    uint256 usd = SafeMath.div(
-      SafeMath.add(msg.value, weiUsdRate),
-      weiUsdRate
-    );
+    uint256 usd = msg.value.add(weiUsdRate).div(weiUsdRate);
 
-    uint256 vestingEnds = SafeMath.add(vestingStarts, _vestingTime);
+    uint256 vestingEnds = vestingStarts.add(_vestingTime);
 
     doPurchase(usd, msg.value, 0, _beneficiary, _discountBase, vestingEnds);
     forwardFunds();
@@ -143,67 +138,6 @@ contract TokenSale is Ownable, ITokenSale {
       returns(uint256)
   {
     return doPurchase(_usd, 0, _btc, _address, _discountBase, _vestingEnds);
-  }
-
-  /**
-   * @notice The owner of this contract is the owner of token's contract
-   * @param _usd amount invested in USD
-   * @param _eth amount invested in ETH y contribution was made in ETH, 0 otherwise
-   * @param _btc amount invested in BTC y contribution was made in BTC, 0 otherwise
-   * @param _address Address to send tokens to
-   * @param _vestingEnds vesting finish timestamp
-   * @param _discountBase a multiplier for tokens based on a discount choosen and a vesting time
-   */
-  function doPurchase(
-      uint256 _usd,
-      uint256 _eth,
-      uint256 _btc,
-      address _address,
-      uint256 _discountBase,
-      uint256 _vestingEnds
-  )
-      internal
-      isActive
-      returns(uint256)
-  {
-    require(_usd >= 10);
-
-    uint256 soldAmount = computeTokens(_usd);
-    soldAmount = computeBonus(soldAmount, _discountBase);
-
-    if (vestingStarts < vestingStarts){
-      vestingStarts = vestingStarts;
-    }
-
-    updateStats(_usd, soldAmount);
-    grantVestedTokens(_address, soldAmount, vestingStarts, _vestingEnds);
-    NewBuyer(_address, soldAmount, _usd, _eth, _btc);
-
-    return soldAmount;
-  }
-
-  /**
-   * @dev Helper function to update collected and allocated tokens stats
-   */
-  function updateStats(uint256 usd, uint256 tokens) internal {
-    raised = raised + usd;
-    soldTokens = soldTokens + tokens;
-  }
-
-  /**
-   * @dev Helper function to compute bonus amount
-   * @param _amount number of toknes before bonus
-   * @param _discountBase percentage of price after discount
-   * @notice 80 <= dicountBase <= 100
-   * @notice _discountBase is the resultant of (100 - discount)
-   */
-  function computeBonus(
-      uint256 _amount,
-      uint256 _discountBase
-  ) internal pure returns(uint256) {
-    require(_discountBase >= 80);
-    require(_discountBase <= 100);
-    return _amount * 100 / _discountBase;
   }
 
   /**
@@ -236,6 +170,67 @@ contract TokenSale is Ownable, ITokenSale {
       _numerator = _denominator + usd;
       return 70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18));
     }
+  }
+
+  function forwardFunds() internal {
+    wallet.transfer(msg.value);
+  }
+
+  /**
+   * @notice The owner of this contract is the owner of token's contract
+   * @param _usd amount invested in USD
+   * @param _eth amount invested in ETH y contribution was made in ETH, 0 otherwise
+   * @param _btc amount invested in BTC y contribution was made in BTC, 0 otherwise
+   * @param _address Address to send tokens to
+   * @param _vestingEnds vesting finish timestamp
+   * @param _discountBase a multiplier for tokens based on a discount choosen and a vesting time
+   */
+  function doPurchase(
+      uint256 _usd,
+      uint256 _eth,
+      uint256 _btc,
+      address _address,
+      uint256 _discountBase,
+      uint256 _vestingEnds
+  )
+      internal
+      isActive
+      returns(uint256)
+  {
+    require(_usd >= 10);
+
+    uint256 soldAmount = computeTokens(_usd);
+    soldAmount = computeBonus(soldAmount, _discountBase);
+
+    updateStats(_usd, soldAmount);
+    grantVestedTokens(_address, soldAmount, vestingStarts, _vestingEnds);
+    NewBuyer(_address, soldAmount, _usd, _eth, _btc);
+
+    return soldAmount;
+  }
+
+  /**
+   * @dev Helper function to update collected and allocated tokens stats
+   */
+  function updateStats(uint256 usd, uint256 tokens) internal {
+    raised = raised + usd;
+    soldTokens = soldTokens + tokens;
+  }
+
+  /**
+   * @dev Helper function to compute bonus amount
+   * @param _amount number of toknes before bonus
+   * @param _discountBase percentage of price after discount
+   * @notice 80 <= dicountBase <= 100
+   * @notice _discountBase is the resultant of (100 - discount)
+   */
+  function computeBonus(
+      uint256 _amount,
+      uint256 _discountBase
+  ) internal pure returns(uint256) {
+    require(_discountBase >= 80);
+    require(_discountBase <= 100);
+    return _amount * 100 / _discountBase;
   }
 
   /**
@@ -276,13 +271,13 @@ contract TokenSale is Ownable, ITokenSale {
    * @param _start vesting start timestamp
    * @param _vesting vesting finish timestamp
    */
-   function grantVestedTokens(
-        address _to,
-        uint256 _value,
-        uint256 _start,
-        uint256 _vesting
-    ) internal {
-      token.transfer(vesting, _value);
-      vesting.grantVestedTokens(_to, _value, _start, _vesting);
-    }
+  function grantVestedTokens(
+      address _to,
+      uint256 _value,
+      uint256 _start,
+      uint256 _vesting
+  ) internal {
+    token.transfer(vesting, _value);
+    vesting.grantVestedTokens(_to, _value, _start, _vesting);
+  }
 }

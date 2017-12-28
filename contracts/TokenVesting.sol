@@ -1,13 +1,16 @@
 pragma solidity ^0.4.18;
 
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
-import './SendToken.sol';
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./SendToken.sol";
+
 
 /**
  * @title Vesting contract for SDT
  * @dev see https://send.sd/token
  */
-contract TokenVesting is Ownable{
+contract TokenVesting is Ownable {
+  using SafeMath for uint256;
+
   address public ico;
   bool public initialized;
   bool public active;
@@ -41,7 +44,7 @@ contract TokenVesting is Ownable{
     _;
   }
 
-  modifier isActive(){
+  modifier isActive() {
     require(active);
     _;
   }
@@ -89,14 +92,70 @@ contract TokenVesting is Ownable{
       uint256 _start,
       uint256 _vesting
   ) public icoResticted isActive {
-    require (_value > 0);
-    require (_vesting > _start);
-    require (grants[_to].length < 10);
+    require(_value > 0);
+    require(_vesting > _start);
+    require(grants[_to].length < 10);
 
     TokenGrant memory grant = TokenGrant(_value, 0, _vesting, _start);
     grants[_to].push(grant);
 
     NewTokenGrant(_to, _value, _start, _vesting);
+  }
+
+  /**
+  * @dev Claim all vested tokens up to current date for myself
+  */
+  function claimTokens() public {
+    claim(msg.sender);
+  }
+
+  /**
+  * @dev Claim all vested tokens up to current date in behaviour of an user
+  */
+  function claimTokensFor(address _to) public onlyOwner {
+    claim(_to);
+  }
+
+  /**
+  * @dev Get claimable tokens
+  */
+  function claimableTokens() public constant returns (uint256) {
+    address _to = msg.sender;
+    uint256 numberOfGrants = grants[_to].length;
+
+    if (numberOfGrants == 0) {
+      return 0;
+    }
+
+    uint256 claimable = 0;
+    uint256 claimableFor = 0;
+    for (uint256 i = 0; i < numberOfGrants; i++) {
+      claimableFor = calculateVestedTokens(
+        grants[_to][i].value,
+        grants[_to][i].vesting,
+        grants[_to][i].start,
+        grants[_to][i].claimed
+      );
+      claimable = claimable.add(claimableFor);
+    }
+    return claimable;
+  }
+
+  function totalVestedTokens() public constant returns (uint256) {
+    address _to = msg.sender;
+    uint256 numberOfGrants = grants[_to].length;
+
+    if (numberOfGrants == 0) {
+      return 0;
+    }
+
+    uint256 claimable = 0;
+    for (uint256 i = 0; i < numberOfGrants; i++) {
+      claimable = claimable.add(
+        grants[_to][i].value.sub(grants[_to][i].claimed)
+      );
+    }
+    return claimable;
   }
 
   /**
@@ -117,29 +176,16 @@ contract TokenVesting is Ownable{
     if (time < _start) {
       return 0;
     }
+
     if (time >= _vesting) {
-      return SafeMath.sub(_tokens, _claimed);
+      return _tokens.sub(_claimed);
     }
-    uint256 vestedTokens = SafeMath.div(
-      SafeMath.mul(_tokens, SafeMath.sub(time, _start)),
-      SafeMath.sub(_vesting, _start)
+
+    uint256 vestedTokens = _tokens.mul(time.sub(_start)).div(
+      _vesting.sub(_start)
     );
 
-    return SafeMath.sub(vestedTokens, _claimed);
-  }
-
-  /**
-  * @dev Claim all vested tokens up to current date for myself
-  */
-  function claimTokens() public {
-    claim(msg.sender);
-  }
-
-  /**
-  * @dev Claim all vested tokens up to current date in behaviour of an user
-  */
-  function claimTokensFor(address _to) public onlyOwner {
-    claim(_to);
+    return vestedTokens.sub(_claimed);
   }
 
   /**
@@ -157,71 +203,19 @@ contract TokenVesting is Ownable{
     uint256 claimable = 0;
     uint256 claimableFor = 0;
     for (uint256 i = 0; i < numberOfGrants; i++) {
-      claimableFor = calculateVestedTokens (
+      claimableFor = calculateVestedTokens(
         grants[_to][i].value,
         grants[_to][i].vesting,
         grants[_to][i].start,
         grants[_to][i].claimed
       );
-      claimable = SafeMath.add (
-        claimable,
-        claimableFor
-      );
-      grants[_to][i].claimed = SafeMath.add (
-        grants[_to][i].claimed,
-        claimableFor
-      );
+      claimable = claimable.add(claimableFor);
+      grants[_to][i].claimed = grants[_to][i].claimed.add(claimableFor);
     }
 
     token.transfer(_to, claimable);
     circulatingSupply += claimable;
 
     NewTokenClaim(_to, claimable);
-  }
-
-  /**
-  * @dev Get claimable tokens
-  */
-  function claimableTokens() public constant returns (uint256) {
-    address _to = msg.sender;
-    uint256 numberOfGrants = grants[_to].length;
-
-    if (numberOfGrants == 0) {
-      return 0;
-    }
-
-    uint256 claimable = 0;
-    uint256 claimableFor = 0;
-    for (uint256 i = 0; i < numberOfGrants; i++) {
-      claimableFor = calculateVestedTokens (
-        grants[_to][i].value,
-        grants[_to][i].vesting,
-        grants[_to][i].start,
-        grants[_to][i].claimed
-      );
-      claimable = SafeMath.add (
-        claimable,
-        claimableFor
-      );
-    }
-    return claimable;
-  }
-
-  function totalVestedTokens() public constant returns (uint256) {
-    address _to = msg.sender;
-    uint256 numberOfGrants = grants[_to].length;
-
-    if (numberOfGrants == 0) {
-      return 0;
-    }
-
-    uint256 claimable = 0;
-    for (uint256 i = 0; i < numberOfGrants; i++) {
-      claimable = SafeMath.add (
-        claimable,
-        SafeMath.sub (grants[_to][i].value, grants[_to][i].claimed)
-      );
-    }
-    return claimable;
   }
 }
