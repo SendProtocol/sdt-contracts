@@ -3,6 +3,7 @@
 const SDT = artifacts.require("./SDT.sol");
 const Polls = artifacts.require("./Polls.sol");
 const assertJump = require("./helpers/assertJump");
+const { increaseTimeTo, duration } = require("./helpers/time.js");
 
 contract("Polls", function(accounts) {
   let poll;
@@ -92,6 +93,23 @@ contract("Polls", function(accounts) {
       } catch (error) {
         assertJump(error);
       }
+    });
+
+    it("Should show results after time has passed", async function() {
+      token = await SDT.new(1, accounts[0], accounts[1], 100);
+      polls = await Polls.new(token.address);
+      await token.setPolls(polls.address);
+
+      await polls.createPoll(
+        "is this working?",
+        ["yes", "nope"],
+        1,
+        new Date().valueOf() + duration.minutes(1)
+      );
+      await polls.vote(1);
+      await increaseTimeTo(new Date().valueOf() + duration.minutes(2));
+      assert.equal(await polls.showResults(0), 0);
+      assert.equal(await polls.showResults(1), 1);
     });
   });
 });

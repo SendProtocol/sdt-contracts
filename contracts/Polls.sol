@@ -32,6 +32,12 @@ contract Polls is Ownable {
       uint256 endTime
   );
 
+  event ResultRevealed(
+      uint256 pollIDM,
+      uint256 pollOption,
+      uint256 pollResult
+  );
+
   function Polls(address _token) public {
     require(_token != 0x0);
     token = ISnapshotToken(_token);
@@ -79,5 +85,15 @@ contract Polls is Ownable {
 
     voted[poll.block][msg.sender] = true;
     results[poll.block][_option] = results[poll.block][_option] + 1;
+  }
+
+  function showResults(uint256 _option) public view returns (uint256) {
+    require(poll.endTime <= block.timestamp);
+
+    return results[poll.block][_option];
+  }
+
+  function logResults(uint256 _option) public {
+    ResultRevealed(poll.block, _option, showResults(_option));
   }
 }
