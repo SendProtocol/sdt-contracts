@@ -174,12 +174,12 @@ contract("SDT", function(accounts) {
     assert.equal(balance2, amount(1));
   });
 
-    it("should be possible to unverify account", async function() {
+  it("should be possible to unverify account", async function() {
     let referenceId = 1;
     let exchangeRate = 1;
     let token = await SDT.new(100, accounts[0], accounts[1], 100);
     await token.verify(accounts[1]);
-    await token.unverify(accounts[1])
+    await token.unverify(accounts[1]);
     await token.approve(accounts[1], amount(100));
 
     try {
@@ -196,7 +196,6 @@ contract("SDT", function(accounts) {
     } catch (error) {
       assertJump(error);
     }
-
   });
 
   it("should fail if exchange rate is 0", async function() {

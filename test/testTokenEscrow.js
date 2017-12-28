@@ -31,7 +31,7 @@ contract("SDT", function(accounts) {
     let fee = 1;
     let exchangeRate = 1;
 
-    before(async function () {
+    before(async function() {
       this.token = await SDT.new(1, accounts[0], accounts[1], 100);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
@@ -39,7 +39,9 @@ contract("SDT", function(accounts) {
 
     it("should lock amount + fee", async function() {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
       await this.token.escrowTransfer(
         accounts[1],
@@ -132,7 +134,9 @@ contract("SDT", function(accounts) {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
       destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
       await this.escrow.executeEscrowTransfer(
         accounts[0],
@@ -194,7 +198,9 @@ contract("SDT", function(accounts) {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[2]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       destBalanceBefore = await this.token.balanceOf.call(accounts[3]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
       await this.escrow.executeEscrowTransfer(
         accounts[2],
@@ -244,7 +250,7 @@ contract("SDT", function(accounts) {
     let fee = 1;
     let exchangeRate = 0;
 
-    before(async function () {
+    before(async function() {
       this.token = await SDT.new(1, accounts[0], accounts[1], 100);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
@@ -252,7 +258,9 @@ contract("SDT", function(accounts) {
 
     it("should lock amount + fee", async function() {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
       await this.token.escrowTransfer(
         accounts[1],
@@ -285,7 +293,9 @@ contract("SDT", function(accounts) {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
       destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
       await this.escrow.executeEscrowTransfer(
         accounts[0],
@@ -324,7 +334,7 @@ contract("SDT", function(accounts) {
     let tokens = 100;
     let fee = 1;
 
-    before(async function () {
+    before(async function() {
       this.token = await SDT.new(1, accounts[0], accounts[1], 100);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
@@ -332,9 +342,17 @@ contract("SDT", function(accounts) {
 
     it("should lock amount + fee", async function() {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
-      await this.token.escrowTransfer(accounts[1], reference, tokens, fee, pastDate);
+      await this.token.escrowTransfer(
+        accounts[1],
+        reference,
+        tokens,
+        fee,
+        pastDate
+      );
 
       accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
@@ -359,7 +377,9 @@ contract("SDT", function(accounts) {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
       destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
       await this.escrow.claimEscrowTransfer(accounts[1], reference);
 
@@ -393,7 +413,7 @@ contract("SDT", function(accounts) {
     let fee = 1;
     let exchangeRate = 0;
 
-    before(async function () {
+    before(async function() {
       this.token = await SDT.new(1, accounts[0], accounts[1], 100);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
@@ -405,9 +425,17 @@ contract("SDT", function(accounts) {
       this.token.setEscrow(this.escrow.address);
 
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
-      await this.token.escrowTransfer(accounts[1], reference, tokens, fee, pastDate);
+      await this.token.escrowTransfer(
+        accounts[1],
+        reference,
+        tokens,
+        fee,
+        pastDate
+      );
 
       accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
@@ -429,9 +457,13 @@ contract("SDT", function(accounts) {
     });
 
     it("should should fail if user tries to claim tokens after invalidation", async function() {
-      await this.escrow.invalidateEscrowTransferExpiration(accounts[0], reference, {
-        from: accounts[1]
-      });
+      await this.escrow.invalidateEscrowTransferExpiration(
+        accounts[0],
+        reference,
+        {
+          from: accounts[1]
+        }
+      );
 
       try {
         await this.escrow.claimEscrowTransfer(accounts[1], reference);
@@ -445,7 +477,9 @@ contract("SDT", function(accounts) {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
       destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
-      escrowBalanceBefore = await this.token.balanceOf.call(this.escrow.address);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
 
       await this.escrow.executeEscrowTransfer(
         accounts[0],
