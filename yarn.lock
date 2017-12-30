@@ -21,8 +21,8 @@ acorn@^4.0.3:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-4.0.13.tgz#105495ae5361d697bd195c825192e1ad7f253787"
 
 acorn@^5.0.0:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.2.1.tgz#317ac7821826c22c702d66189ab8359675f135d7"
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.3.0.tgz#7446d39459c54fb49a80e6ee6478149b940ec822"
 
 ajv-keywords@^2.0.0:
   version "2.1.1"
@@ -565,6 +565,10 @@ diffie-hellman@^5.0.0:
 domain-browser@^1.1.1:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-1.1.7.tgz#867aa4b093faa05f1de08c06f4d7b21fdf8698bc"
+
+dotenv@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-4.0.0.tgz#864ef1379aced55ce6f95debecdce179f7a0cd1d"
 
 ecc-jsbn@~0.1.1:
   version "0.1.1"
@@ -1460,8 +1464,8 @@ lru-cache@^4.0.1:
     yallist "^2.1.2"
 
 mathjs@^3.16.5:
-  version "3.18.0"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-3.18.0.tgz#9d0162f31088459c3093f43e363d6a7ae7acf9d5"
+  version "3.18.1"
+  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-3.18.1.tgz#aea34e3ba74828c295ca06627d1041e7cfb435da"
   dependencies:
     complex.js "2.0.4"
     decimal.js "9.0.1"
@@ -2233,8 +2237,8 @@ solc@0.4.18:
     yargs "^4.7.1"
 
 solidity-coverage@^0.4.2:
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.4.4.tgz#68b375bc2a99613a7cdfd7acf40c704dd7fc1b67"
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.4.7.tgz#840552d8990152d2e18b3eca5e40364fe8debfe2"
   dependencies:
     death "^1.1.0"
     ethereumjs-testrpc-sc "6.0.7"
@@ -2243,12 +2247,12 @@ solidity-coverage@^0.4.2:
     req-cwd "^1.0.1"
     shelljs "^0.7.4"
     sol-explore "^1.6.2"
-    solidity-parser-sc "0.4.1"
+    solidity-parser-sc "0.4.4"
     web3 "^0.18.4"
 
-solidity-parser-sc@0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/solidity-parser-sc/-/solidity-parser-sc-0.4.1.tgz#d72e4fd7776a305b2b56270a821638178521f89a"
+solidity-parser-sc@0.4.4:
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/solidity-parser-sc/-/solidity-parser-sc-0.4.4.tgz#a7354476ce7b774caa43c9089c00b68a2efbec61"
   dependencies:
     mocha "^2.4.5"
     pegjs "^0.10.0"
@@ -2739,5 +2743,7 @@ yargs@~3.10.0:
     window-size "0.1.0"
 
 zeppelin-solidity@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/zeppelin-solidity/-/zeppelin-solidity-1.4.0.tgz#0b8e0ef219897431a5be47004f78b20e0a2ee34a"
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/zeppelin-solidity/-/zeppelin-solidity-1.5.0.tgz#ddb6db9a37ac13d730358a74cf0bd94faaf5eb5f"
+  dependencies:
+    dotenv "^4.0.0"
