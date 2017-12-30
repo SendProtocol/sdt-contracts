@@ -1,8 +1,5 @@
 pragma solidity ^0.4.18;
 
-import 'zeppelin-solidity/contracts/token/StandardToken.sol';
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'zeppelin-solidity/contracts/token/BurnableToken.sol';
 import './ISnapshotToken.sol';
 
 /**
@@ -11,7 +8,7 @@ import './ISnapshotToken.sol';
  * @dev Snapshot Token implementtion
  * @dev https://send.sd/token
  */
-contract SnapshotToken is Ownable, StandardToken, BurnableToken, ISnapshotToken {
+contract SnapshotToken is ISnapshotToken {
   uint256 public snapshotBlock;
 
   mapping (address => Snapshot) internal snapshots;

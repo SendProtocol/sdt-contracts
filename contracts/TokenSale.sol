@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import "./SDT.sol";
+import "./ISnapshotToken.sol";
 import "./TokenVesting.sol";
 import "./ITokenSale.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -20,6 +20,7 @@ contract TokenSale is Ownable, ITokenSale {
 
   uint256 public vestingStarts;
   uint256 public weiUsdRate;
+  uint256 public btcUsdRate;
 
   uint256 public soldTokens = 0;
   uint256 public raised = 0;
@@ -28,7 +29,7 @@ contract TokenSale is Ownable, ITokenSale {
   bool public isStopped = false;
   bool public isFinalized = false;
 
-  SDT public token;
+  ISnapshotToken public token;
   TokenVesting public vesting;
 
   mapping (address => bool) internal proxies;
@@ -47,9 +48,9 @@ contract TokenSale is Ownable, ITokenSale {
   }
 
   modifier isActive() {
-    require(activated == true);
-    require(isStopped == false);
-    require(isFinalized == false);
+    require(activated);
+    require(!isStopped);
+    require(!isFinalized);
     require(block.timestamp >= startTime);
     require(block.timestamp <= endTime);
     _;
@@ -71,27 +72,29 @@ contract TokenSale is Ownable, ITokenSale {
     wallet = _wallet;
   }
 
+
+  function setWeiUsdRate(uint256 _rate) public onlyOwner {
+    require(_rate > 0);
+    weiUsdRate = _rate;
+  }
+
+  function setBtcUsdRate(uint256 _rate) public onlyOwner {
+    require(_rate > 0);
+    btcUsdRate = _rate;
+  }
+
   /**
    * @dev deploy the token itself
    * @notice The owner of this contract is the owner of token's contract
-   * @param _supply Token total supply
-   * @param _ownerPool Percentage of tokens the owner assigns to himself
    */
-  function deploy(
-      uint256 _supply,
-      uint256 _ownerPool,
+  function initialize(
+      address _sdt,
       address _vestingContract
-  ) public onlyOwner returns(bool) {
+  ) public onlyOwner {
     require(!activated);
-    token = new SDT(
-      _supply,
-      msg.sender,
-      this,
-      _ownerPool
-    );
+    token = ISnapshotToken(_sdt);
     vesting = TokenVesting(_vestingContract);
     activated = true;
-    return true;
   }
 
   function stop() public onlyOwner isActive returns(bool) {
@@ -113,11 +116,10 @@ contract TokenSale is Ownable, ITokenSale {
     address _beneficiary,
     uint256 _vestingTime,
     uint256 _discountBase
-  ) public payable {
+  ) public validAddress(_beneficiary) payable {
     require(proxies[msg.sender]);
-    require(_beneficiary != address(0));
 
-    uint256 usd = msg.value.add(weiUsdRate).div(weiUsdRate);
+    uint256 usd = msg.value.div(weiUsdRate);
 
     uint256 vestingEnds = vestingStarts.add(_vestingTime);
 
@@ -126,18 +128,18 @@ contract TokenSale is Ownable, ITokenSale {
   }
 
   function btcPurchase(
-      uint256 _usd,
-      uint256 _btc,
-      address _address,
+      address _beneficiary,
+      uint256 _vestingTime,
       uint256 _discountBase,
-      uint256 _vestingEnds
-  )
-      public
-      onlyOwner
-      validAddress(_address)
-      returns(uint256)
-  {
-    return doPurchase(_usd, 0, _btc, _address, _discountBase, _vestingEnds);
+      uint256 _btcValue
+  ) public validAddress(_beneficiary) {
+    require(proxies[msg.sender]);
+
+    uint256 usd = _btcValue.div(btcUsdRate);
+
+    uint256 vestingEnds = vestingStarts.add(_vestingTime);
+
+    doPurchase(usd, 0, _btcValue, _beneficiary, _discountBase, vestingEnds);
   }
 
   /**

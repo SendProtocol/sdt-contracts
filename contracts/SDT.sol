@@ -7,8 +7,8 @@ import './SendToken.sol';
  * @dev see https://send.sd/token
  */
 contract SDT is SendToken {
-  string public name = 'SEND Token';
-  string public symbol = 'SDT';
+  string public name = "SEND Token";
+  string public symbol = "SDT";
   uint256 public decimals = 18;
 
   modifier validAddress(address _address){

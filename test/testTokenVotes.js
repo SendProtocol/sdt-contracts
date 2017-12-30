@@ -85,17 +85,6 @@ contract("Polls", function(accounts) {
       }
     });
 
-    it("should fail if an user with no enough tokens at the time of the poll tries to vote", async function() {
-      await polls.vote(1);
-      await token.transfer(await token.balanceOf(accounts[0]), accounts[1]);
-      try {
-        await polls.vote(1, { from: accounts[1] });
-        assert.fail("should have thrown before");
-      } catch (error) {
-        assertJump(error);
-      }
-    });
-
     it("should fail if user tries to vote after end date", async function() {
       await polls.createPoll("is this working?", ["yes", "nope"], 1, 1);
       try {
