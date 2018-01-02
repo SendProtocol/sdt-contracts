@@ -9,6 +9,7 @@
   "dependencies": {
     "mathjs": "^3.16.5",
     "truffle": "^4.0.1",
+    "truffle-flattener": "^1.2.0",
     "zeppelin-solidity": "^1.4.0"
   },
   "devDependencies": {

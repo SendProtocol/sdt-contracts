@@ -1,11 +1,14 @@
 pragma solidity ^0.4.18;
 
+import "./SnapshotToken.sol";
+
+
 /**
  * @title ISendToken - Send Consensus Network Token interface
  * @dev token interface built on top of ERC20 standard interface
  * @dev see https://send.sd/token
  */
-contract ISendToken {
+contract ISendToken is SnapshotToken {
   function isVerified(address _address) public constant returns(bool);
 
   function verify(address _address) public;
@@ -19,6 +22,15 @@ contract ISendToken {
       uint256 referenceId,
       uint256 exchangeRate,
       uint256 fee
+  ) public;
+
+  function issueExchangeRate(
+      address _from,
+      address _to,
+      address _verifiedAddress,
+      uint256 _value,
+      uint256 _referenceId,
+      uint256 _exchangeRate
   ) public;
 
   event VerifiedTransfer(

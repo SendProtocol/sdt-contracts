@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import './SendToken.sol';
+import './ISendToken.sol';
 
 /**
  * @title Vesting contract for SDT
@@ -8,7 +8,7 @@ import './SendToken.sol';
  */
 contract Escrow {
   address public tokenAddress;
-  SendToken public token;
+  ISendToken public token;
 
   struct Lock {
     uint256 value;
@@ -19,7 +19,7 @@ contract Escrow {
   mapping (address => mapping(address => mapping(uint256 => Lock))) internal escrows;
 
   function Escrow(address _token) public {
-    token = SendToken(_token);
+    token = ISendToken(_token);
   }
 
   event EscrowCreated(
@@ -42,7 +42,7 @@ contract Escrow {
     uint256 reference
   );
 
-  modifier tokenRestricted(){
+  modifier tokenRestricted() {
     require (msg.sender == address(token));
     _;
   }

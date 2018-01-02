@@ -1,7 +1,8 @@
 pragma solidity ^0.4.18;
 
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./SendToken.sol";
+import "zeppelin-solidity/contracts/token/ERC20Basic.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /**
@@ -14,7 +15,7 @@ contract TokenVesting is Ownable {
   address public ico;
   bool public initialized;
   bool public active;
-  SendToken public token;
+  ERC20Basic public token;
   mapping (address => TokenGrant[]) public grants;
   mapping (address => bool) public allowed;
 
@@ -54,7 +55,7 @@ contract TokenVesting is Ownable {
   }
 
   function init(address _token, address _ico) public onlyOwner {
-    token = SendToken(_token);
+    token = ERC20Basic(_token);
     ico = _ico;
     initialized = true;
     active = true;

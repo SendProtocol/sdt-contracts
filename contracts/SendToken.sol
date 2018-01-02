@@ -2,7 +2,6 @@ pragma solidity ^0.4.18;
 
 import './ISendToken.sol';
 import './Escrow.sol';
-import './SnapshotToken.sol';
 
 
 /**
@@ -11,7 +10,7 @@ import './SnapshotToken.sol';
  * @dev Implementation of Send Consensus network Standard
  * @dev https://send.sd/token
  */
-contract SendToken is SnapshotToken, ISendToken {
+contract SendToken is ISendToken {
   Escrow public escrow;
 
   mapping (address => bool) internal verifiedAddresses;
