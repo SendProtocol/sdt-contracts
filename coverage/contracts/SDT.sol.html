@@ -22,12 +22,12 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>7/7</span>
+        <span class='fraction'>4/4</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">50% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>2/4</span>
+        <span class='fraction'>1/2</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>8/8</span>
+        <span class='fraction'>5/5</span>
       </div>
     </div>
   </div>
@@ -77,42 +77,7 @@
 32
 33
 34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">96×</span>
-<span class="cline-any cline-yes">96×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+35</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -128,14 +93,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">48×</span>
+<span class="cline-any cline-yes">48×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">48×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">48×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">48×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">48×</span>
 <span class="cline-any cline-yes">48×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -148,43 +120,29 @@ import './SendToken.sol';
  * @dev see https://send.sd/token
  */
 contract SDT is SendToken {
-  string public name = "SEND Token";
-  string public symbol = "SDT";
-  uint256 public decimals = 18;
+  string constant public name = "SEND Token";
+  string constant public symbol = "SDT";
+  uint256 constant public decimals = 18;
+  uint256 constant public initialSupply = 700000000 * 10**decimals;
 &nbsp;
-  modifier validAddress(address _address){
+  modifier validAddress(address _address) {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(_address != address(0x0));
     _;
   }
 &nbsp;
   /**
   * @dev Constructor
-  * @param _supply Number of tokens
-  * @param _owner The owner of this contract
   * @param _sale Address that will hold all vesting allocated tokens
-  * @param _ownerPool Percentage of tokens to allocate on owner address
-  * @notice _supply*10^18 will be created
   * @notice contract owner will have special powers in the contract
   * @notice _sale should hold all tokens in production as all pool will be vested
-  * @notice _salewallet will get all tokens not assigned to owner address
   * @return A uint256 representing the locked amount of tokens
   */
-  function SDT(
-      uint256 _supply,
-      address _owner,
-      address _sale,
-      uint256 _ownerPool
-  ) public validAddress(_owner) validAddress(_sale) {
-    <span class="missing-if-branch" title="else path not taken" >E</span>require(_ownerPool &lt;= 100);
-&nbsp;
-    totalSupply = _supply * 10**decimals;
-&nbsp;
-    owner = _owner;
+  function SDT(address _sale) public validAddress(_sale) {
+    totalSupply = initialSupply;
 &nbsp;
     verifiedAddresses[owner] = true;
 &nbsp;
-    balances[_owner] = totalSupply * _ownerPool / 100;
-    balances[_sale] = totalSupply * (100 - _ownerPool) / 100;
+    balances[_sale] = totalSupply;
   }
 }
 &nbsp;</pre></td></tr>
@@ -193,7 +151,7 @@ contract SDT is SendToken {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Dec 30 2017 13:02:38 GMT-0300 (-03)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Jan 02 2018 13:08:17 GMT-0300 (-03)
 </div>
 </div>
 <script src="../prettify.js"></script>
