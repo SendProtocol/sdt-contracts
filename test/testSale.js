@@ -51,6 +51,7 @@ contract("TokenSale", function(accounts) {
       this.sale.address,
       0
     );
+    await this.token.transferOwnership(this.sale.address);
     await this.sale.initialize(this.token.address, this.vesting.address);
     assert(await this.sale.activated.call());
     assert.equal(
