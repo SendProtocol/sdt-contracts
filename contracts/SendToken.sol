@@ -16,12 +16,12 @@ contract SendToken is SnapshotToken, ISendToken {
 
   mapping (address => bool) internal verifiedAddresses;
 
-  modifier verifiedResticted(){
+  modifier verifiedResticted() {
     require(verifiedAddresses[msg.sender]);
     _;
   }
 
-  modifier escrowResticted(){
+  modifier escrowResticted() {
     require(msg.sender == address(escrow));
     _;
   }

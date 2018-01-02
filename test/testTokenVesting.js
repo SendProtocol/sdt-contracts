@@ -22,7 +22,7 @@ contract("TokenVesting", function(accounts) {
     this.start = latestTime() + duration.minutes(1);
     this.end = this.start + duration.years(1);
     this.vesting = await TokenVesting.new();
-    this.token = await SDT.new(10, this.owner, this.tokenHolder, 0);
+    this.token = await SDT.new(this.tokenHolder);
 
     await this.vesting.init(this.token.address, this.tokenHolder);
     await this.token.transfer(this.vesting.address, this.amount, {

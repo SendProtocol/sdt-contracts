@@ -45,13 +45,7 @@ contract("TokenSale", function(accounts) {
   });
 
   it("should be possible to activate crowdsale", async function() {
-    this.token = await SDT.new(
-      700 * 10 ** 6,
-      accounts[0],
-      this.sale.address,
-      0
-    );
-    await this.token.transferOwnership(this.sale.address);
+    this.token = await SDT.new(this.sale.address);
     await this.sale.initialize(this.token.address, this.vesting.address);
     assert(await this.sale.activated.call());
     assert.equal(

@@ -32,7 +32,7 @@ contract("SDT", function(accounts) {
     let exchangeRate = 1;
 
     before(async function() {
-      this.token = await SDT.new(1, accounts[0], accounts[1], 100);
+      this.token = await SDT.new(accounts[0]);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
     });
@@ -90,7 +90,7 @@ contract("SDT", function(accounts) {
         await this.token.escrowTransfer(
           accounts[1],
           referenceTwo,
-          amount(1),
+          amount(700000000),
           fee,
           futureDate
         );
@@ -105,7 +105,7 @@ contract("SDT", function(accounts) {
         await this.token.escrowTransfer(
           accounts[1],
           referenceTwo,
-          amount(1) - (tokens + fee),
+          amount(700000000) - (tokens + fee),
           fee,
           futureDate
         );
@@ -173,6 +173,7 @@ contract("SDT", function(accounts) {
     });
 
     it("should fail if exchange rate not set", async function() {
+      await this.token.verify(accounts[0]);
       await this.token.escrowTransfer(
         accounts[0],
         reference,
@@ -251,7 +252,7 @@ contract("SDT", function(accounts) {
     let exchangeRate = 0;
 
     before(async function() {
-      this.token = await SDT.new(1, accounts[0], accounts[1], 100);
+      this.token = await SDT.new(accounts[0]);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
     });
@@ -335,7 +336,7 @@ contract("SDT", function(accounts) {
     let fee = 1;
 
     before(async function() {
-      this.token = await SDT.new(1, accounts[0], accounts[1], 100);
+      this.token = await SDT.new(accounts[0]);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
     });
@@ -414,13 +415,12 @@ contract("SDT", function(accounts) {
     let exchangeRate = 0;
 
     before(async function() {
-      this.token = await SDT.new(1, accounts[0], accounts[1], 100);
+      this.token = await SDT.new(accounts[0]);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
     });
 
     it("should lock amount + fee", async function() {
-      token = await SDT.new(1, accounts[0], accounts[1], 100);
       escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
 

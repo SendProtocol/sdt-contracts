@@ -1,6 +1,5 @@
 pragma solidity ^0.4.18;
 
-import 'zeppelin-solidity/contracts/token/MintableToken.sol';
 import 'zeppelin-solidity/contracts/token/BurnableToken.sol';
 
 
@@ -10,7 +9,7 @@ import 'zeppelin-solidity/contracts/token/BurnableToken.sol';
  * @dev Snapshot Token interface
  * @dev https://send.sd/token
  */
-contract ISnapshotToken is MintableToken, BurnableToken {
+contract ISnapshotToken is BurnableToken {
   address public polls;
 
   modifier pollsResticted() {

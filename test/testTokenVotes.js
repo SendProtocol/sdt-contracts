@@ -15,7 +15,7 @@ contract("Polls", function(accounts) {
 
   describe("create poll", function() {
     it("should store new poll if user is owner", async function() {
-      token = await SDT.new(1, accounts[0], accounts[1], 100);
+      token = await SDT.new(accounts[0]);
       polls = await Polls.new(token.address);
       await token.setPolls(polls.address);
 
@@ -53,7 +53,7 @@ contract("Polls", function(accounts) {
 
   describe("vote", function() {
     it("should return true if voting user meets condition", async function() {
-      token = await SDT.new(1, accounts[0], accounts[1], 100);
+      token = await SDT.new(accounts[0]);
       polls = await Polls.new(token.address);
       await token.setPolls(polls.address);
 
@@ -96,7 +96,7 @@ contract("Polls", function(accounts) {
     });
 
     it("Should show results after time has passed", async function() {
-      token = await SDT.new(1, accounts[0], accounts[1], 100);
+      token = await SDT.new(accounts[0]);
       polls = await Polls.new(token.address);
       await token.setPolls(polls.address);
 
