@@ -21,7 +21,8 @@
     "build": "truffle compile",
     "deploy": "truffle migrate",
     "test": "bash scripts/test.sh",
-    "coverage": "bash scripts/coverage.sh"
+    "coverage": "bash scripts/coverage.sh",
+    "flatten": "bash scripts/flatten.sh"
   },
   "repository": {
     "type": "git",
