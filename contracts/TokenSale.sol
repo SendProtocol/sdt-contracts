@@ -22,8 +22,8 @@ contract TokenSale is Ownable, ITokenSale {
   uint256 public weiUsdRate;
   uint256 public btcUsdRate;
 
-  uint256 public soldTokens = 0;
-  uint256 public raised = 0;
+  uint256 public soldTokens;
+  uint256 public raised;
 
   bool public activated = false;
   bool public isStopped = false;
@@ -90,9 +90,11 @@ contract TokenSale is Ownable, ITokenSale {
   function initialize(
       address _sdt,
       address _vestingContract
-  ) public onlyOwner {
+  ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     require(!activated);
     token = ISnapshotToken(_sdt);
+    require(token.owner() == address(this));
+
     vesting = TokenVesting(_vestingContract);
     activated = true;
   }
