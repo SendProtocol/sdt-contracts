@@ -249,14 +249,14 @@ contract TokenSale is Ownable, ITokenSale {
    * @dev Helper function to compute bonus amount
    * @param _amount number of toknes before bonus
    * @param _discountBase percentage of price after discount
-   * @notice 80 <= dicountBase <= 100
+   * @notice 70 <= dicountBase <= 100
    * @notice _discountBase is the resultant of (100 - discount)
    */
   function computeBonus(
       uint256 _amount,
       uint256 _discountBase
   ) internal pure returns(uint256) {
-    require(_discountBase >= 80);
+    require(_discountBase >= 70);
     require(_discountBase <= 100);
     return _amount * 100 / _discountBase;
   }
