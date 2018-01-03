@@ -89,12 +89,16 @@ contract TokenSale is Ownable, ITokenSale {
    */
   function initialize(
       address _sdt,
-      address _vestingContract
+      address _vestingContract,
+      address _icoCostsPool
   ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     require(!activated);
-    token = ERC20Basic(_sdt);
 
+    token = ERC20Basic(_sdt);
     vesting = TokenVesting(_vestingContract);
+
+    token.transfer(_icoCostsPool, 7000000 ether);
+
     activated = true;
   }
 
@@ -103,8 +107,7 @@ contract TokenSale is Ownable, ITokenSale {
       address _poolB,
       address _poolC,
       address _poolD,
-      address _poolE,
-      address _poolF
+      address _poolE
   )
       public
       validAddress(_poolA)
@@ -112,7 +115,6 @@ contract TokenSale is Ownable, ITokenSale {
       validAddress(_poolC)
       validAddress(_poolD)
       validAddress(_poolE)
-      validAddress(_poolF)
       onlyOwner
   {
     grantVestedTokens(_poolA, 175000000 ether, vestingStarts, 7 years);
@@ -120,7 +122,6 @@ contract TokenSale is Ownable, ITokenSale {
     grantVestedTokens(_poolC, 70000000 ether, vestingStarts, 7 years);
     grantVestedTokens(_poolD, 29000000 ether, vestingStarts, 4 years);
     grantVestedTokens(_poolE, 20000000 ether, vestingStarts, 90 days);
-    token.transfer(_poolF, 7000000 ether);
   }
 
   function stop() public onlyOwner isActive returns(bool) {

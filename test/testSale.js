@@ -37,7 +37,7 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if not owner", async function() {
     try {
-      await this.sale.initialize(0x10, 0x20, { from: accounts[1] });
+      await this.sale.initialize(0x10, 0x20, 0x30, { from: accounts[1] });
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
@@ -46,11 +46,15 @@ contract("TokenSale", function(accounts) {
 
   it("should be possible to activate crowdsale", async function() {
     this.token = await SDT.new(this.sale.address);
-    await this.sale.initialize(this.token.address, this.vesting.address);
+    await this.sale.initialize(this.token.address, this.vesting.address, 0x30);
     assert(await this.sale.activated.call());
     assert.equal(
       await this.token.balanceOf.call(this.sale.address),
-      700 * 10 ** 24
+      693 * 10 ** 24
+    );
+    assert.equal(
+      await this.token.balanceOf.call(0x30),
+      7 * 10 ** 24
     );
   });
 
