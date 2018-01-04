@@ -47,6 +47,11 @@ contract("TokenSale", function(accounts) {
   it("should be possible to activate crowdsale", async function() {
     this.token = await SDT.new(this.sale.address);
     await this.sale.initialize(this.token.address, this.vesting.address, 0x30);
+    await this.sale.allow(accounts[9]);
+
+    this.proxy = await SaleProxy.new(this.sale.address, 5000, 100);
+    await this.sale.addProxyContract(this.proxy.address);
+
     assert(await this.sale.activated.call());
     assert.equal(
       await this.token.balanceOf.call(this.sale.address),
@@ -70,11 +75,19 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if purchasing less than min", async function() {
     try {
-      this.proxy = await SaleProxy.new(this.sale.address, 5000, 100);
-
-      await this.sale.addProxyContract(this.proxy.address);
       await this.sale.setBtcUsdRate(10);
-      await this.proxy.btcPurchase(0x1, 90);
+      await this.proxy.btcPurchase(accounts[9], 90);
+
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("should fail if address not whitelisted", async function() {
+    try {
+      await this.sale.setBtcUsdRate(10);
+      await this.proxy.btcPurchase(accounts[8], 90);
 
       assert.fail("should have thrown before");
     } catch (error) {

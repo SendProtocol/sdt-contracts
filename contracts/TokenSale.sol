@@ -33,6 +33,7 @@ contract TokenSale is Ownable, ITokenSale {
   TokenVesting public vesting;
 
   mapping (address => bool) internal proxies;
+  mapping (address => bool) public allowed;
 
   event NewBuyer(
     address indexed holder,
@@ -72,7 +73,6 @@ contract TokenSale is Ownable, ITokenSale {
     wallet = _wallet;
   }
 
-
   function setWeiUsdRate(uint256 _rate) public onlyOwner {
     require(_rate > 0);
     weiUsdRate = _rate;
@@ -81,6 +81,10 @@ contract TokenSale is Ownable, ITokenSale {
   function setBtcUsdRate(uint256 _rate) public onlyOwner {
     require(_rate > 0);
     btcUsdRate = _rate;
+  }
+
+  function allow(address _address) public onlyOwner {
+    allowed[_address] = true;
   }
 
   /**
@@ -226,9 +230,11 @@ contract TokenSale is Ownable, ITokenSale {
       isActive
       returns(uint256)
   {
+    require(allowed[_address]);
     require(_usd >= 10);
 
     uint256 soldAmount = computeTokens(_usd);
+
     soldAmount = computeBonus(soldAmount, _discountBase);
 
     updateStats(_usd, soldAmount);
