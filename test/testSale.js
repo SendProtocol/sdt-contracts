@@ -71,11 +71,12 @@ contract("TokenSale", function(accounts) {
     assert.equal(await this.vesting.ico.call(), this.sale.address);
     assert.equal(await this.vesting.token.call(), await this.sale.token.call());
     assert.equal(await this.token.balanceOf.call(this.vesting.address), 0);
+    await this.sale.setBtcUsdRate(10);
+    await this.sale.setWeiUsdRate(100);
   });
 
   it("should fail if purchasing less than min", async function() {
     try {
-      await this.sale.setBtcUsdRate(10);
       await this.proxy.btcPurchase(accounts[9], 90);
 
       assert.fail("should have thrown before");
@@ -86,7 +87,6 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if address not whitelisted", async function() {
     try {
-      await this.sale.setBtcUsdRate(10);
       await this.proxy.btcPurchase(accounts[8], 90);
 
       assert.fail("should have thrown before");
@@ -95,7 +95,7 @@ contract("TokenSale", function(accounts) {
     }
   });
 
-  it("10 USD at 0.14 - should return the right amount with a maximum error of 0.001%", async function() {
+  it("[BTC] 10 USD at 0.14 - should return the right amount with a maximum error of 0.001%", async function() {
     //Calculate tokens
     bought = await this.sale.computeTokens.call(10);
     error = math.abs(bought.valueOf() - 10 / 0.14 * 10 ** 18);
@@ -123,7 +123,7 @@ contract("TokenSale", function(accounts) {
     assert.equal(await this.sale.soldTokens.call(), granted.valueOf());
   });
 
-  it("6M USD at 0.14 - should return right amount with a maximum error of 0.001%", async function() {
+  it("[ETH] 6M USD at 0.14 - should return right amount with a maximum error of 0.001%", async function() {
     //Calculate tokens
     bought = await this.sale.computeTokens.call(6000000);
     error = math.abs(bought.valueOf() - 6000000 / 0.14 * 10 ** 18);
@@ -132,7 +132,7 @@ contract("TokenSale", function(accounts) {
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-    await this.proxy.btcPurchase(accounts[9], 60000000);
+    await this.proxy.sendTransaction({from: accounts[9], value: 600000000});
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -154,7 +154,7 @@ contract("TokenSale", function(accounts) {
   });
 
   it(
-    "2M USD with 6M and 10 USD sold," +
+    "[BTC] 2M USD with 6M and 10 USD sold," +
       "should return 999990 USD 0.14 and 1000010 with incremental price formula," +
       "with a maximum error of 0.001%",
     async function() {
@@ -189,7 +189,7 @@ contract("TokenSale", function(accounts) {
   );
 
   it(
-    "7M USD with 8M and 10 USD sold, should return the right amout " +
+    "[ETH] 7M USD with 8M and 10 USD sold, should return the right amout " +
       "with a maximum error of 0.001%",
     async function() {
       let val1 = 70000000 * math.log(1.46666635556) * 10 ** 18;
@@ -201,7 +201,7 @@ contract("TokenSale", function(accounts) {
       let circulatingSupply = await this.vesting.circulatingSupply.call();
       let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-      await this.proxy.btcPurchase(accounts[9], 70000000);
+      await this.proxy.sendTransaction({from: accounts[9], value: 700000000});
       let newCirculatingSupply = await this.vesting.circulatingSupply.call();
       let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
