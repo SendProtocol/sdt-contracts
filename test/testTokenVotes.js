@@ -108,8 +108,47 @@ contract("Polls", function(accounts) {
       );
       await polls.vote(1);
       await increaseTimeTo(new Date().valueOf() + duration.minutes(2));
-      assert.equal(await polls.logResults(0), 0);
-      assert.equal(await polls.logResults(1), 1);
+      assert.equal(await polls.showResults(0), 0);
+      assert.equal(await polls.showResults(1), 1);
+    });
+
+    it("Should fail if not owner", async function() {
+      token = await SDT.new(accounts[0]);
+      polls = await Polls.new(token.address);
+      await token.setPolls(polls.address);
+
+      await polls.createPoll(
+        "is this working?",
+        ["yes", "nope"],
+        1,
+        new Date().valueOf() + duration.minutes(1)
+      );
+      await polls.vote(1);
+      await increaseTimeTo(new Date().valueOf() + duration.minutes(2));
+
+      try {
+        await polls.logResults(0, {from: accounts[9]});
+        await polls.logResults(1, {from: accounts[9]});
+      } catch (error) {
+        assertJump(error);
+      }
+    });
+
+    it("Should succeed if owner", async function() {
+      token = await SDT.new(accounts[0]);
+      polls = await Polls.new(token.address);
+      await token.setPolls(polls.address);
+
+      await polls.createPoll(
+        "is this working?",
+        ["yes", "nope"],
+        1,
+        new Date().valueOf() + duration.minutes(1)
+      );
+      await polls.vote(1);
+      await increaseTimeTo(new Date().valueOf() + duration.minutes(2));
+      await polls.logResults(0);
+      await polls.logResults(1);
     });
   });
 });

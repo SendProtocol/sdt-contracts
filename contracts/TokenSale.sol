@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 import "./TokenVesting.sol";
 import "./ITokenSale.sol";
-import "zeppelin-solidity/contracts/token/ERC20Basic.sol";
+import "./ISendToken.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -29,7 +29,7 @@ contract TokenSale is Ownable, ITokenSale {
   bool public isStopped = false;
   bool public isFinalized = false;
 
-  ERC20Basic public token;
+  ISendToken public token;
   TokenVesting public vesting;
 
   mapping (address => bool) internal proxies;
@@ -98,7 +98,7 @@ contract TokenSale is Ownable, ITokenSale {
   ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     require(!activated);
 
-    token = ERC20Basic(_sdt);
+    token = ISendToken(_sdt);
     vesting = TokenVesting(_vestingContract);
 
     token.transfer(_icoCostsPool, 7000000 ether);
@@ -121,11 +121,12 @@ contract TokenSale is Ownable, ITokenSale {
       validAddress(_poolE)
       onlyOwner
   {
-    grantVestedTokens(_poolA, 175000000 ether, vestingStarts, 7 years);
-    grantVestedTokens(_poolB, 168000000 ether, vestingStarts, 7 years);
-    grantVestedTokens(_poolC, 70000000 ether, vestingStarts, 7 years);
-    grantVestedTokens(_poolD, 29000000 ether, vestingStarts, 4 years);
-    grantVestedTokens(_poolE, 20000000 ether, vestingStarts, 90 days);
+    grantVestedTokens(_poolA, (175000000 ether) * soldTokens / (231000000 ether), vestingStarts, 7 years);
+    grantVestedTokens(_poolB, (168000000 ether) * soldTokens / (231000000 ether), vestingStarts, 7 years);
+    grantVestedTokens(_poolC, (70000000 ether) * soldTokens / (231000000 ether), vestingStarts, 7 years);
+    grantVestedTokens(_poolD, (29000000 ether) * soldTokens / (231000000 ether), vestingStarts, 4 years);
+    grantVestedTokens(_poolE, (20000000 ether) * soldTokens / (231000000 ether), vestingStarts, 90 days);
+    token.burn(token.balanceOf(this));
   }
 
   function stop() public onlyOwner isActive returns(bool) {

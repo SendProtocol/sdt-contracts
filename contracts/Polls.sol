@@ -93,11 +93,7 @@ contract Polls is Ownable {
     return results[poll.block][_option];
   }
 
-  function logResults(uint256 _option) public onlyOwner view returns (uint256) {
-    uint256 result = showResults(_option);
-    
-    ResultRevealed(poll.block, _option, result);
-
-    return result;
+  function logResults(uint256 _option) public onlyOwner {
+    ResultRevealed(poll.block, _option, showResults(_option));
   }
 }
