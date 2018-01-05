@@ -108,8 +108,8 @@ contract("Polls", function(accounts) {
       );
       await polls.vote(1);
       await increaseTimeTo(new Date().valueOf() + duration.minutes(2));
-      assert.equal(await polls.showResults(0), 0);
-      assert.equal(await polls.showResults(1), 1);
+      assert.equal(await polls.logResults(0), 0);
+      assert.equal(await polls.logResults(1), 1);
     });
   });
 });
