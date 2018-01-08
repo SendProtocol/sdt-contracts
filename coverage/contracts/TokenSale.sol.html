@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">93.75% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>75/80</span>
+        <span class='fraction'>80/80</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">63.64% </span>
+        <span class="strong">63.04% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>28/44</span>
+        <span class='fraction'>29/46</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">95% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>19/20</span>
+        <span class='fraction'>20/20</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">94.19% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>81/86</span>
+        <span class='fraction'>87/87</span>
       </div>
     </div>
   </div>
@@ -361,7 +361,12 @@
 316
 317
 318
-319</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+319
+320
+321
+322
+323
+324</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -407,8 +412,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">15×</span>
-<span class="cline-any cline-yes">15×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -482,13 +491,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -614,6 +622,8 @@
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -675,15 +685,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5×</span>
-<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.18;
 &nbsp;
 import "./TokenVesting.sol";
 import "./ITokenSale.sol";
-import "zeppelin-solidity/contracts/token/ERC20Basic.sol";
+import "./ISendToken.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 &nbsp;
@@ -694,6 +704,10 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
  */
 contract TokenSale is Ownable, ITokenSale {
   using SafeMath for uint256;
+&nbsp;
+  /* Leave 10 tokens margin error in order to succedd
+  with last pool allocation in case hard cap is reached */
+  uint256 public hardcap = 230999990 ether;
 &nbsp;
   uint256 public startTime;
   uint256 public endTime;
@@ -710,7 +724,7 @@ contract TokenSale is Ownable, ITokenSale {
   bool public isStopped = false;
   bool public isFinalized = false;
 &nbsp;
-  ERC20Basic public token;
+  ISendToken public token;
   TokenVesting public vesting;
 &nbsp;
   mapping (address =&gt; bool) internal proxies;
@@ -779,7 +793,7 @@ contract TokenSale is Ownable, ITokenSale {
   ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(!activated);
 &nbsp;
-    token = ERC20Basic(_sdt);
+    token = ISendToken(_sdt);
     vesting = TokenVesting(_vestingContract);
 &nbsp;
     token.transfer(_icoCostsPool, 7000000 ether);
@@ -787,26 +801,25 @@ contract TokenSale is Ownable, ITokenSale {
     activated = true;
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  function finalize(</span>
+  function finalize(
       address _poolA,
       address _poolB,
       address _poolC,
-      address _poolD,
-      address _poolE
+      address _poolD
   )
       public
       validAddress(_poolA)
       validAddress(_poolB)
       validAddress(_poolC)
       validAddress(_poolD)
-      validAddress(_poolE)
       onlyOwner
   {
-<span class="cstat-no" title="statement not covered" >    grantVestedTokens(_poolA, 175000000 ether, vestingStarts, 7 years)</span>;
-<span class="cstat-no" title="statement not covered" >    grantVestedTokens(_poolB, 168000000 ether, vestingStarts, 7 years)</span>;
-<span class="cstat-no" title="statement not covered" >    grantVestedTokens(_poolC, 70000000 ether, vestingStarts, 7 years)</span>;
-<span class="cstat-no" title="statement not covered" >    grantVestedTokens(_poolD, 29000000 ether, vestingStarts, 4 years)</span>;
-<span class="cstat-no" title="statement not covered" >    grantVestedTokens(_poolE, 20000000 ether, vestingStarts, 90 days)</span>;
+    grantVestedTokens(_poolA, (175000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
+    grantVestedTokens(_poolB, (168000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
+    grantVestedTokens(_poolC, (70000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
+    grantVestedTokens(_poolD, 49000000 ether, vestingStarts, vestingStarts + 4 years);
+&nbsp;
+    token.burn(token.balanceOf(this));
   }
 &nbsp;
   function stop() public onlyOwner isActive returns(bool) {
@@ -931,6 +944,8 @@ contract TokenSale is Ownable, ITokenSale {
   function updateStats(uint256 usd, uint256 tokens) internal {
     raised = raised + usd;
     soldTokens = soldTokens + tokens;
+&nbsp;
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(soldTokens &lt; hardcap);
   }
 &nbsp;
   /**
@@ -1003,7 +1018,7 @@ contract TokenSale is Ownable, ITokenSale {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 05 2018 10:43:27 GMT-0500 (-05)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Jan 08 2018 14:02:36 GMT-0500 (-05)
 </div>
 </div>
 <script src="../prettify.js"></script>
