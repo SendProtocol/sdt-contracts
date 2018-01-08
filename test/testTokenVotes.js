@@ -3,7 +3,8 @@
 const SDT = artifacts.require("./SDT.sol");
 const Polls = artifacts.require("./Polls.sol");
 const assertJump = require("./helpers/assertJump");
-const { increaseTimeTo, duration } = require("./helpers/time.js");
+
+const { latestTime, increaseTimeTo, duration } = require("./helpers/time.js");
 
 contract("Polls", function(accounts) {
   let poll;
@@ -104,10 +105,10 @@ contract("Polls", function(accounts) {
         "is this working?",
         ["yes", "nope"],
         1,
-        new Date().valueOf() + duration.minutes(1)
+        latestTime() + duration.minutes(1)
       );
       await polls.vote(1);
-      await increaseTimeTo(new Date().valueOf() + duration.minutes(2));
+      await increaseTimeTo(latestTime() + duration.minutes(2));
       assert.equal(await polls.showResults(0), 0);
       assert.equal(await polls.showResults(1), 1);
     });
@@ -121,10 +122,10 @@ contract("Polls", function(accounts) {
         "is this working?",
         ["yes", "nope"],
         1,
-        new Date().valueOf() + duration.minutes(1)
+        latestTime() + duration.minutes(1)
       );
       await polls.vote(1);
-      await increaseTimeTo(new Date().valueOf() + duration.minutes(2));
+      await increaseTimeTo(latestTime() + duration.minutes(2));
 
       try {
         await polls.logResults(0, {from: accounts[9]});

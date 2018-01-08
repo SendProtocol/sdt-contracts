@@ -23,7 +23,7 @@ function amount(a) {
 contract("SDT", function(accounts) {
   let token;
   let escrow;
-  let futureDate = new Date().valueOf() + 3600;
+  let futureDate = latestTime() + duration.hours(1);
 
   describe("escrow basic flow", function() {
     let tokens = 100;
@@ -389,7 +389,7 @@ contract("SDT", function(accounts) {
 
     it("should return tokens to owner except fee", async function() {
 
-      await increaseTimeTo(futureDate + duration.days(1));
+      await increaseTimeTo(futureDate + duration.hours(2));
 
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
@@ -438,6 +438,7 @@ contract("SDT", function(accounts) {
       this.token = await SDT.new(accounts[0]);
       this.escrow = await Escrow.new(this.token.address);
       this.token.setEscrow(this.escrow.address);
+      futureDate = latestTime() + duration.hours(1);
     });
 
     it("should lock amount + fee", async function() {
@@ -483,8 +484,8 @@ contract("SDT", function(accounts) {
     });
 
     it("should allow user to get tokens back on an expired lock", async function() {
-      await increaseTimeTo(futureDate + duration.days(1));
-      
+      await increaseTimeTo(futureDate + duration.hours(2));
+
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
       destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
@@ -572,12 +573,7 @@ contract("SDT", function(accounts) {
     });
 
     it("should fail if user tries to claim tokens after invalidation", async function() {
-      await this.escrow.mediate(
-        1,
-        {
-          from: accounts[1]
-        }
-      );
+      await this.escrow.mediate(1, {from: accounts[1]});
 
       try {
         await this.escrow.claim(accounts[1], 1);
@@ -629,4 +625,58 @@ contract("SDT", function(accounts) {
       );
     });
   });
+
+  describe("withdraw other tokens", function() {
+    let tokens = 100;
+    let fee = 1;
+    let exchangeRate = 0;
+
+    before(async function() {
+      this.token = await SDT.new(accounts[0]);
+      this.otherToken = await SDT.new(accounts[7]);
+      this.escrow = await Escrow.new(this.token.address);
+      this.token.setEscrow(this.escrow.address);
+    });
+
+    it("should give tokens back", async function() {
+      await this.otherToken.transfer(this.escrow.address, 10, {from: accounts[7]})
+
+      accountBalanceBefore = await this.otherToken.balanceOf.call(accounts[7]);
+      escrowBalanceBefore = await this.otherToken.balanceOf.call(
+        this.escrow.address
+      );
+
+      assert.equal(escrowBalanceBefore, 10);
+      assert.equal(accountBalanceBefore, amount(700000000) - 10);
+
+      await this.escrow.transferToken(this.otherToken.address, accounts[7], 10);
+
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
+
+      assert.equal(escrowBalanceAfter, 0);
+      assert.equal(accountBalanceAfter, amount(700000000));
+    });
+
+    it("should fail if not owner", async function() {
+      await this.otherToken.transfer(this.escrow.address, 10, {from: accounts[7]})
+      try {
+        await this.escrow.transferToken(this.otherToken.address, accounts[7], 10, {from: accounts[5]});
+        assert.fail("should have thrown before");
+      } catch (error) {
+        assertJump(error);
+      }
+    });
+
+    it("should fail if trying to use with SDT", async function() {
+      await this.token.transfer(this.escrow.address, 10)
+      try {
+        await this.escrow.transferToken(this.token.address, accounts[7], 10);
+        assert.fail("should have thrown before");
+      } catch (error) {
+        assertJump(error);
+      }
+    });
+
+  });  
 });
