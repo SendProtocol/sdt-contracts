@@ -11,36 +11,29 @@ contract Escrow {
   ISendToken public token;
 
   struct Lock {
+    address sender;
+    address recipient;
     uint256 value;
     uint256 fee;
     uint256 expiration;
+    bool paid;
   }
 
-  mapping (address => mapping(address => mapping(uint256 => Lock))) internal escrows;
+  mapping(address => mapping(uint256 => Lock)) internal escrows;
 
   function Escrow(address _token) public {
     token = ISendToken(_token);
   }
 
-  event EscrowCreated(
+  event Created(
     address indexed sender,
-    address indexed authority,
-    uint256 reference
+    address indexed recipient,
+    address indexed arbitrator,
+    uint256 transactionId
   );
-
-  event EscrowResolved(
-    address indexed sender,
-    address indexed authority,
-    uint256 reference,
-    address resolver,
-    address sentTo
-  );
-
-  event EscrowMediation(
-    address indexed sender,
-    address indexed authority,
-    uint256 reference
-  );
+  event Released(address indexed arbitrator, address indexed sentTo, uint256 transactionId);
+  event Dispute(address indexed arbitrator, uint256 transactionId);
+  event Paid(address indexed arbitrator, uint256 transactionId);
 
   modifier tokenRestricted() {
     require (msg.sender == address(token));
@@ -49,28 +42,57 @@ contract Escrow {
 
   /**
    * @dev Create a record for held tokens
-   * @param _authority Address to be authorized to spend locked funds
-   * @param _reference Intenral ID for applications implementing this
+   * @param _arbitrator Address to be authorized to spend locked funds
+   * @param _transactionId Intenral ID for applications implementing this
    * @param _tokens Amount of tokens to lock
-   * @param _fee A fee to be paid to authority (may be 0)
+   * @param _fee A fee to be paid to arbitrator (may be 0)
    * @param _expiration After this timestamp, user can claim tokens back.
    */
-  function escrowTransfer(
+  function create(
       address _sender,
-      address _authority,
-      uint256 _reference,
+      address _recipient,
+      address _arbitrator,
+      uint256 _transactionId,
       uint256 _tokens,
       uint256 _fee,
       uint256 _expiration
   ) public tokenRestricted {
 
-    require(escrows[_sender][_authority][_reference].value == 0);
+    require(_tokens > 0);
+    require(_fee >= 0);
+    require(escrows[_arbitrator][_transactionId].value == 0);
 
-    escrows[_sender][_authority][_reference].value = _tokens;
-    escrows[_sender][_authority][_reference].fee = _fee;
-    escrows[_sender][_authority][_reference].expiration = _expiration;
+    escrows[_arbitrator][_transactionId].sender = _sender;
+    escrows[_arbitrator][_transactionId].recipient = _recipient;
+    escrows[_arbitrator][_transactionId].value = _tokens;
+    escrows[_arbitrator][_transactionId].fee = _fee;
+    escrows[_arbitrator][_transactionId].expiration = _expiration;
 
-    EscrowCreated(_sender, _authority, _reference);
+    Created(_sender, _recipient, _arbitrator, _transactionId);
+  }
+
+  /**
+   * @dev Fund escrow record
+   * @param _arbitrator Address to be authorized to spend locked funds
+   * @param _transactionId Intenral ID for applications implementing this
+   * @param _tokens Amount of tokens to lock
+   * @param _fee A fee to be paid to arbitrator (may be 0)
+   */
+  function fund(
+      address _sender,
+      address _arbitrator,
+      uint256 _transactionId,
+      uint256 _tokens,
+      uint256 _fee
+  ) public tokenRestricted {
+
+    require(escrows[_arbitrator][_transactionId].sender == _sender);
+    require(escrows[_arbitrator][_transactionId].value == _tokens);
+    require(escrows[_arbitrator][_transactionId].fee == _fee);
+
+    escrows[_arbitrator][_transactionId].paid = true;
+
+    Paid(_arbitrator, _transactionId);
   }
 
   /**
@@ -79,84 +101,83 @@ contract Escrow {
    * @notice Exchange rate has 18 decimal places
    * @param _sender Address with locked amount
    * @param _recipient Address to send funds to
-   * @param _reference App/user internal associated ID
+   * @param _transactionId App/user internal associated ID
    * @param _exchangeRate Rate to be reported to the blockchain
    */
-  function executeEscrowTransfer(
+  function release(
       address _sender,
       address _recipient,
-      uint256 _reference,
+      uint256 _transactionId,
       uint256 _exchangeRate
   ) public {
 
-    uint256 value = escrows[_sender][msg.sender][_reference].value;
-    uint256 fee = escrows[_sender][msg.sender][_reference].fee;
+    Lock memory lock = escrows[msg.sender][_transactionId];
 
-    require(value > 0);
+    require(lock.sender == _sender);
+    require(lock.recipient == _recipient || lock.sender == _recipient);
+    require(lock.paid);
 
-    token.transfer(_recipient, value);
+    token.transfer(_recipient, lock.value);
 
-    if (fee > 0) {
-      token.transfer(msg.sender, fee);
+    if (lock.fee > 0) {
+      token.transfer(msg.sender, lock.fee);
     }
 
-    delete escrows[_sender][msg.sender][_reference];
+    delete escrows[msg.sender][_transactionId];
 
     token.issueExchangeRate(
       _sender,
       _recipient,
       msg.sender,
-      value,
-      _reference,
+      lock.value,
+      _transactionId,
       _exchangeRate
     );
-    EscrowResolved(_sender, msg.sender, _reference, msg.sender, _recipient);
+    Released(msg.sender, _recipient, _transactionId);
   }
 
   /**
    * @dev Claim back locked amount after expiration time
    * @dev Cannot be claimed if expiration == 0
    * @notice Only works after lock expired
-   * @param _authority Authorized lock address
-   * @param _reference reference ID from App/user
+   * @param _arbitrator Authorized lock address
+   * @param _transactionId transactionId ID from App/user
    */
-  function claimEscrowTransfer(
-      address _authority,
-      uint256 _reference
+  function claim(
+      address _arbitrator,
+      uint256 _transactionId
   ) public {
-    require(escrows[msg.sender][_authority][_reference].value > 0);
-    require(escrows[msg.sender][_authority][_reference].expiration < block.timestamp);
-    require(escrows[msg.sender][_authority][_reference].expiration != 0);
+    Lock memory lock = escrows[_arbitrator][_transactionId];
 
-    uint256 value = escrows[msg.sender][_authority][_reference].value;
-    uint256 fee = escrows[msg.sender][_authority][_reference].fee;
+    require(lock.sender == msg.sender);
+    require(lock.paid);
+    require(lock.expiration < block.timestamp);
+    require(lock.expiration != 0);
 
-    delete escrows[msg.sender][_authority][_reference];
+    delete escrows[_arbitrator][_transactionId];
 
-    token.transfer(msg.sender, value + fee);
+    token.transfer(msg.sender, lock.value + lock.fee);
 
-    EscrowResolved(
+    Released(
+      _arbitrator,
       msg.sender,
-      _authority,
-      _reference,
-      msg.sender,
-      msg.sender
+      _transactionId
     );
   }
 
   /**
    * @dev Remove expiration time on a lock
-   * @notice User wont be able to claim tokens back after this is called by authority address
+   * @notice User wont be able to claim tokens back after this is called by arbitrator address
    * @notice Only authorized address
-   * @param _sender Address with locked amount
-   * @param _reference App/user internal associated ID
+   * @param _transactionId App/user internal associated ID
    */
-  function invalidateEscrowTransferExpiration(
-      address _sender,
-      uint256 _reference
+  function mediate(
+      uint256 _transactionId
   ) public {
-    require(escrows[_sender][msg.sender][_reference].value > 0);
-    escrows[_sender][msg.sender][_reference].expiration = 0;
-    EscrowMediation(_sender, msg.sender, _reference);
+    require(escrows[msg.sender][_transactionId].paid);
+
+    escrows[msg.sender][_transactionId].expiration = 0;
+
+    Dispute(msg.sender, _transactionId);
   }
 }

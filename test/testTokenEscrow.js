@@ -1,5 +1,7 @@
 "use strict";
 
+const { latestTime, increaseTimeTo, duration } = require("./helpers/time.js");
+
 const SDT = artifacts.require("./SDT.sol");
 const Escrow = artifacts.require("./Escrow.sol");
 const assertJump = require("./helpers/assertJump");
@@ -22,11 +24,8 @@ contract("SDT", function(accounts) {
   let token;
   let escrow;
   let futureDate = new Date().valueOf() + 3600;
-  let pastDate = 1;
 
   describe("escrow basic flow", function() {
-    let reference = 1;
-    let referenceTwo = 2;
     let tokens = 100;
     let fee = 1;
     let exchangeRate = 1;
@@ -43,13 +42,22 @@ contract("SDT", function(accounts) {
         this.escrow.address
       );
 
-      await this.token.escrowTransfer(
-        accounts[1],
-        reference,
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[2],
+        1,
         tokens,
         fee,
-        futureDate
+        futureDate,
+        {from: accounts[1]}
       );
+
+      await this.token.fundEscrow(
+        accounts[1],
+        1,
+        tokens,
+        fee
+      )
 
       accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
@@ -72,12 +80,14 @@ contract("SDT", function(accounts) {
 
     it("should fail if trying to use the same keys", async function() {
       try {
-        await this.token.escrowTransfer(
-          accounts[1],
-          reference,
+        await this.token.createEscrow(
+          accounts[0],
+          accounts[2],
+          1,
           tokens,
           fee,
-          futureDate
+          futureDate,
+          {from: accounts[1]}
         );
         assert.fail("should have thrown before");
       } catch (error) {
@@ -86,14 +96,73 @@ contract("SDT", function(accounts) {
     });
 
     it("should fail if trying to use more than balance", async function() {
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[2],
+        2,
+        amount(700000000),
+        fee,
+        futureDate,
+        {from: accounts[1]}
+      );
       try {
-        await this.token.escrowTransfer(
+        await this.token.fundEscrow(
           accounts[1],
-          referenceTwo,
+          2,
           amount(700000000),
-          fee,
-          futureDate
-        );
+          fee
+        )
+        assert.fail("should have thrown before");
+      } catch (error) {
+        assertJump(error);
+      }
+    });
+
+    it("should fail if values are not exact", async function() {
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[2],
+        4,
+        tokens,
+        fee,
+        futureDate,
+        {from: accounts[1]}
+      );
+      try {
+        await this.token.fundEscrow(
+          accounts[1],
+          4,
+          tokens + 1,
+          fee
+        )
+        assert.fail("should have thrown before");
+      } catch (error) {
+        assertJump(error);
+      }
+    });
+
+    it("should fail if values are not exact", async function() {
+      try {
+        await this.token.fundEscrow(
+          accounts[1],
+          4,
+          tokens,
+          fee + 1
+        )
+        assert.fail("should have thrown before");
+      } catch (error) {
+        assertJump(error);
+      }
+    });
+
+    it("should fail if trying to fund an unexisting escrow", async function() {
+      try {
+        await this.token.fundEscrow(
+          accounts[1],
+          5,
+          tokens,
+          fee + 1
+        )
         assert.fail("should have thrown before");
       } catch (error) {
         assertJump(error);
@@ -101,14 +170,22 @@ contract("SDT", function(accounts) {
     });
 
     it("should fail if not enough balance to pay fee", async function() {
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[2],
+        3,
+        amount(700000000) - (tokens + fee),
+        fee,
+        futureDate,
+        {from: accounts[1]}
+      );
       try {
-        await this.token.escrowTransfer(
+        await this.token.fundEscrow(
           accounts[1],
-          referenceTwo,
+          3,
           amount(700000000) - (tokens + fee),
-          fee,
-          futureDate
-        );
+          fee
+        )
         assert.fail("should have thrown before");
       } catch (error) {
         assertJump(error);
@@ -117,10 +194,10 @@ contract("SDT", function(accounts) {
 
     it("should fail if no verified sets an exchange rate", async function() {
       try {
-        await this.escrow.executeEscrowTransfer(
+        await this.escrow.release(
           accounts[0],
           accounts[2],
-          reference,
+          1,
           exchangeRate,
           { from: accounts[1] }
         );
@@ -138,10 +215,10 @@ contract("SDT", function(accounts) {
         this.escrow.address
       );
 
-      await this.escrow.executeEscrowTransfer(
+      await this.escrow.release(
         accounts[0],
         accounts[2],
-        reference,
+        1,
         0,
         { from: accounts[1] }
       );
@@ -173,21 +250,32 @@ contract("SDT", function(accounts) {
     });
 
     it("should fail if exchange rate not set", async function() {
-      await this.token.verify(accounts[0]);
-      await this.token.escrowTransfer(
-        accounts[0],
-        reference,
+      await this.token.verify(accounts[4]);
+      await this.token.createEscrow(
+        accounts[2],
+        accounts[3],
+        1,
         tokens,
         0,
         futureDate,
-        { from: accounts[2] }
+        {from: accounts[4]}
       );
+
+      await this.token.fundEscrow(
+        accounts[4],
+        1,
+        tokens,
+        0,
+        {from: accounts[2]}
+      )
+
       try {
-        await this.escrow.executeEscrowTransfer(
+        await this.escrow.release(
           accounts[2],
           accounts[3],
-          reference,
-          0
+          1,
+          0,
+          {from: accounts[4]}
         );
         assert.fail("should have thrown before");
       } catch (error) {
@@ -203,11 +291,12 @@ contract("SDT", function(accounts) {
         this.escrow.address
       );
 
-      await this.escrow.executeEscrowTransfer(
+      await this.escrow.release(
         accounts[2],
         accounts[3],
-        reference,
-        exchangeRate
+        1,
+        exchangeRate,
+        {from: accounts[4]}
       );
 
       accountBalanceAfter = await this.token.balanceOf.call(accounts[2]);
@@ -232,10 +321,10 @@ contract("SDT", function(accounts) {
 
     it("should fail if already resolved", async function() {
       try {
-        await this.escrow.executeEscrowTransfer(
+        await this.escrow.release(
           accounts[2],
           accounts[3],
-          reference,
+          1,
           exchangeRate
         );
         assert.fail("should have thrown before");
@@ -246,7 +335,6 @@ contract("SDT", function(accounts) {
   });
 
   describe("escrow rollback", function() {
-    let reference = 1;
     let tokens = 100;
     let fee = 1;
     let exchangeRate = 0;
@@ -263,13 +351,22 @@ contract("SDT", function(accounts) {
         this.escrow.address
       );
 
-      await this.token.escrowTransfer(
-        accounts[1],
-        reference,
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[2],
+        1,
         tokens,
         fee,
-        futureDate
+        futureDate,
+        {from: accounts[1]}
       );
+
+      await this.token.fundEscrow(
+        accounts[1],
+        1,
+        tokens,
+        fee
+      )
 
       accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
@@ -291,6 +388,9 @@ contract("SDT", function(accounts) {
     });
 
     it("should return tokens to owner except fee", async function() {
+
+      await increaseTimeTo(futureDate + duration.days(1));
+
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
       destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
@@ -298,10 +398,10 @@ contract("SDT", function(accounts) {
         this.escrow.address
       );
 
-      await this.escrow.executeEscrowTransfer(
+      await this.escrow.release(
         accounts[0],
         accounts[0],
-        reference,
+        1,
         exchangeRate,
         { from: accounts[1] }
       );
@@ -331,7 +431,6 @@ contract("SDT", function(accounts) {
   });
 
   describe("escrow claim", function() {
-    let reference = 1;
     let tokens = 100;
     let fee = 1;
 
@@ -347,13 +446,22 @@ contract("SDT", function(accounts) {
         this.escrow.address
       );
 
-      await this.token.escrowTransfer(
-        accounts[1],
-        reference,
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[2],
+        1,
         tokens,
         fee,
-        pastDate
+        futureDate,
+        {from: accounts[1]}
       );
+
+      await this.token.fundEscrow(
+        accounts[1],
+        1,
+        tokens,
+        fee
+      )
 
       accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
@@ -375,6 +483,8 @@ contract("SDT", function(accounts) {
     });
 
     it("should allow user to get tokens back on an expired lock", async function() {
+      await increaseTimeTo(futureDate + duration.days(1));
+      
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
       destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
@@ -382,7 +492,7 @@ contract("SDT", function(accounts) {
         this.escrow.address
       );
 
-      await this.escrow.claimEscrowTransfer(accounts[1], reference);
+      await this.escrow.claim(accounts[1], 1);
 
       accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
       authBalanceAfter = await this.token.balanceOf.call(accounts[1]);
@@ -409,7 +519,6 @@ contract("SDT", function(accounts) {
   });
 
   describe("escrow mediate", function() {
-    let reference = 1;
     let tokens = 100;
     let fee = 1;
     let exchangeRate = 0;
@@ -421,21 +530,27 @@ contract("SDT", function(accounts) {
     });
 
     it("should lock amount + fee", async function() {
-      escrow = await Escrow.new(this.token.address);
-      this.token.setEscrow(this.escrow.address);
-
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceBefore = await this.token.balanceOf.call(
         this.escrow.address
       );
 
-      await this.token.escrowTransfer(
-        accounts[1],
-        reference,
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[2],
+        1,
         tokens,
         fee,
-        pastDate
+        futureDate,
+        {from: accounts[1]}
       );
+
+      await this.token.fundEscrow(
+        accounts[1],
+        1,
+        tokens,
+        fee
+      )
 
       accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
@@ -456,17 +571,16 @@ contract("SDT", function(accounts) {
       );
     });
 
-    it("should should fail if user tries to claim tokens after invalidation", async function() {
-      await this.escrow.invalidateEscrowTransferExpiration(
-        accounts[0],
-        reference,
+    it("should fail if user tries to claim tokens after invalidation", async function() {
+      await this.escrow.mediate(
+        1,
         {
           from: accounts[1]
         }
       );
 
       try {
-        await this.escrow.claimEscrowTransfer(accounts[1], reference);
+        await this.escrow.claim(accounts[1], 1);
         assert.fail("should have thrown before");
       } catch (error) {
         assertJump(error);
@@ -481,10 +595,10 @@ contract("SDT", function(accounts) {
         this.escrow.address
       );
 
-      await this.escrow.executeEscrowTransfer(
+      await this.escrow.release(
         accounts[0],
         accounts[2],
-        reference,
+        1,
         0,
         { from: accounts[1] }
       );

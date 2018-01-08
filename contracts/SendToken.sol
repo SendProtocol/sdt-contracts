@@ -97,31 +97,56 @@ contract SendToken is ISendToken {
   }
 
   /**
-   * @dev execute an escrow transfer
-   * @dev specified amount will be locked on escrow contract
-   * @param _authority Address authorized to approve/reject transaction
-   * @param _reference Intenral ID for applications implementing this
+   * @dev create an escrow transfer
+   * @param _sender Address to send tokens
+   * @param _recipient Address to receive tokens
+   * @param _transactionId internal ID for arbitrator
    * @param _tokens Amount of tokens to lock
-   * @param _fee A fee to be paid to authority (may be 0)
+   * @param _fee A fee to be paid to arbitrator (may be 0)
    * @param _expiration After this timestamp, user can claim tokens back.
    */
-  function escrowTransfer(
-      address _authority,
-      uint256 _reference,
+  function createEscrow(
+      address _sender,
+      address _recipient,
+      uint256 _transactionId,
       uint256 _tokens,
       uint256 _fee,
       uint256 _expiration
   ) public {
-    uint256 total = _tokens + _fee;
-    transfer(escrow, total);
-
-    escrow.escrowTransfer(
+    escrow.create(
+      _sender,
+      _recipient,
       msg.sender,
-      _authority,
-      _reference,
+      _transactionId,
       _tokens,
       _fee,
       _expiration
+    );
+  }
+
+  /**
+   * @dev fund escrow
+   * @dev specified amount will be locked on escrow contract
+   * @param _arbitrator Address of escrow arbitrator
+   * @param _transactionId internal ID for arbitrator
+   * @param _tokens Amount of tokens to lock
+   * @param _fee A fee to be paid to arbitrator (may be 0)
+   */
+  function fundEscrow(
+      address _arbitrator,
+      uint256 _transactionId,
+      uint256 _tokens,
+      uint256 _fee
+  ) public {
+    uint256 total = _tokens + _fee;
+    transfer(escrow, total);
+
+    escrow.fund(
+      msg.sender,
+      _arbitrator,
+      _transactionId,
+      _tokens,
+      _fee
     );
   }
 
@@ -133,7 +158,7 @@ contract SendToken is ISendToken {
       address _to,
       address _verifiedAddress,
       uint256 _value,
-      uint256 _referenceId,
+      uint256 _transactionId,
       uint256 _exchangeRate
   ) public escrowResticted {
     bool noRate = (_exchangeRate == 0);
@@ -144,7 +169,7 @@ contract SendToken is ISendToken {
         _to,
         _verifiedAddress,
         _value,
-        _referenceId,
+        _transactionId,
         _exchangeRate
       );
     } else {
