@@ -252,7 +252,7 @@ contract("TokenSale", function(accounts) {
       from: accounts[5]
     });
 
-    let saleBalance = await this.token.balanceOf(this.sale.address);
+    let saleBalance = await this.token.balanceOf.call(this.sale.address);
     let supply = await this.token.totalSupply.call();
 
     let sold = await this.sale.soldTokens.call();

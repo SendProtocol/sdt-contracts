@@ -109,8 +109,8 @@ contract("Polls", function(accounts) {
       );
       await polls.vote(1);
       await increaseTimeTo(latestTime() + duration.minutes(2));
-      assert.equal(await polls.showResults(0), 0);
-      assert.equal(await polls.showResults(1), 1);
+      assert.equal(await polls.showResults.call(0), 0);
+      assert.equal(await polls.showResults.call(1), 1);
     });
 
     it("Should fail if not owner", async function() {
