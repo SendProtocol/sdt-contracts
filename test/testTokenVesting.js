@@ -19,7 +19,7 @@ contract("TokenVesting", function(accounts) {
   });
 
   beforeEach(async function() {
-    this.start = latestTime() + duration.minutes(1);
+    this.start = latestTime() + duration.hours(1);
     this.end = this.start + duration.years(1);
     this.vesting = await TokenVesting.new();
     this.token = await SDT.new(this.tokenHolder);

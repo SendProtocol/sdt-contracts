@@ -18,7 +18,7 @@ contract("TokenSale", function(accounts) {
     this.sale = await TokenSale.new(
       this.currentDate - 1,
       this.currentDate + 1000,
-      accounts[5],
+      accounts[7],
       this.currentDate + 100
     );
     this.vesting = await TokenVesting.new();
@@ -235,4 +235,46 @@ contract("TokenSale", function(accounts) {
     await this.sale.resume();
     await this.proxy.btcPurchase(accounts[9], 70000000);
   });
+
+  it("Should be possible finalize sale", async function() {
+    await this.sale.finalize(accounts[2], accounts[3], accounts[4], accounts[5],);
+
+    let granted2 = await this.vesting.totalVestedTokens.call({
+      from: accounts[2]
+    });
+    let granted3 = await this.vesting.totalVestedTokens.call({
+      from: accounts[3]
+    });
+    let granted4 = await this.vesting.totalVestedTokens.call({
+      from: accounts[4]
+    });
+    let granted5 = await this.vesting.totalVestedTokens.call({
+      from: accounts[5]
+    });
+
+    let saleBalance = await this.token.balanceOf(this.sale.address);
+    let supply = await this.token.totalSupply.call();
+
+    let sold = await this.sale.soldTokens.call();
+    let total = 231000000 * 10 ** 18;
+
+    let soldFraction =  sold / total;
+
+    let poolA = soldFraction * 175000000 * 10 ** 18;
+    let poolB = soldFraction * 168000000 * 10 ** 18;
+    let poolC = soldFraction * 70000000 * 10 ** 18;
+    let poolD = 49000000 * 10 ** 18;
+
+    /* sold + allocated pools + 1% (7M) reserve allocated on sale init */
+    let expectedSupply = poolA + poolB + poolC + poolD + 7000000 * 10 ** 18 + sold.toNumber(); 
+
+    assert(math.abs(granted2 - poolA) < 1 * 10 ** 18); //1 SDT or error margin
+    assert(math.abs(granted3 - poolB) < 1 * 10 ** 18); //1 SDT or error margin
+    assert(math.abs(granted4 - poolC) < 1 * 10 ** 18); //1 SDT or error margin
+    assert(math.abs(granted5 - poolD) < 1 * 10 ** 18); //1 SDT or error margin
+    assert.equal(saleBalance, 0)
+    assert(math.abs(supply -  expectedSupply) < 1 * 10 ** 18) //1 SDT or error margin
+
+  });
+
 });

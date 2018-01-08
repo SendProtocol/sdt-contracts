@@ -14,6 +14,10 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 contract TokenSale is Ownable, ITokenSale {
   using SafeMath for uint256;
 
+  /* Leave 10 tokens margin error in order to succedd
+  with last pool allocation in case hard cap is reached */
+  uint256 public hardcap = 230999990 ether;
+
   uint256 public startTime;
   uint256 public endTime;
   address public wallet;
@@ -110,22 +114,20 @@ contract TokenSale is Ownable, ITokenSale {
       address _poolA,
       address _poolB,
       address _poolC,
-      address _poolD,
-      address _poolE
+      address _poolD
   )
       public
       validAddress(_poolA)
       validAddress(_poolB)
       validAddress(_poolC)
       validAddress(_poolD)
-      validAddress(_poolE)
       onlyOwner
   {
-    grantVestedTokens(_poolA, (175000000 ether) * soldTokens / (231000000 ether), vestingStarts, 7 years);
-    grantVestedTokens(_poolB, (168000000 ether) * soldTokens / (231000000 ether), vestingStarts, 7 years);
-    grantVestedTokens(_poolC, (70000000 ether) * soldTokens / (231000000 ether), vestingStarts, 7 years);
-    grantVestedTokens(_poolD, (29000000 ether) * soldTokens / (231000000 ether), vestingStarts, 4 years);
-    grantVestedTokens(_poolE, (20000000 ether) * soldTokens / (231000000 ether), vestingStarts, 90 days);
+    grantVestedTokens(_poolA, (175000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
+    grantVestedTokens(_poolB, (168000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
+    grantVestedTokens(_poolC, (70000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
+    grantVestedTokens(_poolD, 49000000 ether, vestingStarts, vestingStarts + 4 years);
+
     token.burn(token.balanceOf(this));
   }
 
@@ -251,6 +253,8 @@ contract TokenSale is Ownable, ITokenSale {
   function updateStats(uint256 usd, uint256 tokens) internal {
     raised = raised + usd;
     soldTokens = soldTokens + tokens;
+
+    require(soldTokens < hardcap);
   }
 
   /**

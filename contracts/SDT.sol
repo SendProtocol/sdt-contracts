@@ -10,7 +10,6 @@ contract SDT is SendToken {
   string constant public name = "SEND Token";
   string constant public symbol = "SDT";
   uint256 constant public decimals = 18;
-  uint256 constant public totalSupply = 700000000 * 10**decimals;
 
   modifier validAddress(address _address) {
     require(_address != address(0x0));
@@ -26,7 +25,7 @@ contract SDT is SendToken {
   */
   function SDT(address _sale) public validAddress(_sale) {
     verifiedAddresses[owner] = true;
-
+    totalSupply = 700000000 * 10 ** decimals;
     balances[_sale] = totalSupply;
   }
 }
