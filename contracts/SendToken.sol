@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './ISendToken.sol';
-import './Escrow.sol';
+import './IEscrow.sol';
 
 
 /**
@@ -11,7 +11,7 @@ import './Escrow.sol';
  * @dev https://send.sd/token
  */
 contract SendToken is ISendToken {
-  Escrow public escrow;
+  IEscrow public escrow;
 
   mapping (address => bool) internal verifiedAddresses;
 
@@ -58,7 +58,7 @@ contract SendToken is ISendToken {
    * @param _address Address to unverify
    */
   function setEscrow(address _address) public onlyOwner {
-    escrow = Escrow(_address);
+    escrow = IEscrow(_address);
   }
 
   /**

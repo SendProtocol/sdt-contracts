@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Code coverage report for contracts/ISnapshotToken.sol</title>
+    <title>Code coverage report for contracts/IEscrow.sol</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -16,28 +16,28 @@
 <div class='wrapper'>
   <div class='pad1'>
     <h1>
-      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> ISnapshotToken.sol
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> IEscrow.sol
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>1/1</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/2</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>1/1</span>
+        <span class='fraction'>0/0</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>2/2</span>
+        <span class='fraction'>0/0</span>
       </div>
     </div>
   </div>
@@ -63,7 +63,25 @@
 18
 19
 20
-21</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -76,8 +94,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6×</span>
-<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -87,23 +123,41 @@
 &nbsp;
 &nbsp;
 /**
- * @title Snapshot Token
+ * @title Escrow interface
  *
- * @dev Snapshot Token interface
  * @dev https://send.sd/token
  */
-contract ISnapshotToken {
-  address public polls;
+contract IEscrow {
 &nbsp;
-  modifier pollsResticted() {
-    <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == address(polls));
-    _;
-  }
+  event Created(
+    address indexed sender,
+    address indexed recipient,
+    address indexed arbitrator,
+    uint256 transactionId
+  );
+  event Released(address indexed arbitrator, address indexed sentTo, uint256 transactionId);
+  event Dispute(address indexed arbitrator, uint256 transactionId);
+  event Paid(address indexed arbitrator, uint256 transactionId);
 &nbsp;
-  function requestSnapshots(uint256 _blockNumber) public;
-  function takeSnapshot(address _owner) public returns(uint256);
-}
-&nbsp;</pre></td></tr>
+  function create(
+      address _sender,
+      address _recipient,
+      address _arbitrator,
+      uint256 _transactionId,
+      uint256 _tokens,
+      uint256 _fee,
+      uint256 _expiration
+  ) public;
+&nbsp;
+  function fund(
+      address _sender,
+      address _arbitrator,
+      uint256 _transactionId,
+      uint256 _tokens,
+      uint256 _fee
+  ) public;
+&nbsp;
+}</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->
 </div><!-- /wrapper -->

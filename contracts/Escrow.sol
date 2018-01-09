@@ -1,6 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './ISendToken.sol';
+import './IEscrow.sol';
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'zeppelin-solidity/contracts/token/ERC20Basic.sol';
 
@@ -8,7 +9,7 @@ import 'zeppelin-solidity/contracts/token/ERC20Basic.sol';
  * @title Vesting contract for SDT
  * @dev see https://send.sd/token
  */
-contract Escrow is Ownable{
+contract Escrow is IEscrow, Ownable{
   ISendToken public token;
 
   struct Lock {
@@ -25,16 +26,6 @@ contract Escrow is Ownable{
   function Escrow(address _token) public {
     token = ISendToken(_token);
   }
-
-  event Created(
-    address indexed sender,
-    address indexed recipient,
-    address indexed arbitrator,
-    uint256 transactionId
-  );
-  event Released(address indexed arbitrator, address indexed sentTo, uint256 transactionId);
-  event Dispute(address indexed arbitrator, uint256 transactionId);
-  event Paid(address indexed arbitrator, uint256 transactionId);
 
   modifier tokenRestricted() {
     require (msg.sender == address(token));

@@ -1,5 +1,44 @@
 pragma solidity ^0.4.18;
 
+// File: contracts/IEscrow.sol
+
+/**
+ * @title Escrow interface
+ *
+ * @dev https://send.sd/token
+ */
+contract IEscrow {
+
+  event Created(
+    address indexed sender,
+    address indexed recipient,
+    address indexed arbitrator,
+    uint256 transactionId
+  );
+  event Released(address indexed arbitrator, address indexed sentTo, uint256 transactionId);
+  event Dispute(address indexed arbitrator, uint256 transactionId);
+  event Paid(address indexed arbitrator, uint256 transactionId);
+
+  function create(
+      address _sender,
+      address _recipient,
+      address _arbitrator,
+      uint256 _transactionId,
+      uint256 _tokens,
+      uint256 _fee,
+      uint256 _expiration
+  ) public;
+
+  function fund(
+      address _sender,
+      address _arbitrator,
+      uint256 _transactionId,
+      uint256 _tokens,
+      uint256 _fee
+  ) public;
+
+}
+
 // File: contracts/ISnapshotToken.sol
 
 /**
@@ -385,7 +424,7 @@ contract ISendToken is BurnableToken, SnapshotToken {
  * @title Vesting contract for SDT
  * @dev see https://send.sd/token
  */
-contract Escrow is Ownable{
+contract Escrow is IEscrow, Ownable{
   ISendToken public token;
 
   struct Lock {
@@ -402,16 +441,6 @@ contract Escrow is Ownable{
   function Escrow(address _token) public {
     token = ISendToken(_token);
   }
-
-  event Created(
-    address indexed sender,
-    address indexed recipient,
-    address indexed arbitrator,
-    uint256 transactionId
-  );
-  event Released(address indexed arbitrator, address indexed sentTo, uint256 transactionId);
-  event Dispute(address indexed arbitrator, uint256 transactionId);
-  event Paid(address indexed arbitrator, uint256 transactionId);
 
   modifier tokenRestricted() {
     require (msg.sender == address(token));
