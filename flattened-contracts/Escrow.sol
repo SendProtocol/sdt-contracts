@@ -1,5 +1,69 @@
 pragma solidity ^0.4.18;
 
+// File: contracts/ISnapshotToken.sol
+
+/**
+ * @title Snapshot Token
+ *
+ * @dev Snapshot Token interface
+ * @dev https://send.sd/token
+ */
+contract ISnapshotToken {
+  address public polls;
+
+  modifier pollsResticted() {
+    require(msg.sender == address(polls));
+    _;
+  }
+
+  function requestSnapshots(uint256 _blockNumber) public;
+  function takeSnapshot(address _owner) public returns(uint256);
+}
+
+// File: zeppelin-solidity/contracts/ownership/Ownable.sol
+
+/**
+ * @title Ownable
+ * @dev The Ownable contract has an owner address, and provides basic authorization control
+ * functions, this simplifies the implementation of "user permissions".
+ */
+contract Ownable {
+  address public owner;
+
+
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+
+  /**
+   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+   * account.
+   */
+  function Ownable() public {
+    owner = msg.sender;
+  }
+
+
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(msg.sender == owner);
+    _;
+  }
+
+
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0));
+    OwnershipTransferred(owner, newOwner);
+    owner = newOwner;
+  }
+
+}
+
 // File: zeppelin-solidity/contracts/math/SafeMath.sol
 
 /**
@@ -87,96 +151,6 @@ contract BasicToken is ERC20Basic {
 
 }
 
-// File: zeppelin-solidity/contracts/token/BurnableToken.sol
-
-/**
- * @title Burnable Token
- * @dev Token that can be irreversibly burned (destroyed).
- */
-contract BurnableToken is BasicToken {
-
-    event Burn(address indexed burner, uint256 value);
-
-    /**
-     * @dev Burns a specific amount of tokens.
-     * @param _value The amount of token to be burned.
-     */
-    function burn(uint256 _value) public {
-        require(_value <= balances[msg.sender]);
-        // no need to require value <= totalSupply, since that would imply the
-        // sender's balance is greater than the totalSupply, which *should* be an assertion failure
-
-        address burner = msg.sender;
-        balances[burner] = balances[burner].sub(_value);
-        totalSupply = totalSupply.sub(_value);
-        Burn(burner, _value);
-    }
-}
-
-// File: contracts/ISnapshotToken.sol
-
-/**
- * @title Snapshot Token
- *
- * @dev Snapshot Token interface
- * @dev https://send.sd/token
- */
-contract ISnapshotToken is BurnableToken {
-  address public polls;
-
-  modifier pollsResticted() {
-    require(msg.sender == address(polls));
-    _;
-  }
-
-  function requestSnapshots(uint256 _blockNumber) public;
-  function takeSnapshot(address _owner) public returns(uint256);
-}
-
-// File: zeppelin-solidity/contracts/ownership/Ownable.sol
-
-/**
- * @title Ownable
- * @dev The Ownable contract has an owner address, and provides basic authorization control
- * functions, this simplifies the implementation of "user permissions".
- */
-contract Ownable {
-  address public owner;
-
-
-  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-
-  /**
-   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
-   * account.
-   */
-  function Ownable() public {
-    owner = msg.sender;
-  }
-
-
-  /**
-   * @dev Throws if called by any account other than the owner.
-   */
-  modifier onlyOwner() {
-    require(msg.sender == owner);
-    _;
-  }
-
-
-  /**
-   * @dev Allows the current owner to transfer control of the contract to a newOwner.
-   * @param newOwner The address to transfer ownership to.
-   */
-  function transferOwnership(address newOwner) public onlyOwner {
-    require(newOwner != address(0));
-    OwnershipTransferred(owner, newOwner);
-    owner = newOwner;
-  }
-
-}
-
 // File: zeppelin-solidity/contracts/token/ERC20.sol
 
 /**
@@ -249,14 +223,10 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
-   * @dev Increase the amount of tokens that an owner allowed to a spender.
-   *
    * approve should be called when allowed[_spender] == 0. To increment
    * allowed value is better to use this function to avoid 2 calls (and wait until
    * the first transaction is mined)
    * From MonolithDAO Token.sol
-   * @param _spender The address which will spend the funds.
-   * @param _addedValue The amount of tokens to increase the allowance by.
    */
   function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
     allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
@@ -264,16 +234,6 @@ contract StandardToken is ERC20, BasicToken {
     return true;
   }
 
-  /**
-   * @dev Decrease the amount of tokens that an owner allowed to a spender.
-   *
-   * approve should be called when allowed[_spender] == 0. To decrement
-   * allowed value is better to use this function to avoid 2 calls (and wait until
-   * the first transaction is mined)
-   * From MonolithDAO Token.sol
-   * @param _spender The address which will spend the funds.
-   * @param _subtractedValue The amount of tokens to decrease the allowance by.
-   */
   function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
     uint oldValue = allowed[msg.sender][_spender];
     if (_subtractedValue > oldValue) {
@@ -350,6 +310,33 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
   }
 }
 
+// File: zeppelin-solidity/contracts/token/BurnableToken.sol
+
+/**
+ * @title Burnable Token
+ * @dev Token that can be irreversibly burned (destroyed).
+ */
+contract BurnableToken is StandardToken {
+
+    event Burn(address indexed burner, uint256 value);
+
+    /**
+     * @dev Burns a specific amount of tokens.
+     * @param _value The amount of token to be burned.
+     */
+    function burn(uint256 _value) public {
+        require(_value > 0);
+        require(_value <= balances[msg.sender]);
+        // no need to require value <= totalSupply, since that would imply the
+        // sender's balance is greater than the totalSupply, which *should* be an assertion failure
+
+        address burner = msg.sender;
+        balances[burner] = balances[burner].sub(_value);
+        totalSupply = totalSupply.sub(_value);
+        Burn(burner, _value);
+    }
+}
+
 // File: contracts/ISendToken.sol
 
 /**
@@ -357,7 +344,7 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
  * @dev token interface built on top of ERC20 standard interface
  * @dev see https://send.sd/token
  */
-contract ISendToken is SnapshotToken {
+contract ISendToken is BurnableToken, SnapshotToken {
   function isVerified(address _address) public constant returns(bool);
 
   function verify(address _address) public;
@@ -398,41 +385,33 @@ contract ISendToken is SnapshotToken {
  * @title Vesting contract for SDT
  * @dev see https://send.sd/token
  */
-contract Escrow {
-  address public tokenAddress;
+contract Escrow is Ownable{
   ISendToken public token;
 
   struct Lock {
+    address sender;
+    address recipient;
     uint256 value;
     uint256 fee;
     uint256 expiration;
+    bool paid;
   }
 
-  mapping (address => mapping(address => mapping(uint256 => Lock))) internal escrows;
+  mapping(address => mapping(uint256 => Lock)) internal escrows;
 
   function Escrow(address _token) public {
     token = ISendToken(_token);
   }
 
-  event EscrowCreated(
+  event Created(
     address indexed sender,
-    address indexed authority,
-    uint256 reference
+    address indexed recipient,
+    address indexed arbitrator,
+    uint256 transactionId
   );
-
-  event EscrowResolved(
-    address indexed sender,
-    address indexed authority,
-    uint256 reference,
-    address resolver,
-    address sentTo
-  );
-
-  event EscrowMediation(
-    address indexed sender,
-    address indexed authority,
-    uint256 reference
-  );
+  event Released(address indexed arbitrator, address indexed sentTo, uint256 transactionId);
+  event Dispute(address indexed arbitrator, uint256 transactionId);
+  event Paid(address indexed arbitrator, uint256 transactionId);
 
   modifier tokenRestricted() {
     require (msg.sender == address(token));
@@ -441,28 +420,57 @@ contract Escrow {
 
   /**
    * @dev Create a record for held tokens
-   * @param _authority Address to be authorized to spend locked funds
-   * @param _reference Intenral ID for applications implementing this
+   * @param _arbitrator Address to be authorized to spend locked funds
+   * @param _transactionId Intenral ID for applications implementing this
    * @param _tokens Amount of tokens to lock
-   * @param _fee A fee to be paid to authority (may be 0)
+   * @param _fee A fee to be paid to arbitrator (may be 0)
    * @param _expiration After this timestamp, user can claim tokens back.
    */
-  function escrowTransfer(
+  function create(
       address _sender,
-      address _authority,
-      uint256 _reference,
+      address _recipient,
+      address _arbitrator,
+      uint256 _transactionId,
       uint256 _tokens,
       uint256 _fee,
       uint256 _expiration
   ) public tokenRestricted {
 
-    require(escrows[_sender][_authority][_reference].value == 0);
+    require(_tokens > 0);
+    require(_fee >= 0);
+    require(escrows[_arbitrator][_transactionId].value == 0);
 
-    escrows[_sender][_authority][_reference].value = _tokens;
-    escrows[_sender][_authority][_reference].fee = _fee;
-    escrows[_sender][_authority][_reference].expiration = _expiration;
+    escrows[_arbitrator][_transactionId].sender = _sender;
+    escrows[_arbitrator][_transactionId].recipient = _recipient;
+    escrows[_arbitrator][_transactionId].value = _tokens;
+    escrows[_arbitrator][_transactionId].fee = _fee;
+    escrows[_arbitrator][_transactionId].expiration = _expiration;
 
-    EscrowCreated(_sender, _authority, _reference);
+    Created(_sender, _recipient, _arbitrator, _transactionId);
+  }
+
+  /**
+   * @dev Fund escrow record
+   * @param _arbitrator Address to be authorized to spend locked funds
+   * @param _transactionId Intenral ID for applications implementing this
+   * @param _tokens Amount of tokens to lock
+   * @param _fee A fee to be paid to arbitrator (may be 0)
+   */
+  function fund(
+      address _sender,
+      address _arbitrator,
+      uint256 _transactionId,
+      uint256 _tokens,
+      uint256 _fee
+  ) public tokenRestricted {
+
+    require(escrows[_arbitrator][_transactionId].sender == _sender);
+    require(escrows[_arbitrator][_transactionId].value == _tokens);
+    require(escrows[_arbitrator][_transactionId].fee == _fee);
+
+    escrows[_arbitrator][_transactionId].paid = true;
+
+    Paid(_arbitrator, _transactionId);
   }
 
   /**
@@ -471,84 +479,95 @@ contract Escrow {
    * @notice Exchange rate has 18 decimal places
    * @param _sender Address with locked amount
    * @param _recipient Address to send funds to
-   * @param _reference App/user internal associated ID
+   * @param _transactionId App/user internal associated ID
    * @param _exchangeRate Rate to be reported to the blockchain
    */
-  function executeEscrowTransfer(
+  function release(
       address _sender,
       address _recipient,
-      uint256 _reference,
+      uint256 _transactionId,
       uint256 _exchangeRate
   ) public {
 
-    uint256 value = escrows[_sender][msg.sender][_reference].value;
-    uint256 fee = escrows[_sender][msg.sender][_reference].fee;
+    Lock memory lock = escrows[msg.sender][_transactionId];
 
-    require(value > 0);
+    require(lock.sender == _sender);
+    require(lock.recipient == _recipient || lock.sender == _recipient);
+    require(lock.paid);
 
-    token.transfer(_recipient, value);
+    token.transfer(_recipient, lock.value);
 
-    if (fee > 0) {
-      token.transfer(msg.sender, fee);
+    if (lock.fee > 0) {
+      token.transfer(msg.sender, lock.fee);
     }
 
-    delete escrows[_sender][msg.sender][_reference];
+    delete escrows[msg.sender][_transactionId];
 
     token.issueExchangeRate(
       _sender,
       _recipient,
       msg.sender,
-      value,
-      _reference,
+      lock.value,
+      _transactionId,
       _exchangeRate
     );
-    EscrowResolved(_sender, msg.sender, _reference, msg.sender, _recipient);
+    Released(msg.sender, _recipient, _transactionId);
   }
 
   /**
    * @dev Claim back locked amount after expiration time
    * @dev Cannot be claimed if expiration == 0
    * @notice Only works after lock expired
-   * @param _authority Authorized lock address
-   * @param _reference reference ID from App/user
+   * @param _arbitrator Authorized lock address
+   * @param _transactionId transactionId ID from App/user
    */
-  function claimEscrowTransfer(
-      address _authority,
-      uint256 _reference
+  function claim(
+      address _arbitrator,
+      uint256 _transactionId
   ) public {
-    require(escrows[msg.sender][_authority][_reference].value > 0);
-    require(escrows[msg.sender][_authority][_reference].expiration < block.timestamp);
-    require(escrows[msg.sender][_authority][_reference].expiration != 0);
+    Lock memory lock = escrows[_arbitrator][_transactionId];
 
-    uint256 value = escrows[msg.sender][_authority][_reference].value;
-    uint256 fee = escrows[msg.sender][_authority][_reference].fee;
+    require(lock.sender == msg.sender);
+    require(lock.paid);
+    require(lock.expiration < block.timestamp);
+    require(lock.expiration != 0);
 
-    delete escrows[msg.sender][_authority][_reference];
+    delete escrows[_arbitrator][_transactionId];
 
-    token.transfer(msg.sender, value + fee);
+    token.transfer(msg.sender, lock.value + lock.fee);
 
-    EscrowResolved(
+    Released(
+      _arbitrator,
       msg.sender,
-      _authority,
-      _reference,
-      msg.sender,
-      msg.sender
+      _transactionId
     );
   }
 
   /**
    * @dev Remove expiration time on a lock
-   * @notice User wont be able to claim tokens back after this is called by authority address
+   * @notice User wont be able to claim tokens back after this is called by arbitrator address
    * @notice Only authorized address
-   * @param _sender Address with locked amount
-   * @param _reference App/user internal associated ID
+   * @param _transactionId App/user internal associated ID
    */
-  function invalidateEscrowTransferExpiration(
-      address _sender,
-      uint256 _reference
+  function mediate(
+      uint256 _transactionId
   ) public {
-    require(escrows[_sender][msg.sender][_reference].value > 0);
-    escrows[_sender][msg.sender][_reference].expiration = 0;
-    EscrowMediation(_sender, msg.sender, _reference);
+    require(escrows[msg.sender][_transactionId].paid);
+
+    escrows[msg.sender][_transactionId].expiration = 0;
+
+    Dispute(msg.sender, _transactionId);
   }
+
+  /**
+   This function is a way to get other ETC20 tokens 
+   back to their rightful owner if sent by mistake
+   */
+  function transferToken(address _tokenAddress, address _transferTo, uint256 _value) onlyOwner external {
+    require (_tokenAddress != address(token));
+
+    ERC20Basic erc20Token = ERC20Basic(_tokenAddress);
+    erc20Token.transfer(_transferTo, _value);
+  }
+
 }
