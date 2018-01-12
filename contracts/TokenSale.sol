@@ -195,6 +195,12 @@ contract TokenSale is Ownable, ITokenSale {
         _denominator = 14000000; // 7M+7M raised
         _numerator = _denominator + usd;
 
+        if (usd < 50000) {
+          return (_usd * 100000000000000000000 / 14) + 
+            (70000000000000000000000000 / (raised + 7000000) + 
+            70000000000000000000000000 / (raised + usd + 7000000)) * usd / 2;
+        }
+
         return (_usd * 100000000000000000000 / 14) +
           (70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18)));
 
@@ -202,6 +208,12 @@ contract TokenSale is Ownable, ITokenSale {
         return usd * 100000000000000000000 / 14;
       }
     } else {
+
+      if (usd < 50000) {
+        return (70000000000000000000000000 / (raised + 7000000) + 
+          70000000000000000000000000 / (raised + usd + 7000000)) * usd / 2;
+      }
+
       _denominator = 7000000 + raised;
       _numerator = _denominator + usd;
       return 70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18));

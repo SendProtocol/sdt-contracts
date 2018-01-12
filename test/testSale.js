@@ -123,16 +123,16 @@ contract("TokenSale", function(accounts) {
     assert.equal(await this.sale.soldTokens.call(), granted.valueOf());
   });
 
-  it("[ETH] 6M USD at 0.14 - should return right amount with a maximum error of 0.001%", async function() {
+  it("[BTC] 49990 USD at 0.14 - should return the right amount with a maximum error of 0.001%", async function() {
     //Calculate tokens
-    bought = await this.sale.computeTokens.call(6000000);
-    error = math.abs(bought.valueOf() - 6000000 / 0.14 * 10 ** 18);
+    bought = await this.sale.computeTokens.call(49990);
+    error = math.abs(bought.valueOf() - 49990 / 0.14 * 10 ** 18);
 
     //execute purchase
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-    await this.proxy.sendTransaction({from: accounts[9], value: 600000000});
+    await this.proxy.btcPurchase(accounts[9], 499900);
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -141,7 +141,7 @@ contract("TokenSale", function(accounts) {
     });
 
     allocated = allocated.plus(bought);
-    collected += 6000000;
+    collected += 49990;
 
     assert(error < bought.valueOf() * this.maxError);
     assert.equal(granted.valueOf(), allocated.valueOf());
@@ -149,8 +149,34 @@ contract("TokenSale", function(accounts) {
     assert.equal(newCirculatingSupply.valueOf(), circulatingSupply.valueOf());
     assert.equal(await this.sale.raised.call().valueOf(), collected);
     assert.equal(await this.sale.soldTokens.call(), granted.valueOf());
+  });
+
+  it("[ETH] 5,950,010 USD at 0.14 - should return right amount with a maximum error of 0.001%", async function() {
+    //Calculate tokens
+    bought = await this.sale.computeTokens.call(5950010);
+    error = math.abs(bought.valueOf() - 5950010 / 0.14 * 10 ** 18);
+
+    //execute purchase
+    let circulatingSupply = await this.vesting.circulatingSupply.call();
+    let saleBalance = await this.token.balanceOf.call(this.sale.address);
+
+    await this.proxy.sendTransaction({from: accounts[9], value: 595001000});
+    let newCirculatingSupply = await this.vesting.circulatingSupply.call();
+    let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
+
+    let granted = await this.vesting.totalVestedTokens.call({
+      from: accounts[9]
+    });
+
+    allocated = allocated.plus(bought);
+    collected += 5950010;
 
     assert(error < bought.valueOf() * this.maxError);
+    assert.equal(granted.valueOf(), allocated.valueOf());
+    assert.equal(newSaleBalance.valueOf(), saleBalance.sub(bought).valueOf());
+    assert.equal(newCirculatingSupply.valueOf(), circulatingSupply.valueOf());
+    assert.equal(await this.sale.raised.call().valueOf(), collected);
+    assert.equal(await this.sale.soldTokens.call(), granted.valueOf());
   });
 
   it(
@@ -221,6 +247,39 @@ contract("TokenSale", function(accounts) {
     }
   );
 
+  it(
+    "[ETH] 49999 USD with 15M and 10 USD sold, should return the right amout " +
+      "with a maximum error of 0.001%",
+    async function() {
+      let val1 = 70000000 * math.log(1.00227268079) * 10 ** 18;
+
+      bought = await this.sale.computeTokens.call(49999);
+      error = math.abs(bought.valueOf() - val1);
+
+      //execute purchase
+      let circulatingSupply = await this.vesting.circulatingSupply.call();
+      let saleBalance = await this.token.balanceOf.call(this.sale.address);
+
+      await this.proxy.sendTransaction({from: accounts[9], value: 4999900});
+      let newCirculatingSupply = await this.vesting.circulatingSupply.call();
+      let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
+
+      let granted = await this.vesting.totalVestedTokens.call({
+        from: accounts[9]
+      });
+
+      allocated = allocated.plus(bought);
+      collected += 49999;
+
+      assert(error < bought.valueOf() * this.maxError);
+      assert.equal(granted.valueOf(), allocated.valueOf());
+      assert.equal(newSaleBalance.valueOf(), saleBalance.sub(bought).valueOf());
+      assert.equal(newCirculatingSupply.valueOf(), circulatingSupply.valueOf());
+      assert.equal(await this.sale.raised.call().valueOf(), collected);
+      assert.equal(await this.sale.soldTokens.call(), granted.valueOf());
+    }
+  );
+
   it("Should be possible to stop the sale", async function() {
     this.sale.stop();
     try {
@@ -275,6 +334,52 @@ contract("TokenSale", function(accounts) {
     assert.equal(saleBalance, 0)
     assert(math.abs(supply -  expectedSupply) < 1 * 10 ** 18) //1 SDT or error margin
 
+  });
+
+  it("[BTC] Should allocate the right amount", async function() {
+    this.sale = await TokenSale.new(
+      this.currentDate - 1,
+      this.currentDate + 1000,
+      accounts[7],
+      this.currentDate + 100
+    );
+    this.vesting = await TokenVesting.new();
+    this.token = await SDT.new(this.sale.address);
+    await this.sale.initialize(this.token.address, this.vesting.address, 0x30);
+    await this.sale.allow(accounts[9]);
+
+    this.proxy = await SaleProxy.new(this.sale.address, 5000, 100);
+    await this.sale.addProxyContract(this.proxy.address);
+
+    assert(await this.sale.activated.call());
+
+    await this.vesting.init(this.token.address, this.sale.address);
+    await this.sale.setBtcUsdRate(10);
+    await this.sale.setWeiUsdRate(100);
+
+    await this.proxy.btcPurchase(accounts[9], 69999990);
+
+    //Calculate tokens
+    bought = await this.sale.computeTokens.call(49999);
+    error = math.abs(bought.valueOf() - 
+            1 / 0.14 * 10 ** 18 - 
+            70000000 * math.log(1.00357128597) * 10 ** 18);
+
+    //execute purchase
+    let circulatingSupply = await this.vesting.circulatingSupply.call();
+    let saleBalance = await this.token.balanceOf.call(this.sale.address);
+
+    await this.proxy.sendTransaction({from: accounts[9], value: 499990});
+    let newCirculatingSupply = await this.vesting.circulatingSupply.call();
+    let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
+
+    let granted = await this.vesting.totalVestedTokens.call({
+      from: accounts[9]
+    });
+
+    collected = 6999999 + 49999;
+
+    assert(error < bought.valueOf() * this.maxError);
   });
 
 });
