@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 import './ITokenSale.sol';
 
 contract SaleProxy {
-  uint256 public discounBase;
+  uint256 public discountBase;
   uint256 public vestingTime;
   ITokenSale public saleContract;
 
@@ -14,14 +14,14 @@ contract SaleProxy {
   ) public {
     saleContract = ITokenSale(_saleContract);
     vestingTime = _vestingTime;
-    discounBase = _discountBase;
+    discountBase = _discountBase;
   }
 
   function () external payable {
-    saleContract.ethPurchase.value(msg.value)(msg.sender, vestingTime, discounBase);
+    saleContract.ethPurchase.value(msg.value)(msg.sender, vestingTime, discountBase);
   }
 
   function btcPurchase(address _beneficiary, uint256 _btcValue) public {
-    saleContract.btcPurchase(_beneficiary, vestingTime, discounBase, _btcValue);
+    saleContract.btcPurchase(_beneficiary, vestingTime, discountBase, _btcValue);
   }
 }
