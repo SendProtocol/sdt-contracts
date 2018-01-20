@@ -210,38 +210,40 @@ contract TokenSale is Ownable, ITokenSale {
   */
   function computeTokens(uint256 usd) public view returns(uint256) {
     require(usd > 0);
-
-    uint256 _numerator;
     uint256 _denominator;
 
     if (raised < 7000000) {
-      if (usd + raised > 7000000) {
+      if (usd + raised <= 7000000) {
+        // all of the investment belongs to the linear function.
+        return usd * 100000000000000000000 / 14;
+      } else {
+        // only the investment needed to reach 7000000 belongs to the linear function.
         uint256 _usd = 7000000 - raised;
+        // the investment above 7000000 belongs to the non-linear function.
         usd -= _usd;
 
         if (usd < 50000) {
+          // for low investments belonging to the non-linear function we use a
+          // simplification of ln.
           return (_usd * 100000000000000000000 / 14) +
-            (70000000000000000000000000 / (raised + 7000000) +
-            70000000000000000000000000 / (raised + usd + 7000000)) * usd / 2;
+            (70000000 ether / (raised + 7000000) +
+            70000000 ether / (raised + usd + 7000000)) * usd / 2;
         }
 
         _denominator = 14000000; // 7M+7M raised
-        _numerator = _denominator + usd;
-
         return (_usd * 100000000000000000000 / 14) +
-          (70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18)));
-      } else {
-        return usd * 100000000000000000000 / 14;
+          (70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18)));
       }
     } else {
       if (usd < 50000) {
-        return (70000000000000000000000000 / (raised + 7000000) +
-          70000000000000000000000000 / (raised + usd + 7000000)) * usd / 2;
+        // for low investments belonging to the non-linear function we use a
+        // simplification of ln.
+        return (70000000 ether / (raised + 7000000) +
+          70000000 ether / (raised + usd + 7000000)) * usd / 2;
       }
 
       _denominator = 7000000 + raised;
-      _numerator = _denominator + usd;
-      return 70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18));
+      return 70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18));
     }
   }
 

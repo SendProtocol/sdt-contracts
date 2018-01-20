@@ -22,7 +22,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>108/108</span>
+        <span class='fraction'>106/106</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">66% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>115/115</span>
+        <span class='fraction'>112/112</span>
       </div>
     </div>
   </div>
@@ -403,7 +403,9 @@
 358
 359
 360
-361</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+361
+362
+363</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -615,36 +617,38 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">16×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16×</span>
 <span class="cline-any cline-yes">16×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">16×</span>
 <span class="cline-any cline-yes">11×</span>
-<span class="cline-any cline-yes">4×</span>
-<span class="cline-any cline-yes">4×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4×</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3×</span>
 <span class="cline-any cline-yes">3×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -975,38 +979,40 @@ contract TokenSale is Ownable, ITokenSale {
   */
   function computeTokens(uint256 usd) public view returns(uint256) {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(usd &gt; 0);
-&nbsp;
-    uint256 _numerator;
     uint256 _denominator;
 &nbsp;
     if (raised &lt; 7000000) {
-      if (usd + raised &gt; 7000000) {
+      if (usd + raised &lt;= 7000000) {
+        // all of the investment belongs to the linear function.
+        return usd * 100000000000000000000 / 14;
+      } else {
+        // only the investment needed to reach 7000000 belongs to the linear function.
         uint256 _usd = 7000000 - raised;
+        // the investment above 7000000 belongs to the non-linear function.
         usd -= _usd;
 &nbsp;
         if (usd &lt; 50000) {
+          // for low investments belonging to the non-linear function we use a
+          // simplification of ln.
           return (_usd * 100000000000000000000 / 14) +
-            (70000000000000000000000000 / (raised + 7000000) +
-            70000000000000000000000000 / (raised + usd + 7000000)) * usd / 2;
+            (70000000 ether / (raised + 7000000) +
+            70000000 ether / (raised + usd + 7000000)) * usd / 2;
         }
 &nbsp;
         _denominator = 14000000; // 7M+7M raised
-        _numerator = _denominator + usd;
-&nbsp;
         return (_usd * 100000000000000000000 / 14) +
-          (70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18)));
-      } else {
-        return usd * 100000000000000000000 / 14;
+          (70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18)));
       }
     } else {
       if (usd &lt; 50000) {
-        return (70000000000000000000000000 / (raised + 7000000) +
-          70000000000000000000000000 / (raised + usd + 7000000)) * usd / 2;
+        // for low investments belonging to the non-linear function we use a
+        // simplification of ln.
+        return (70000000 ether / (raised + 7000000) +
+          70000000 ether / (raised + usd + 7000000)) * usd / 2;
       }
 &nbsp;
       _denominator = 7000000 + raised;
-      _numerator = _denominator + usd;
-      return 70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18));
+      return 70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18));
     }
   }
 &nbsp;
@@ -1129,7 +1135,7 @@ contract TokenSale is Ownable, ITokenSale {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 19 2018 10:38:03 GMT-0300 (-03)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 19 2018 23:02:00 GMT-0300 (-03)
 </div>
 </div>
 <script src="../prettify.js"></script>
