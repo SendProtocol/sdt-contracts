@@ -223,10 +223,14 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
+   * @dev Increase the amount of tokens that an owner allowed to a spender.
+   *
    * approve should be called when allowed[_spender] == 0. To increment
    * allowed value is better to use this function to avoid 2 calls (and wait until
    * the first transaction is mined)
    * From MonolithDAO Token.sol
+   * @param _spender The address which will spend the funds.
+   * @param _addedValue The amount of tokens to increase the allowance by.
    */
   function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
     allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
@@ -234,6 +238,16 @@ contract StandardToken is ERC20, BasicToken {
     return true;
   }
 
+  /**
+   * @dev Decrease the amount of tokens that an owner allowed to a spender.
+   *
+   * approve should be called when allowed[_spender] == 0. To decrement
+   * allowed value is better to use this function to avoid 2 calls (and wait until
+   * the first transaction is mined)
+   * From MonolithDAO Token.sol
+   * @param _spender The address which will spend the funds.
+   * @param _subtractedValue The amount of tokens to decrease the allowance by.
+   */
   function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
     uint oldValue = allowed[msg.sender][_spender];
     if (_subtractedValue > oldValue) {
@@ -316,7 +330,7 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
  * @title Burnable Token
  * @dev Token that can be irreversibly burned (destroyed).
  */
-contract BurnableToken is StandardToken {
+contract BurnableToken is BasicToken {
 
     event Burn(address indexed burner, uint256 value);
 
@@ -325,7 +339,6 @@ contract BurnableToken is StandardToken {
      * @param _value The amount of token to be burned.
      */
     function burn(uint256 _value) public {
-        require(_value > 0);
         require(_value <= balances[msg.sender]);
         // no need to require value <= totalSupply, since that would imply the
         // sender's balance is greater than the totalSupply, which *should* be an assertion failure
@@ -708,8 +721,36 @@ contract TokenSale is Ownable, ITokenSale {
     token = ISendToken(_sdt);
     vesting = TokenVesting(_vestingContract);
 
+    // 1% reserve is released on deploy
     token.transfer(_icoCostsPool, 7000000 ether);
 
+    //rearly backers allocation
+
+    uint256 threeMonths = vestingStarts.add(90 days);
+    uint256 twoYears = vestingStarts.add(2 years);
+
+    updateStats(1016000, 17310000 ether);
+    grantVestedTokens(0xd6E722A6bae8E62d1034d4620CA898601AC9350b, 860000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xacC37F88e93ae2FD1E371f76912785E3B21A8a73, 100000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x005B9E744b0e2Ff467D748CE228694D306670c35, 100000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x7A6720b291cd2e806d7B86aD279a6de109fE002a, 180000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x90dF318D244F170F57B3669e7646C2bb693Ceb54, 100000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xfB4EEAa3056e5d77499fa52897d4E1ef996E06DC, 100000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x93934523F6f56Ff139d6B14AF71cA759A3b8c1a0, 100000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x10eC5d603Fb471d5C0A9d4a2753dA810f4c3Ba54, 100000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xbF85462eB89308A328882f6a66aD11FF070c1eA9, 150000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x11e64d7bc1368cCa98270290Ee574E690C82B765, 200000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x08F77e15f4f756a7C9F77dFA28847e0f5488e9B2, 860000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xA4E2f15a770DDDC064D29f5311b3e17E24681dE0, 200000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xaf10CcBAA460626ebA1aFfe324168624C2B568eA, 400000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x6C261AeD58bE6cf65afABA1bA45E8DbBe32382fA, 400000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x323B1A13f3DD40Db10ddc125f07DDcF021b040E0, 600000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xd4fa81451EB5bB0E99bA56B5Fda8d804aC91D3D6, 2700000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x4571F12E28b45d5D3AdE71e368739B6216485962, 2360000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x2059236Bff26556d43772e7Cd613136025dA601b, 1950000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x93C77A6DC1fe12D64F4d97E96c6672FE517eb0Bb, 1950000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x675F249E78ca19367b9e26B206B9Bc519195De94, 1950000 ether, vestingStarts, twoYears);
+    grantVestedTokens(0xb93151f6f5Cf1F416CdBE8C76745D18CDfe83395, 1950000 ether, vestingStarts, twoYears);
     activated = true;
   }
 
@@ -785,29 +826,40 @@ contract TokenSale is Ownable, ITokenSale {
   */
   function computeTokens(uint256 usd) public view returns(uint256) {
     require(usd > 0);
-
-    uint256 _numerator;
     uint256 _denominator;
 
     if (raised < 7000000) {
-      if (usd + raised > 7000000) {
-
+      if (usd + raised <= 7000000) {
+        // all of the investment belongs to the linear function.
+        return usd * 100000000000000000000 / 14;
+      } else {
+        // only the investment needed to reach 7000000 belongs to the linear function.
         uint256 _usd = 7000000 - raised;
+        // the investment above 7000000 belongs to the non-linear function.
         usd -= _usd;
 
+        if (usd < 50000) {
+          // for low investments belonging to the non-linear function we use a
+          // simplification of ln.
+          return (_usd * 100000000000000000000 / 14) +
+            (70000000 ether / (raised + 7000000) +
+            70000000 ether / (raised + usd + 7000000)) * usd / 2;
+        }
+
         _denominator = 14000000; // 7M+7M raised
-        _numerator = _denominator + usd;
-
         return (_usd * 100000000000000000000 / 14) +
-          (70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18)));
-
-      } else {
-        return usd * 100000000000000000000 / 14;
+          (70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18)));
       }
     } else {
+      if (usd < 50000) {
+        // for low investments belonging to the non-linear function we use a
+        // simplification of ln.
+        return (70000000 ether / (raised + 7000000) +
+          70000000 ether / (raised + usd + 7000000)) * usd / 2;
+      }
+
       _denominator = 7000000 + raised;
-      _numerator = _denominator + usd;
-      return 70000000 * (ln(_numerator * 10 ** 18) - ln(_denominator * 10 ** 18));
+      return 70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18));
     }
   }
 
