@@ -18,10 +18,10 @@ contract SaleProxy {
   }
 
   function () external payable {
-    saleContract.ethPurchase.value(msg.value)(msg.sender, vestingTime, discountBase);
+    require(saleContract.ethPurchase.value(msg.value)(msg.sender, vestingTime, discountBase));
   }
 
   function btcPurchase(address _beneficiary, uint256 _btcValue) public {
-    saleContract.btcPurchase(_beneficiary, vestingTime, discountBase, _btcValue);
+    require(saleContract.btcPurchase.(msg.sender, vestingTime, discountBase));
   }
 }
