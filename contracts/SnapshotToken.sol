@@ -52,6 +52,10 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
     return StandardToken.transferFrom(_from, _to, _value);
   }
 
+  /**
+   * @dev Take snapshot
+   * @param _owner address The address to take snapshot from
+   */
   function takeSnapshot(address _owner) public returns(uint256) {
     if (snapshots[_owner].block < snapshotBlock) {
       snapshots[_owner].block = snapshotBlock;
@@ -60,6 +64,10 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
     return snapshots[_owner].balance;
   }
 
+  /**
+   * @dev Set snacpshot block
+   * @param _blockNumber uint256 The new blocknumber for snapshots
+   */
   function requestSnapshots(uint256 _blockNumber) public pollsResticted {
     snapshotBlock = _blockNumber;
   }

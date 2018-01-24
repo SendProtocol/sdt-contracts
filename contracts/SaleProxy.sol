@@ -24,7 +24,7 @@ contract SaleProxy is Ownable {
   }
 
   function btcPurchase(address _beneficiary, uint256 _btcValue) public {
-    require(saleContract.btcPurchase.(msg.sender, vestingTime, discountBase));
+    require(saleContract.btcPurchase(_beneficiary, vestingTime, discountBase, _btcValue));
   }
 
   //////////

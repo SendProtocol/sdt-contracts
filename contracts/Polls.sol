@@ -87,12 +87,20 @@ contract Polls is Ownable {
     results[poll.block][_option] = results[poll.block][_option] + 1;
   }
 
+  /**
+   * @dev get results for option
+   * @param _option Index of option to check (first option is 0)
+   */
   function showResults(uint256 _option) public view returns (uint256) {
     require(poll.endTime <= block.timestamp);
 
     return results[poll.block][_option];
   }
 
+  /**
+   * @dev issue an event with result for option
+   * @param _option Index of option to check (first option is 0)
+   */
   function logResults(uint256 _option) public onlyOwner {
     ResultRevealed(poll.block, _option, showResults(_option));
   }

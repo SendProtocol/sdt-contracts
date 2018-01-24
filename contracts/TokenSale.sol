@@ -77,23 +77,34 @@ contract TokenSale is Ownable, ITokenSale {
     wallet = _wallet;
   }
 
+  /**
+   * @dev set an exchange rate in wei
+   * @param _rate uint256 The new exchange rate
+   */
   function setWeiUsdRate(uint256 _rate) public onlyOwner {
     require(_rate > 0);
     weiUsdRate = _rate;
   }
 
+  /**
+   * @dev set an exchange rate in satoshis
+   * @param _rate uint256 The new exchange rate
+   */
   function setBtcUsdRate(uint256 _rate) public onlyOwner {
     require(_rate > 0);
     btcUsdRate = _rate;
   }
 
+  /**
+   * @dev Allow an address to send ETH purchases
+   * @param _address address The address to whitelist
+   */
   function allow(address _address) public onlyOwner {
     allowed[_address] = true;
   }
 
   /**
-   * @dev deploy the token itself
-   * @notice The owner of this contract is the owner of token's contract
+   * @dev initialize the contract and set token
    */
   function initialize(
       address _sdt,
@@ -178,7 +189,7 @@ contract TokenSale is Ownable, ITokenSale {
     address _beneficiary,
     uint256 _vestingTime,
     uint256 _discountBase
-  ) public validAddress(_beneficiary) payable {
+  ) public validAddress(_beneficiary) payable returns (bool) {
     require(proxies[msg.sender]);
 
     uint256 usd = msg.value.div(weiUsdRate);
@@ -187,6 +198,8 @@ contract TokenSale is Ownable, ITokenSale {
 
     doPurchase(usd, msg.value, 0, _beneficiary, _discountBase, vestingEnds);
     forwardFunds();
+
+    return true;
   }
 
   function btcPurchase(
@@ -194,7 +207,7 @@ contract TokenSale is Ownable, ITokenSale {
       uint256 _vestingTime,
       uint256 _discountBase,
       uint256 _btcValue
-  ) public validAddress(_beneficiary) {
+  ) public validAddress(_beneficiary) returns (bool) {
     require(proxies[msg.sender]);
 
     uint256 usd = _btcValue.div(btcUsdRate);
@@ -202,6 +215,8 @@ contract TokenSale is Ownable, ITokenSale {
     uint256 vestingEnds = vestingStarts.add(_vestingTime);
 
     doPurchase(usd, 0, _btcValue, _beneficiary, _discountBase, vestingEnds);
+
+    return true;
   }
 
   /**

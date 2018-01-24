@@ -112,6 +112,7 @@ contract TokenVesting is Ownable {
 
   /**
   * @dev Claim all vested tokens up to current date in behaviour of an user
+  * @param _to address Addres to claim tokens
   */
   function claimTokensFor(address _to) public onlyOwner {
     claim(_to);
@@ -142,6 +143,9 @@ contract TokenVesting is Ownable {
     return claimable;
   }
 
+  /**
+  * @dev Get all veted tokens
+  */
   function totalVestedTokens() public constant returns (uint256) {
     address _to = msg.sender;
     uint256 numberOfGrants = grants[_to].length;

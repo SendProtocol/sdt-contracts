@@ -152,6 +152,12 @@ contract SendToken is ISendToken {
 
   /**
    * @dev Issue exchange rates from escrow contract
+   * @param _from Address to send tokens
+   * @param _to Address to receive tokens
+   * @param _verifiedAddress Address issuing the exchange rate
+   * @param _value amount
+   * @param _transactionId internal ID for issuer's reference
+   * @param _exchangeRate exchange rate
    */
   function issueExchangeRate(
       address _from,
