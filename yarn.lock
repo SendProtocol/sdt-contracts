@@ -2223,8 +2223,8 @@ setimmediate@^1.0.4:
   resolved "https://registry.yarnpkg.com/setimmediate/-/setimmediate-1.0.5.tgz#290cbb232e306942d7d7ea9b83732ab7856f8285"
 
 sha.js@^2.4.0, sha.js@^2.4.8:
-  version "2.4.9"
-  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.9.tgz#98f64880474b74f4a38b8da9d3c0f2d104633e7d"
+  version "2.4.10"
+  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.10.tgz#b1fde5cd7d11a5626638a07c604ab909cfa31f9b"
   dependencies:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
@@ -2282,8 +2282,8 @@ solc@0.4.18:
     yargs "^4.7.1"
 
 solidity-coverage@^0.4.2:
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.4.8.tgz#2447c641d43267c12b7ac8114e573a813394766b"
+  version "0.4.9"
+  resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.4.9.tgz#710b1ce57b2ec00bcdac8152934d541a5967895b"
   dependencies:
     death "^1.1.0"
     ethereumjs-testrpc-sc "6.0.7"
@@ -2493,8 +2493,8 @@ tar@^2.2.1:
     inherits "2"
 
 timers-browserify@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/timers-browserify/-/timers-browserify-2.0.4.tgz#96ca53f4b794a5e7c0e1bd7cc88a372298fa01e6"
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/timers-browserify/-/timers-browserify-2.0.6.tgz#241e76927d9ca05f4d959819022f5b3664b64bae"
   dependencies:
     setimmediate "^1.0.4"
 
