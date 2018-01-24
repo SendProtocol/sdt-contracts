@@ -223,14 +223,10 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
-   * @dev Increase the amount of tokens that an owner allowed to a spender.
-   *
    * approve should be called when allowed[_spender] == 0. To increment
    * allowed value is better to use this function to avoid 2 calls (and wait until
    * the first transaction is mined)
    * From MonolithDAO Token.sol
-   * @param _spender The address which will spend the funds.
-   * @param _addedValue The amount of tokens to increase the allowance by.
    */
   function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
     allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
@@ -238,16 +234,6 @@ contract StandardToken is ERC20, BasicToken {
     return true;
   }
 
-  /**
-   * @dev Decrease the amount of tokens that an owner allowed to a spender.
-   *
-   * approve should be called when allowed[_spender] == 0. To decrement
-   * allowed value is better to use this function to avoid 2 calls (and wait until
-   * the first transaction is mined)
-   * From MonolithDAO Token.sol
-   * @param _spender The address which will spend the funds.
-   * @param _subtractedValue The amount of tokens to decrease the allowance by.
-   */
   function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
     uint oldValue = allowed[msg.sender][_spender];
     if (_subtractedValue > oldValue) {
@@ -311,6 +297,10 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
     return StandardToken.transferFrom(_from, _to, _value);
   }
 
+  /**
+   * @dev Take snapshot
+   * @param _owner address The address to take snapshot from
+   */
   function takeSnapshot(address _owner) public returns(uint256) {
     if (snapshots[_owner].block < snapshotBlock) {
       snapshots[_owner].block = snapshotBlock;
@@ -319,6 +309,10 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
     return snapshots[_owner].balance;
   }
 
+  /**
+   * @dev Set snacpshot block
+   * @param _blockNumber uint256 The new blocknumber for snapshots
+   */
   function requestSnapshots(uint256 _blockNumber) public pollsResticted {
     snapshotBlock = _blockNumber;
   }
@@ -330,7 +324,7 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
  * @title Burnable Token
  * @dev Token that can be irreversibly burned (destroyed).
  */
-contract BurnableToken is BasicToken {
+contract BurnableToken is StandardToken {
 
     event Burn(address indexed burner, uint256 value);
 
@@ -339,6 +333,7 @@ contract BurnableToken is BasicToken {
      * @param _value The amount of token to be burned.
      */
     function burn(uint256 _value) public {
+        require(_value > 0);
         require(_value <= balances[msg.sender]);
         // no need to require value <= totalSupply, since that would imply the
         // sender's balance is greater than the totalSupply, which *should* be an assertion failure
@@ -399,8 +394,8 @@ contract ISendToken is BurnableToken, SnapshotToken {
  * @dev see https://send.sd/crowdsale
  */
 contract ITokenSale {
-  function ethPurchase(address _beneficiary, uint256 _vestingTime, uint256 _discountBase) public payable;
-  function btcPurchase(address _beneficiary, uint256 _vestingTime, uint256 _discountBase, uint256 btcValue) public;
+  function ethPurchase(address _beneficiary, uint256 _vestingTime, uint256 _discountBase) public payable returns(bool);
+  function btcPurchase(address _beneficiary, uint256 _vestingTime, uint256 _discountBase, uint256 btcValue) public returns(bool);
 }
 
 // File: contracts/TokenVesting.sol
@@ -512,6 +507,7 @@ contract TokenVesting is Ownable {
 
   /**
   * @dev Claim all vested tokens up to current date in behaviour of an user
+  * @param _to address Addres to claim tokens
   */
   function claimTokensFor(address _to) public onlyOwner {
     claim(_to);
@@ -542,6 +538,9 @@ contract TokenVesting is Ownable {
     return claimable;
   }
 
+  /**
+  * @dev Get all veted tokens
+  */
   function totalVestedTokens() public constant returns (uint256) {
     address _to = msg.sender;
     uint256 numberOfGrants = grants[_to].length;
@@ -693,23 +692,34 @@ contract TokenSale is Ownable, ITokenSale {
     wallet = _wallet;
   }
 
+  /**
+   * @dev set an exchange rate in wei
+   * @param _rate uint256 The new exchange rate
+   */
   function setWeiUsdRate(uint256 _rate) public onlyOwner {
     require(_rate > 0);
     weiUsdRate = _rate;
   }
 
+  /**
+   * @dev set an exchange rate in satoshis
+   * @param _rate uint256 The new exchange rate
+   */
   function setBtcUsdRate(uint256 _rate) public onlyOwner {
     require(_rate > 0);
     btcUsdRate = _rate;
   }
 
+  /**
+   * @dev Allow an address to send ETH purchases
+   * @param _address address The address to whitelist
+   */
   function allow(address _address) public onlyOwner {
     allowed[_address] = true;
   }
 
   /**
-   * @dev deploy the token itself
-   * @notice The owner of this contract is the owner of token's contract
+   * @dev initialize the contract and set token
    */
   function initialize(
       address _sdt,
@@ -794,7 +804,7 @@ contract TokenSale is Ownable, ITokenSale {
     address _beneficiary,
     uint256 _vestingTime,
     uint256 _discountBase
-  ) public validAddress(_beneficiary) payable {
+  ) public validAddress(_beneficiary) payable returns (bool) {
     require(proxies[msg.sender]);
 
     uint256 usd = msg.value.div(weiUsdRate);
@@ -803,6 +813,8 @@ contract TokenSale is Ownable, ITokenSale {
 
     doPurchase(usd, msg.value, 0, _beneficiary, _discountBase, vestingEnds);
     forwardFunds();
+
+    return true;
   }
 
   function btcPurchase(
@@ -810,7 +822,7 @@ contract TokenSale is Ownable, ITokenSale {
       uint256 _vestingTime,
       uint256 _discountBase,
       uint256 _btcValue
-  ) public validAddress(_beneficiary) {
+  ) public validAddress(_beneficiary) returns (bool) {
     require(proxies[msg.sender]);
 
     uint256 usd = _btcValue.div(btcUsdRate);
@@ -818,6 +830,8 @@ contract TokenSale is Ownable, ITokenSale {
     uint256 vestingEnds = vestingStarts.add(_vestingTime);
 
     doPurchase(usd, 0, _btcValue, _beneficiary, _discountBase, vestingEnds);
+
+    return true;
   }
 
   /**

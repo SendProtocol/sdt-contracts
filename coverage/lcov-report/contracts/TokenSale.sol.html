@@ -22,7 +22,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>106/106</span>
+        <span class='fraction'>108/108</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">66% </span>
@@ -37,7 +37,7 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>112/112</span>
+        <span class='fraction'>114/114</span>
       </div>
     </div>
   </div>
@@ -405,7 +405,22 @@
 360
 361
 362
-363</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -485,18 +500,29 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -593,6 +619,8 @@
 <span class="cline-any cline-yes">4×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -609,6 +637,8 @@
 <span class="cline-any cline-yes">8×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -846,23 +876,34 @@ contract TokenSale is Ownable, ITokenSale {
     wallet = _wallet;
   }
 &nbsp;
+  /**
+   * @dev set an exchange rate in wei
+   * @param _rate uint256 The new exchange rate
+   */
   function setWeiUsdRate(uint256 _rate) public onlyOwner {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(_rate &gt; 0);
     weiUsdRate = _rate;
   }
 &nbsp;
+  /**
+   * @dev set an exchange rate in satoshis
+   * @param _rate uint256 The new exchange rate
+   */
   function setBtcUsdRate(uint256 _rate) public onlyOwner {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(_rate &gt; 0);
     btcUsdRate = _rate;
   }
 &nbsp;
+  /**
+   * @dev Allow an address to send ETH purchases
+   * @param _address address The address to whitelist
+   */
   function allow(address _address) public onlyOwner {
     allowed[_address] = true;
   }
 &nbsp;
   /**
-   * @dev deploy the token itself
-   * @notice The owner of this contract is the owner of token's contract
+   * @dev initialize the contract and set token
    */
   function initialize(
       address _sdt,
@@ -947,7 +988,7 @@ contract TokenSale is Ownable, ITokenSale {
     address _beneficiary,
     uint256 _vestingTime,
     uint256 _discountBase
-  ) public validAddress(_beneficiary) payable {
+  ) public validAddress(_beneficiary) payable returns (bool) {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(proxies[msg.sender]);
 &nbsp;
     uint256 usd = msg.value.div(weiUsdRate);
@@ -956,6 +997,8 @@ contract TokenSale is Ownable, ITokenSale {
 &nbsp;
     doPurchase(usd, msg.value, 0, _beneficiary, _discountBase, vestingEnds);
     forwardFunds();
+&nbsp;
+    return true;
   }
 &nbsp;
   function btcPurchase(
@@ -963,7 +1006,7 @@ contract TokenSale is Ownable, ITokenSale {
       uint256 _vestingTime,
       uint256 _discountBase,
       uint256 _btcValue
-  ) public validAddress(_beneficiary) {
+  ) public validAddress(_beneficiary) returns (bool) {
     require(proxies[msg.sender]);
 &nbsp;
     uint256 usd = _btcValue.div(btcUsdRate);
@@ -971,6 +1014,8 @@ contract TokenSale is Ownable, ITokenSale {
     uint256 vestingEnds = vestingStarts.add(_vestingTime);
 &nbsp;
     doPurchase(usd, 0, _btcValue, _beneficiary, _discountBase, vestingEnds);
+&nbsp;
+    return true;
   }
 &nbsp;
   /**
@@ -1135,7 +1180,7 @@ contract TokenSale is Ownable, ITokenSale {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 19 2018 23:02:00 GMT-0300 (-03)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jan 24 2018 12:31:19 GMT-0500 (-05)
 </div>
 </div>
 <script src="../prettify.js"></script>

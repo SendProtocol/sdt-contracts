@@ -262,14 +262,10 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
-   * @dev Increase the amount of tokens that an owner allowed to a spender.
-   *
    * approve should be called when allowed[_spender] == 0. To increment
    * allowed value is better to use this function to avoid 2 calls (and wait until
    * the first transaction is mined)
    * From MonolithDAO Token.sol
-   * @param _spender The address which will spend the funds.
-   * @param _addedValue The amount of tokens to increase the allowance by.
    */
   function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
     allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
@@ -277,16 +273,6 @@ contract StandardToken is ERC20, BasicToken {
     return true;
   }
 
-  /**
-   * @dev Decrease the amount of tokens that an owner allowed to a spender.
-   *
-   * approve should be called when allowed[_spender] == 0. To decrement
-   * allowed value is better to use this function to avoid 2 calls (and wait until
-   * the first transaction is mined)
-   * From MonolithDAO Token.sol
-   * @param _spender The address which will spend the funds.
-   * @param _subtractedValue The amount of tokens to decrease the allowance by.
-   */
   function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
     uint oldValue = allowed[msg.sender][_spender];
     if (_subtractedValue > oldValue) {
@@ -350,6 +336,10 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
     return StandardToken.transferFrom(_from, _to, _value);
   }
 
+  /**
+   * @dev Take snapshot
+   * @param _owner address The address to take snapshot from
+   */
   function takeSnapshot(address _owner) public returns(uint256) {
     if (snapshots[_owner].block < snapshotBlock) {
       snapshots[_owner].block = snapshotBlock;
@@ -358,6 +348,10 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
     return snapshots[_owner].balance;
   }
 
+  /**
+   * @dev Set snacpshot block
+   * @param _blockNumber uint256 The new blocknumber for snapshots
+   */
   function requestSnapshots(uint256 _blockNumber) public pollsResticted {
     snapshotBlock = _blockNumber;
   }
@@ -369,7 +363,7 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
  * @title Burnable Token
  * @dev Token that can be irreversibly burned (destroyed).
  */
-contract BurnableToken is BasicToken {
+contract BurnableToken is StandardToken {
 
     event Burn(address indexed burner, uint256 value);
 
@@ -378,6 +372,7 @@ contract BurnableToken is BasicToken {
      * @param _value The amount of token to be burned.
      */
     function burn(uint256 _value) public {
+        require(_value > 0);
         require(_value <= balances[msg.sender]);
         // no need to require value <= totalSupply, since that would imply the
         // sender's balance is greater than the totalSupply, which *should* be an assertion failure

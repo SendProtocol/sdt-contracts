@@ -7,8 +7,8 @@ pragma solidity ^0.4.18;
  * @dev see https://send.sd/crowdsale
  */
 contract ITokenSale {
-  function ethPurchase(address _beneficiary, uint256 _vestingTime, uint256 _discountBase) public payable;
-  function btcPurchase(address _beneficiary, uint256 _vestingTime, uint256 _discountBase, uint256 btcValue) public;
+  function ethPurchase(address _beneficiary, uint256 _vestingTime, uint256 _discountBase) public payable returns(bool);
+  function btcPurchase(address _beneficiary, uint256 _vestingTime, uint256 _discountBase, uint256 btcValue) public returns(bool);
 }
 
 // File: zeppelin-solidity/contracts/ownership/Ownable.sol
@@ -91,7 +91,7 @@ contract SaleProxy is Ownable {
   }
 
   function btcPurchase(address _beneficiary, uint256 _btcValue) public {
-    require(saleContract.btcPurchase.(msg.sender, vestingTime, discountBase));
+    require(saleContract.btcPurchase(_beneficiary, vestingTime, discountBase, _btcValue));
   }
 
   //////////
