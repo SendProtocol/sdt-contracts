@@ -31,7 +31,7 @@ Basic deployment flow:
 - Deploy vesting contract
 - Deploy Token with sale contract address
 - Initialize vesting contract with token and sale addresses
-- Set BTC nad ETH exchange rates on sale contract
+- Set BTC and ETH exchange rates on sale contract
 - Initialize sale with token and vesting addresses
 - Create as many SaleProxy contracts as needed
 - Add proxy contracts to sale contract proxy list
