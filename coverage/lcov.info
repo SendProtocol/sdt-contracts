@@ -1,5 +1,5 @@
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/Escrow.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/Escrow.sol
 FN:26,Escrow
 FN:30,tokenRestricted
 FN:43,create
@@ -99,7 +99,7 @@ BRF:34
 BRH:25
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/IEscrow.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/IEscrow.sol
 FNF:0
 FNH:0
 LF:0
@@ -108,7 +108,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/ISendToken.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/ISendToken.sol
 FNF:0
 FNH:0
 LF:0
@@ -117,7 +117,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/ISnapshotToken.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/ISnapshotToken.sol
 FN:13,pollsResticted
 FNF:1
 FNH:1
@@ -132,7 +132,7 @@ BRF:2
 BRH:1
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/ITokenSale.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/ITokenSale.sol
 FNF:0
 FNH:0
 LF:0
@@ -141,7 +141,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/Polls.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/Polls.sol
 FN:41,Polls
 FN:54,createPoll
 FN:81,vote
@@ -185,7 +185,7 @@ BRF:10
 BRH:8
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/SaleProxy.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/SaleProxy.sol
 FN:12,SaleProxy
 FN:22,
 FN:26,btcPurchase
@@ -220,7 +220,7 @@ BRF:6
 BRH:3
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/SDT.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/SDT.sol
 FN:14,validAddress
 FN:26,SDT
 FNF:2
@@ -240,7 +240,7 @@ BRF:2
 BRH:1
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/SendToken.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/SendToken.sol
 FN:18,verifiedResticted
 FN:23,escrowResticted
 FN:33,isVerified
@@ -302,7 +302,7 @@ BRF:12
 BRH:11
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/SnapshotToken.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/SnapshotToken.sol
 FN:28,setPolls
 FN:37,transfer
 FN:49,transferFrom
@@ -335,7 +335,7 @@ BRF:2
 BRH:2
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/TokenSale.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/TokenSale.sol
 FN:50,validAddress
 FN:55,isActive
 FN:64,TokenSale
@@ -458,7 +458,6 @@ DA:236,4
 DA:238,4
 DA:240,4
 DA:243,2
-DA:248,2
 DA:249,2
 DA:253,5
 DA:256,2
@@ -482,8 +481,6 @@ DA:327,9
 DA:339,10
 DA:340,10
 DA:342,10
-DA:343,405
-DA:344,405
 DA:347,10
 DA:348,10
 DA:350,10
@@ -495,8 +492,8 @@ DA:355,50
 DA:356,50
 DA:374,55
 DA:375,55
-LF:117
-LH:117
+LF:114
+LH:114
 BRDA:51,1,0,26
 BRDA:51,1,1,0
 BRDA:56,2,0,13
@@ -551,7 +548,7 @@ BRF:50
 BRH:33
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/TokenVesting.sol
+SF:/home/bibidibabidiboo/dev/wesend/sdt-contracts/contracts/TokenVesting.sol
 FN:43,icoResticted
 FN:48,isActive
 FN:53,TokenVesting

@@ -89,10 +89,6 @@ contract("TokenSale", function(accounts) {
     preallocated = await this.sale.soldTokens.call();
   });
 
-  it("should be possible to activate vesting contract", async function() {
-
-  });
-
   it("should fail if purchasing less than min", async function() {
     try {
       await this.proxy.btcPurchase(accounts[9], 90);
