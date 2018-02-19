@@ -294,6 +294,18 @@ contract("TokenSale", function(accounts) {
     }
   );
 
+  it(
+    "Should fail if no contract owner",
+    async function() {
+    try {
+      await this.proxy.btcPurchase(accounts[9], 20000000, {from: accounts[9]});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+    }
+  );
+
   it("Should be possible to stop the sale", async function() {
     this.sale.stop();
     try {
