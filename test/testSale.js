@@ -78,10 +78,7 @@ contract("TokenSale", function(accounts) {
     assert.equal(await this.vesting.ico.call(), this.sale.address);
     assert.equal(await this.vesting.token.call(), await this.sale.token.call());
     assert(await this.sale.activated.call());
-    assert.equal(
-      await this.token.balanceOf.call(0x30),
-      7 * 10 ** 24
-    );
+    assert.equal(await this.token.balanceOf.call(0x30), 7 * 10 ** 24);
 
     collected = await this.sale.raised.call();
     presold = await this.sale.raised.call();
@@ -174,7 +171,10 @@ contract("TokenSale", function(accounts) {
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-    await this.proxy.sendTransaction({from: accounts[9], value: (5950010 - presold) * 100});
+    await this.proxy.sendTransaction({
+      from: accounts[9],
+      value: (5950010 - presold) * 100
+    });
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -241,7 +241,7 @@ contract("TokenSale", function(accounts) {
       let circulatingSupply = await this.vesting.circulatingSupply.call();
       let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-      await this.proxy.sendTransaction({from: accounts[9], value: 700000000});
+      await this.proxy.sendTransaction({ from: accounts[9], value: 700000000 });
       let newCirculatingSupply = await this.vesting.circulatingSupply.call();
       let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -274,7 +274,7 @@ contract("TokenSale", function(accounts) {
       let circulatingSupply = await this.vesting.circulatingSupply.call();
       let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-      await this.proxy.sendTransaction({from: accounts[9], value: 4999900});
+      await this.proxy.sendTransaction({ from: accounts[9], value: 4999900 });
       let newCirculatingSupply = await this.vesting.circulatingSupply.call();
       let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -294,17 +294,16 @@ contract("TokenSale", function(accounts) {
     }
   );
 
-  it(
-    "Should fail if no contract owner",
-    async function() {
+  it("Should fail if no contract owner", async function() {
     try {
-      await this.proxy.btcPurchase(accounts[9], 20000000, {from: accounts[9]});
+      await this.proxy.btcPurchase(accounts[9], 20000000, {
+        from: accounts[9]
+      });
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
     }
-    }
-  );
+  });
 
   it("Should be possible to stop the sale", async function() {
     this.sale.stop();
@@ -322,7 +321,12 @@ contract("TokenSale", function(accounts) {
   });
 
   it("Should be possible finalize sale", async function() {
-    await this.sale.finalize(accounts[2], accounts[3], accounts[4], accounts[5]);
+    await this.sale.finalize(
+      accounts[2],
+      accounts[3],
+      accounts[4],
+      accounts[5]
+    );
 
     let granted2 = await this.vesting.totalVestedTokens.call({
       from: accounts[2]
@@ -343,7 +347,7 @@ contract("TokenSale", function(accounts) {
     let sold = await this.sale.soldTokens.call();
     let total = 231000000 * 10 ** 18;
 
-    let soldFraction =  sold / total;
+    let soldFraction = sold / total;
 
     let poolA = soldFraction * 175000000 * 10 ** 18;
     let poolB = soldFraction * 168000000 * 10 ** 18;
@@ -351,15 +355,15 @@ contract("TokenSale", function(accounts) {
     let poolD = 49000000 * 10 ** 18;
 
     /* sold + allocated pools + 1% (7M) reserve allocated on sale init */
-    let expectedSupply = poolA + poolB + poolC + poolD + 7000000 * 10 ** 18 + sold.toNumber(); 
+    let expectedSupply =
+      poolA + poolB + poolC + poolD + 7000000 * 10 ** 18 + sold.toNumber();
 
     assert(math.abs(granted2 - poolA) < 1 * 10 ** 18); //1 SDT or error margin
     assert(math.abs(granted3 - poolB) < 1 * 10 ** 18); //1 SDT or error margin
     assert(math.abs(granted4 - poolC) < 1 * 10 ** 18); //1 SDT or error margin
     assert(math.abs(granted5 - poolD) < 1 * 10 ** 18); //1 SDT or error margin
-    assert.equal(saleBalance, 0)
-    assert(math.abs(supply -  expectedSupply) < 1 * 10 ** 18) //1 SDT or error margin
-
+    assert.equal(saleBalance, 0);
+    assert(math.abs(supply - expectedSupply) < 1 * 10 ** 18); //1 SDT or error margin
   });
 
   it("[BTC] Should allocate the right amount", async function() {
@@ -381,19 +385,24 @@ contract("TokenSale", function(accounts) {
 
     await this.sale.setBtcUsdRate(10);
     await this.sale.setWeiUsdRate(100);
-    await this.proxy.btcPurchase(accounts[9], 69999990 - presold.toNumber() * 10);
+    await this.proxy.btcPurchase(
+      accounts[9],
+      69999990 - presold.toNumber() * 10
+    );
 
     //Calculate tokens
     bought = await this.sale.computeTokens.call(49999);
-    error = math.abs(bought.valueOf() - 
-            1 / 0.14 * 10 ** 18 - 
-            70000000 * math.log(1.00357128597) * 10 ** 18);
+    error = math.abs(
+      bought.valueOf() -
+        1 / 0.14 * 10 ** 18 -
+        70000000 * math.log(1.00357128597) * 10 ** 18
+    );
 
     //execute purchase
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-    await this.proxy.sendTransaction({from: accounts[9], value: 499990});
+    await this.proxy.sendTransaction({ from: accounts[9], value: 499990 });
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -405,5 +414,4 @@ contract("TokenSale", function(accounts) {
 
     assert(error < bought.valueOf() * this.maxError);
   });
-
 });

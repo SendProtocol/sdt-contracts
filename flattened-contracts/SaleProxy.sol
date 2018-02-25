@@ -90,7 +90,7 @@ contract SaleProxy is Ownable {
     require(saleContract.ethPurchase.value(msg.value)(msg.sender, vestingTime, discountBase));
   }
 
-  function btcPurchase(address _beneficiary, uint256 _btcValue) public {
+  function btcPurchase(address _beneficiary, uint256 _btcValue) public onlyOwner {
     require(saleContract.btcPurchase(_beneficiary, vestingTime, discountBase, _btcValue));
   }
 

@@ -223,10 +223,14 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
+   * @dev Increase the amount of tokens that an owner allowed to a spender.
+   *
    * approve should be called when allowed[_spender] == 0. To increment
    * allowed value is better to use this function to avoid 2 calls (and wait until
    * the first transaction is mined)
    * From MonolithDAO Token.sol
+   * @param _spender The address which will spend the funds.
+   * @param _addedValue The amount of tokens to increase the allowance by.
    */
   function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
     allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
@@ -234,6 +238,16 @@ contract StandardToken is ERC20, BasicToken {
     return true;
   }
 
+  /**
+   * @dev Decrease the amount of tokens that an owner allowed to a spender.
+   *
+   * approve should be called when allowed[_spender] == 0. To decrement
+   * allowed value is better to use this function to avoid 2 calls (and wait until
+   * the first transaction is mined)
+   * From MonolithDAO Token.sol
+   * @param _spender The address which will spend the funds.
+   * @param _subtractedValue The amount of tokens to decrease the allowance by.
+   */
   function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
     uint oldValue = allowed[msg.sender][_spender];
     if (_subtractedValue > oldValue) {
@@ -324,7 +338,7 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
  * @title Burnable Token
  * @dev Token that can be irreversibly burned (destroyed).
  */
-contract BurnableToken is StandardToken {
+contract BurnableToken is BasicToken {
 
     event Burn(address indexed burner, uint256 value);
 
@@ -333,7 +347,6 @@ contract BurnableToken is StandardToken {
      * @param _value The amount of token to be burned.
      */
     function burn(uint256 _value) public {
-        require(_value > 0);
         require(_value <= balances[msg.sender]);
         // no need to require value <= totalSupply, since that would imply the
         // sender's balance is greater than the totalSupply, which *should* be an assertion failure
@@ -777,10 +790,10 @@ contract TokenSale is Ownable, ITokenSale {
       validAddress(_poolD)
       onlyOwner
   {
-    grantVestedTokens(_poolA, (175000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
-    grantVestedTokens(_poolB, (168000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
-    grantVestedTokens(_poolC, (70000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
-    grantVestedTokens(_poolD, 49000000 ether, vestingStarts, vestingStarts + 4 years);
+    grantVestedTokens(_poolA, soldTokens.mul(175000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolB, soldTokens.mul(168000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolC, soldTokens.mul(70000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolD, 49000000 ether, vestingStarts, vestingStarts.add(4 years));
 
     token.burn(token.balanceOf(this));
   }
@@ -840,41 +853,53 @@ contract TokenSale is Ownable, ITokenSale {
   */
   function computeTokens(uint256 usd) public view returns(uint256) {
     require(usd > 0);
-    uint256 _denominator;
 
     if (raised < 7000000) {
       if (usd + raised <= 7000000) {
         // all of the investment belongs to the linear function.
-        return usd * 100000000000000000000 / 14;
+        return linearSection(usd);
       } else {
-        // only the investment needed to reach 7000000 belongs to the linear function.
-        uint256 _usd = 7000000 - raised;
         // the investment above 7000000 belongs to the non-linear function.
-        usd -= _usd;
+        uint256 _usd = raised.add(usd).sub(7000000);
+        // only the investment needed to reach 7000000 belongs to the linear function.
+        usd = usd.sub(_usd);
 
-        if (usd < 50000) {
-          // for low investments belonging to the non-linear function we use a
-          // simplification of ln.
-          return (_usd * 100000000000000000000 / 14) +
-            (70000000 ether / (raised + 7000000) +
-            70000000 ether / (raised + usd + 7000000)) * usd / 2;
-        }
-
-        _denominator = 14000000; // 7M+7M raised
-        return (_usd * 100000000000000000000 / 14) +
-          (70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18)));
+        return linearSection(usd).add(logarithmicSection(7000000, _usd));
       }
     } else {
-      if (usd < 50000) {
-        // for low investments belonging to the non-linear function we use a
-        // simplification of ln.
-        return (70000000 ether / (raised + 7000000) +
-          70000000 ether / (raised + usd + 7000000)) * usd / 2;
-      }
-
-      _denominator = 7000000 + raised;
-      return 70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18));
+      return logarithmicSection(raised, usd);
     }
+  }
+
+  /**
+   * @dev Number of tokens is given by:
+   * usd * 100 ether / 14
+   */
+  function linearSection(uint256 _usd) internal pure returns(uint256) {
+    return _usd.mul(100 ether).div(14);
+  }
+
+  /**
+   * @dev Number of tokens is given by:
+   * 70,000,000 ln((7,000,000 + raised + usd) / (7,000,000 + raised))
+   */
+  function logarithmicSection(uint256 _raised, uint256 _usd) internal pure returns(uint256) {
+    if (_usd < 50000) {
+      // for low investments we use a simplification of ln.
+      return simpleLogarithmicSection(_raised, _usd);
+    }
+    return ln(_raised.add(_usd).add(7000000).mul(1 ether)).sub(ln(_raised.add(7000000).mul(1 ether))).mul(70000000);
+  }
+
+  /**
+   * @dev Number of tokens is given by:
+   * 70,000,000 * (1 / (7,000,000 + raised + usd) + 1 / (7,000,000 + raised)) * usd / 2
+   */
+  function simpleLogarithmicSection(uint256 _raised, uint256 _usd) internal pure returns(uint256) {
+    uint256 seventyMillion = 70000000 ether;
+    return seventyMillion.div(_raised.add(7000000)).add(
+      seventyMillion.div(_raised.add(_usd).add(7000000))
+    ).mul(_usd).div(2);
   }
 
   function forwardFunds() internal {
@@ -920,8 +945,8 @@ contract TokenSale is Ownable, ITokenSale {
    * @dev Helper function to update collected and allocated tokens stats
    */
   function updateStats(uint256 usd, uint256 tokens) internal {
-    raised = raised + usd;
-    soldTokens = soldTokens + tokens;
+    raised = raised.add(usd);
+    soldTokens = soldTokens.add(tokens);
 
     require(soldTokens < hardcap);
   }
@@ -939,7 +964,7 @@ contract TokenSale is Ownable, ITokenSale {
   ) internal pure returns(uint256) {
     require(_discountBase >= 70);
     require(_discountBase <= 100);
-    return _amount * 100 / _discountBase;
+    return _amount.mul(100).div(_discountBase);
   }
 
   /**
@@ -955,20 +980,20 @@ contract TokenSale is Ownable, ITokenSale {
     uint256 y;
 
     while (x >= 1500000000000000000) {
-      result = result + 405465108108164000; // ln(1.5) = 0.405465108108164
-      x = x * 2 / 3; // same as x / 1.5
+      result = result.add(405465108108164000); // ln(1.5) = 0.405465108108164
+      x = x.mul(2).div(3); // same as x / 1.5
     }
 
-    x = x - 1000000000000000000;
+    x = x.sub(1 ether);
     y = x;
 
     while (n < 10) {
-      result = result + (y / n);
-      n = n + 1;
-      y = y * x / 1000000000000000000;
-      result = result - (y / n);
-      n = n + 1;
-      y = y * x / 1000000000000000000;
+      result = result.add(y.div(n));
+      n++;
+      y = y.mul(x).div(1 ether);
+      result = result.sub(y.div(n));
+      n++;
+      y = y.mul(x).div(1 ether);
     }
   }
 

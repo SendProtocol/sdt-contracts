@@ -22,22 +22,22 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>108/108</span>
+        <span class='fraction'>106/106</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">66% </span>
+        <span class="strong">64.58% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>33/50</span>
+        <span class='fraction'>31/48</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>20/20</span>
+        <span class='fraction'>23/23</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>114/114</span>
+        <span class='fraction'>116/116</span>
       </div>
     </div>
   </div>
@@ -420,7 +420,19 @@
 375
 376
 377
-378</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -646,7 +658,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16×</span>
 <span class="cline-any cline-yes">16×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">16×</span>
@@ -662,25 +673,38 @@
 <span class="cline-any cline-yes">4×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3×</span>
-<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -762,8 +786,8 @@
 <span class="cline-any cline-yes">10×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">10×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">405×</span>
+<span class="cline-any cline-yes">405×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">10×</span>
@@ -961,10 +985,10 @@ contract TokenSale is Ownable, ITokenSale {
       validAddress(_poolD)
       onlyOwner
   {
-    grantVestedTokens(_poolA, (175000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
-    grantVestedTokens(_poolB, (168000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
-    grantVestedTokens(_poolC, (70000000 ether) * soldTokens / (231000000 ether), vestingStarts, vestingStarts + 7 years);
-    grantVestedTokens(_poolD, 49000000 ether, vestingStarts, vestingStarts + 4 years);
+    grantVestedTokens(_poolA, soldTokens.mul(175000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolB, soldTokens.mul(168000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolC, soldTokens.mul(70000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolD, 49000000 ether, vestingStarts, vestingStarts.add(4 years));
 &nbsp;
     token.burn(token.balanceOf(this));
   }
@@ -1024,41 +1048,53 @@ contract TokenSale is Ownable, ITokenSale {
   */
   function computeTokens(uint256 usd) public view returns(uint256) {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(usd &gt; 0);
-    uint256 _denominator;
 &nbsp;
     if (raised &lt; 7000000) {
       if (usd + raised &lt;= 7000000) {
         // all of the investment belongs to the linear function.
-        return usd * 100000000000000000000 / 14;
+        return linearSection(usd);
       } else {
-        // only the investment needed to reach 7000000 belongs to the linear function.
-        uint256 _usd = 7000000 - raised;
         // the investment above 7000000 belongs to the non-linear function.
-        usd -= _usd;
+        uint256 _usd = raised.add(usd).sub(7000000);
+        // only the investment needed to reach 7000000 belongs to the linear function.
+        usd = usd.sub(_usd);
 &nbsp;
-        if (usd &lt; 50000) {
-          // for low investments belonging to the non-linear function we use a
-          // simplification of ln.
-          return (_usd * 100000000000000000000 / 14) +
-            (70000000 ether / (raised + 7000000) +
-            70000000 ether / (raised + usd + 7000000)) * usd / 2;
-        }
-&nbsp;
-        _denominator = 14000000; // 7M+7M raised
-        return (_usd * 100000000000000000000 / 14) +
-          (70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18)));
+        return linearSection(usd).add(logarithmicSection(7000000, _usd));
       }
     } else {
-      if (usd &lt; 50000) {
-        // for low investments belonging to the non-linear function we use a
-        // simplification of ln.
-        return (70000000 ether / (raised + 7000000) +
-          70000000 ether / (raised + usd + 7000000)) * usd / 2;
-      }
-&nbsp;
-      _denominator = 7000000 + raised;
-      return 70000000 * (ln((_denominator + usd) * 10 ** 18) - ln(_denominator * 10 ** 18));
+      return logarithmicSection(raised, usd);
     }
+  }
+&nbsp;
+  /**
+   * @dev Number of tokens is given by:
+   * usd * 100 ether / 14
+   */
+  function linearSection(uint256 _usd) internal returns(uint256) {
+    return _usd.mul(100 ether).div(14);
+  }
+&nbsp;
+  /**
+   * @dev Number of tokens is given by:
+   * 70,000,000 ln((7,000,000 + raised + usd) / (7,000,000 + raised))
+   */
+  function logarithmicSection(uint256 _raised, uint256 _usd) internal returns(uint256) {
+    if (_usd &lt; 50000) {
+      // for low investments we use a simplification of ln.
+      return simpleLogarithmicSection(_raised, _usd);
+    }
+    return ln(_raised.add(_usd).add(7000000).mul(1 ether)).sub(ln(_raised.add(7000000).mul(1 ether))).mul(70000000);
+  }
+&nbsp;
+  /**
+   * @dev Number of tokens is given by:
+   * 70,000,000 * (1 / (7,000,000 + raised + usd) + 1 / (7,000,000 + raised)) * usd / 2
+   */
+  function simpleLogarithmicSection(uint256 _raised, uint256 _usd) internal returns(uint256) {
+    uint256 a = 70000000 ether;
+    return a.div(_raised.add(7000000)).add(
+      a.div(_raised.add(_usd).add(7000000))
+    ).mul(_usd).div(2);
   }
 &nbsp;
   function forwardFunds() internal {
@@ -1104,8 +1140,8 @@ contract TokenSale is Ownable, ITokenSale {
    * @dev Helper function to update collected and allocated tokens stats
    */
   function updateStats(uint256 usd, uint256 tokens) internal {
-    raised = raised + usd;
-    soldTokens = soldTokens + tokens;
+    raised = raised.add(usd);
+    soldTokens = soldTokens.add(tokens);
 &nbsp;
     <span class="missing-if-branch" title="else path not taken" >E</span>require(soldTokens &lt; hardcap);
   }
@@ -1123,7 +1159,7 @@ contract TokenSale is Ownable, ITokenSale {
   ) internal pure returns(uint256) {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(_discountBase &gt;= 70);
     <span class="missing-if-branch" title="else path not taken" >E</span>require(_discountBase &lt;= 100);
-    return _amount * 100 / _discountBase;
+    return _amount.mul(100).div(_discountBase);
   }
 &nbsp;
   /**
@@ -1139,20 +1175,20 @@ contract TokenSale is Ownable, ITokenSale {
     uint256 y;
 &nbsp;
     while (x &gt;= 1500000000000000000) {
-      result = result + 405465108108164000; // ln(1.5) = 0.405465108108164
-      x = x * 2 / 3; // same as x / 1.5
+      result = result.add(405465108108164000); // ln(1.5) = 0.405465108108164
+      x = x.mul(2).div(3); // same as x / 1.5
     }
 &nbsp;
-    x = x - 1000000000000000000;
+    x = x.sub(1 ether);
     y = x;
 &nbsp;
     while (n &lt; 10) {
-      result = result + (y / n);
-      n = n + 1;
-      y = y * x / 1000000000000000000;
-      result = result - (y / n);
-      n = n + 1;
-      y = y * x / 1000000000000000000;
+      result = result.add(y.div(n));
+      n++;
+      y = y.mul(x).div(1 ether);
+      result = result.sub(y.div(n));
+      n++;
+      y = y.mul(x).div(1 ether);
     }
   }
 &nbsp;
@@ -1180,7 +1216,7 @@ contract TokenSale is Ownable, ITokenSale {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jan 24 2018 20:30:41 GMT-0500 (-05)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun Feb 25 2018 19:22:27 GMT+1300 (NZDT)
 </div>
 </div>
 <script src="../prettify.js"></script>
