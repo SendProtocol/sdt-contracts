@@ -1,5 +1,5 @@
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/Escrow.sol
+SF:/home/m/dev/wesend/sdt-contracts/contracts/Escrow.sol
 FN:25,Escrow
 FN:29,tokenRestricted
 FN:42,create
@@ -99,7 +99,7 @@ BRF:34
 BRH:25
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/Polls.sol
+SF:/home/m/dev/wesend/sdt-contracts/contracts/Polls.sol
 FN:41,Polls
 FN:54,createPoll
 FN:81,vote
@@ -143,7 +143,7 @@ BRF:10
 BRH:8
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/SaleProxy.sol
+SF:/home/m/dev/wesend/sdt-contracts/contracts/SaleProxy.sol
 FN:12,SaleProxy
 FN:22,
 FN:26,btcPurchase
@@ -178,7 +178,7 @@ BRF:6
 BRH:3
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/SDT.sol
+SF:/home/m/dev/wesend/sdt-contracts/contracts/SDT.sol
 FN:14,validAddress
 FN:26,SDT
 FNF:2
@@ -198,7 +198,7 @@ BRF:2
 BRH:1
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/SendToken.sol
+SF:/home/m/dev/wesend/sdt-contracts/contracts/SendToken.sol
 FN:20,verifiedResticted
 FN:25,escrowResticted
 FN:35,isVerified
@@ -260,7 +260,7 @@ BRF:12
 BRH:11
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/SnapshotToken.sol
+SF:/home/m/dev/wesend/sdt-contracts/contracts/SnapshotToken.sol
 FN:25,isPolls
 FN:35,setPolls
 FN:44,transfer
@@ -299,7 +299,7 @@ BRF:4
 BRH:3
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/TokenSale.sol
+SF:/home/m/dev/wesend/sdt-contracts/contracts/TokenSale.sol
 FN:50,validAddress
 FN:55,isActive
 FN:64,TokenSale
@@ -451,8 +451,6 @@ DA:339,9
 DA:351,10
 DA:352,10
 DA:354,10
-DA:355,405
-DA:356,405
 DA:359,10
 DA:360,10
 DA:362,10
@@ -464,8 +462,8 @@ DA:367,50
 DA:368,50
 DA:386,55
 DA:387,55
-LF:116
-LH:116
+LF:114
+LH:114
 BRDA:51,1,0,26
 BRDA:51,1,1,0
 BRDA:56,2,0,13
@@ -518,7 +516,7 @@ BRF:48
 BRH:31
 end_of_record
 TN:
-SF:/Users/klaushottvidal/DAPPS/sdt-contracts/contracts/TokenVesting.sol
+SF:/home/m/dev/wesend/sdt-contracts/contracts/TokenVesting.sol
 FN:43,icoResticted
 FN:48,isActive
 FN:53,TokenVesting
