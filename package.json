@@ -10,7 +10,7 @@
     "mathjs": "^3.16.5",
     "truffle": "^4.0.1",
     "truffle-flattener": "^1.2.0",
-    "zeppelin-solidity": "^1.4.0"
+    "zeppelin-solidity": "^1.5.0"
   },
   "devDependencies": {
     "ethereumjs-testrpc": "^6.0.3",
