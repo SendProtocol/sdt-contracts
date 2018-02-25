@@ -1,14 +1,14 @@
 pragma solidity ^0.4.18;
 
-import "./SnapshotToken.sol";
-import 'zeppelin-solidity/contracts/token/BurnableToken.sol';
 
 /**
  * @title ISendToken - Send Consensus Network Token interface
  * @dev token interface built on top of ERC20 standard interface
  * @dev see https://send.sd/token
  */
-contract ISendToken is BurnableToken, SnapshotToken {
+interface ISendToken {
+  function transfer(address to, uint256 value) public returns (bool);
+
   function isVerified(address _address) public constant returns(bool);
 
   function verify(address _address) public;

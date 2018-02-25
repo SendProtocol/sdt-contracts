@@ -7,7 +7,7 @@ pragma solidity ^0.4.18;
  *
  * @dev https://send.sd/token
  */
-contract IEscrow {
+interface IEscrow {
 
   event Created(
     address indexed sender,
@@ -39,6 +39,50 @@ contract IEscrow {
 
 }
 
+// File: contracts/ISendToken.sol
+
+/**
+ * @title ISendToken - Send Consensus Network Token interface
+ * @dev token interface built on top of ERC20 standard interface
+ * @dev see https://send.sd/token
+ */
+interface ISendToken {
+  function transfer(address to, uint256 value) public returns (bool);
+
+  function isVerified(address _address) public constant returns(bool);
+
+  function verify(address _address) public;
+
+  function unverify(address _address) public;
+
+  function verifiedTransferFrom(
+      address from,
+      address to,
+      uint256 value,
+      uint256 referenceId,
+      uint256 exchangeRate,
+      uint256 fee
+  ) public;
+
+  function issueExchangeRate(
+      address _from,
+      address _to,
+      address _verifiedAddress,
+      uint256 _value,
+      uint256 _referenceId,
+      uint256 _exchangeRate
+  ) public;
+
+  event VerifiedTransfer(
+      address indexed from,
+      address indexed to,
+      address indexed verifiedAddress,
+      uint256 value,
+      uint256 referenceId,
+      uint256 exchangeRate
+  );
+}
+
 // File: contracts/ISnapshotToken.sol
 
 /**
@@ -47,14 +91,7 @@ contract IEscrow {
  * @dev Snapshot Token interface
  * @dev https://send.sd/token
  */
-contract ISnapshotToken {
-  address public polls;
-
-  modifier pollsResticted() {
-    require(msg.sender == address(polls));
-    _;
-  }
-
+interface ISnapshotToken {
   function requestSnapshots(uint256 _blockNumber) public;
   function takeSnapshot(address _owner) public returns(uint256);
 }
@@ -318,6 +355,13 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
     uint256 balance;
   }
 
+  address public polls;
+
+  modifier isPolls() {
+    require(msg.sender == address(polls));
+    _;
+  }
+
   /**
    * @dev Remove Verified status of a given address
    * @notice Only contract owner
@@ -366,7 +410,7 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
    * @dev Set snacpshot block
    * @param _blockNumber uint256 The new blocknumber for snapshots
    */
-  function requestSnapshots(uint256 _blockNumber) public pollsResticted {
+  function requestSnapshots(uint256 _blockNumber) public isPolls {
     snapshotBlock = _blockNumber;
   }
 }
@@ -397,48 +441,6 @@ contract BurnableToken is BasicToken {
     }
 }
 
-// File: contracts/ISendToken.sol
-
-/**
- * @title ISendToken - Send Consensus Network Token interface
- * @dev token interface built on top of ERC20 standard interface
- * @dev see https://send.sd/token
- */
-contract ISendToken is BurnableToken, SnapshotToken {
-  function isVerified(address _address) public constant returns(bool);
-
-  function verify(address _address) public;
-
-  function unverify(address _address) public;
-
-  function verifiedTransferFrom(
-      address from,
-      address to,
-      uint256 value,
-      uint256 referenceId,
-      uint256 exchangeRate,
-      uint256 fee
-  ) public;
-
-  function issueExchangeRate(
-      address _from,
-      address _to,
-      address _verifiedAddress,
-      uint256 _value,
-      uint256 _referenceId,
-      uint256 _exchangeRate
-  ) public;
-
-  event VerifiedTransfer(
-      address indexed from,
-      address indexed to,
-      address indexed verifiedAddress,
-      uint256 value,
-      uint256 referenceId,
-      uint256 exchangeRate
-  );
-}
-
 // File: contracts/SendToken.sol
 
 /**
@@ -447,7 +449,7 @@ contract ISendToken is BurnableToken, SnapshotToken {
  * @dev Implementation of Send Consensus network Standard
  * @dev https://send.sd/token
  */
-contract SendToken is ISendToken {
+contract SendToken is ISendToken, SnapshotToken, BurnableToken {
   IEscrow public escrow;
 
   mapping (address => bool) internal verifiedAddresses;

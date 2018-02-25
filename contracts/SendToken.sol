@@ -1,7 +1,9 @@
 pragma solidity ^0.4.18;
 
+import "./SnapshotToken.sol";
 import './ISendToken.sol';
 import './IEscrow.sol';
+import 'zeppelin-solidity/contracts/token/BurnableToken.sol';
 
 
 /**
@@ -10,7 +12,7 @@ import './IEscrow.sol';
  * @dev Implementation of Send Consensus network Standard
  * @dev https://send.sd/token
  */
-contract SendToken is ISendToken {
+contract SendToken is ISendToken, SnapshotToken, BurnableToken {
   IEscrow public escrow;
 
   mapping (address => bool) internal verifiedAddresses;

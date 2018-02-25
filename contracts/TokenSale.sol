@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 import "./TokenVesting.sol";
 import "./ITokenSale.sol";
-import "./ISendToken.sol";
+import "zeppelin-solidity/contracts/token/BurnableToken.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -33,7 +33,7 @@ contract TokenSale is Ownable, ITokenSale {
   bool public isStopped = false;
   bool public isFinalized = false;
 
-  ISendToken public token;
+  BurnableToken public token;
   TokenVesting public vesting;
 
   mapping (address => bool) internal proxies;
@@ -113,7 +113,7 @@ contract TokenSale is Ownable, ITokenSale {
   ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     require(!activated);
 
-    token = ISendToken(_sdt);
+    token = BurnableToken(_sdt);
     vesting = TokenVesting(_vestingContract);
 
     // 1% reserve is released on deploy

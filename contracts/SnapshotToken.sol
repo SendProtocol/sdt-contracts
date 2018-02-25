@@ -20,6 +20,13 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
     uint256 balance;
   }
 
+  address public polls;
+
+  modifier isPolls() {
+    require(msg.sender == address(polls));
+    _;
+  }
+
   /**
    * @dev Remove Verified status of a given address
    * @notice Only contract owner
@@ -68,7 +75,7 @@ contract SnapshotToken is ISnapshotToken, StandardToken, Ownable {
    * @dev Set snacpshot block
    * @param _blockNumber uint256 The new blocknumber for snapshots
    */
-  function requestSnapshots(uint256 _blockNumber) public pollsResticted {
+  function requestSnapshots(uint256 _blockNumber) public isPolls {
     snapshotBlock = _blockNumber;
   }
 }

@@ -6,7 +6,7 @@ pragma solidity ^0.4.18;
  *
  * @dev https://send.sd/token
  */
-contract IEscrow {
+interface IEscrow {
 
   event Created(
     address indexed sender,

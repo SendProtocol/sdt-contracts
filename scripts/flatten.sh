@@ -8,6 +8,7 @@ declare -a contracts=(
     "SaleProxy.sol"
     "SDT.sol"
     "Escrow.sol"
+    "Polls.sol"
 )
 
 for i in "${contracts[@]}"

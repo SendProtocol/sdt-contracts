@@ -7,14 +7,7 @@ pragma solidity ^0.4.18;
  * @dev Snapshot Token interface
  * @dev https://send.sd/token
  */
-contract ISnapshotToken {
-  address public polls;
-
-  modifier pollsResticted() {
-    require(msg.sender == address(polls));
-    _;
-  }
-
+interface ISnapshotToken {
   function requestSnapshots(uint256 _blockNumber) public;
   function takeSnapshot(address _owner) public returns(uint256);
 }

@@ -3,13 +3,12 @@ pragma solidity ^0.4.18;
 import './ISendToken.sol';
 import './IEscrow.sol';
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'zeppelin-solidity/contracts/token/ERC20Basic.sol';
 
 /**
  * @title Vesting contract for SDT
  * @dev see https://send.sd/token
  */
-contract Escrow is IEscrow, Ownable{
+contract Escrow is IEscrow, Ownable {
   ISendToken public token;
 
   struct Lock {
@@ -174,13 +173,13 @@ contract Escrow is IEscrow, Ownable{
   }
 
   /**
-   This function is a way to get other ETC20 tokens 
+   This function is a way to get other ETC20 tokens
    back to their rightful owner if sent by mistake
    */
   function transferToken(address _tokenAddress, address _transferTo, uint256 _value) onlyOwner external {
     require (_tokenAddress != address(token));
 
-    ERC20Basic erc20Token = ERC20Basic(_tokenAddress);
+    ISendToken erc20Token = ISendToken(_tokenAddress);
     erc20Token.transfer(_transferTo, _value);
   }
 
