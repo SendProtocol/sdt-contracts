@@ -47,5 +47,6 @@ Contracts for Send Token (SDT) as described in Send's [Token Sale Details](https
 ## Reviewers and audits
 - Marcio Abreu (Author) - CTO @ Send
 - Klaus Hott (Author) - Blockchain Advisor @ Send
+- CoinFabrik (Auditor) - Blockchain Technologies, FinTech and Smart Contracts Development: [Security audit results](https://blog.coinfabrik.com/security-audit-send-sdt-token-sale-ico-smart-contract/)
 
 Bug bounty program for SDT token TBA.
