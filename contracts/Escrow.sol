@@ -80,6 +80,7 @@ contract Escrow is IEscrow, Ownable {
     require(escrows[_arbitrator][_transactionId].sender == _sender);
     require(escrows[_arbitrator][_transactionId].value == _tokens);
     require(escrows[_arbitrator][_transactionId].fee == _fee);
+    require(escrows[_arbitrator][_transactionId].paid == false);
 
     escrows[_arbitrator][_transactionId].paid = true;
 

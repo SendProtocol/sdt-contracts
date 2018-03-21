@@ -78,6 +78,45 @@ contract("SDT", function(accounts) {
       );
     });
 
+    it("should fiail if trying to fund an escrow twice", async function() {
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
+
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[2],
+        7878,
+        tokens,
+        fee,
+        futureDate,
+        {from: accounts[1]}
+      );
+
+      await this.token.fundEscrow(
+        accounts[1],
+        7878,
+        tokens,
+        fee
+      )
+
+      try {
+        await this.token.fundEscrow(
+          accounts[1],
+          7878  ,
+          tokens,
+          fee
+        )
+      } catch (error) {
+        assertJump(error);
+      }
+
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
+
+    });
+
     it("should fail if trying to use the same keys", async function() {
       try {
         await this.token.createEscrow(
