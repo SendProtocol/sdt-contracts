@@ -24,7 +24,7 @@ Contracts for Send Token (SDT) as described in Send's [Token Sale Details](https
 
 [TokenSale.sol](contracts/TokenSale.sol) A sale contract as described in [Token Sale Details](https://send.sd) (Document still not approved for public release)
 
-[SaleProxy.sol](contracts/SaleProxy.sol) a proxy contract to buy with a specific discount/vesting period (as described in [Token Sale Details](https://send.sd) (Document still not approved for public release) without the need of additional inputs on the user's side.
+[Distribution.sol](contracts/Distribution.sol) A contract to handle SDT's distribution process as described in [Token Sale Details](https://send.sd) (Document still not approved for public release).
 
 [TokenVestg.sol](contracts/TokenVesting.sol) A contract to store vested SDT tokens. Users can claim vested tokens if whitelisted by Send.
 
@@ -37,10 +37,10 @@ Contracts for Send Token (SDT) as described in Send's [Token Sale Details](https
 - Deploy sale contract
 - Deploy vesting contract
 - Deploy token with sale contract address
+- Deploy distribution contract with token's address
 - Initialize vesting contract with token and sale addresses
 - Set BTC and ETH exchange rates on sale contract
-- Initialize sale with token and vesting addresses
-- Create as many SaleProxy contracts as needed
+- Initialize sale with token, distribution and vesting addresses
 - Add proxy contracts to sale contract proxy list
 - Deploy escrow contract and link on token contract
 
