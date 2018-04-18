@@ -428,7 +428,7 @@ contract("SDT", function(accounts) {
 
     it("should return tokens to owner except fee", async function() {
 
-      await increaseTimeTo(futureDate + duration.hours(2));
+      await increaseTimeTo(latestTime() + duration.hours(2));
 
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);

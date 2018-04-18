@@ -5,10 +5,10 @@ rm flattened-contracts/*
 declare -a contracts=(
     "TokenVesting.sol"
     "TokenSale.sol"
-    "SaleProxy.sol"
     "SDT.sol"
     "Escrow.sol"
     "Polls.sol"
+    "Distribution.sol"
 )
 
 for i in "${contracts[@]}"

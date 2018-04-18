@@ -1,7 +1,6 @@
 pragma solidity ^0.4.18;
 
 import "./TokenVesting.sol";
-import "./ITokenSale.sol";
 import "zeppelin-solidity/contracts/token/BurnableToken.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
@@ -11,20 +10,22 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
  * @title Crowdsale contract
  * @dev see https://send.sd/crowdsale
  */
-contract TokenSale is Ownable, ITokenSale {
+contract TokenSale is Ownable {
   using SafeMath for uint256;
 
   /* Leave 10 tokens margin error in order to succedd
   with last pool allocation in case hard cap is reached */
-  uint256 public hardcap = 230999990 ether;
+  uint256 public hardcap = 70000000 ether;
+  uint256 public vestingTime = 7776000;
+  uint256 public weiUsdRate = 1;
+  uint256 public btcUsdRate = 1;
 
+  uint256 public vestingEnds;
   uint256 public startTime;
   uint256 public endTime;
   address public wallet;
 
   uint256 public vestingStarts;
-  uint256 public weiUsdRate;
-  uint256 public btcUsdRate;
 
   uint256 public soldTokens;
   uint256 public raised;
@@ -36,7 +37,6 @@ contract TokenSale is Ownable, ITokenSale {
   BurnableToken public token;
   TokenVesting public vesting;
 
-  mapping (address => bool) internal proxies;
   mapping (address => bool) public allowed;
 
   event NewBuyer(
@@ -72,6 +72,7 @@ contract TokenSale is Ownable, ITokenSale {
     require(_vestingStarts > startTime);
 
     vestingStarts = _vestingStarts;
+    vestingEnds = vestingStarts.add(vestingTime);
     startTime = _startTime;
     endTime = _endTime;
     wallet = _wallet;
@@ -109,7 +110,8 @@ contract TokenSale is Ownable, ITokenSale {
   function initialize(
       address _sdt,
       address _vestingContract,
-      address _icoCostsPool
+      address _icoCostsPool,
+      address _distributionContract
   ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     require(!activated);
 
@@ -118,6 +120,7 @@ contract TokenSale is Ownable, ITokenSale {
 
     // 1% reserve is released on deploy
     token.transfer(_icoCostsPool, 7000000 ether);
+    token.transfer(_distributionContract, 161000000 ether);
 
     //rearly backers allocation
 
@@ -162,9 +165,9 @@ contract TokenSale is Ownable, ITokenSale {
       validAddress(_poolD)
       onlyOwner
   {
-    grantVestedTokens(_poolA, soldTokens.mul(175000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
-    grantVestedTokens(_poolB, soldTokens.mul(168000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
-    grantVestedTokens(_poolC, soldTokens.mul(70000000 ether).div(231000000 ether), vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolA, 175000000 ether, vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolB, 168000000 ether, vestingStarts, vestingStarts.add(7 years));
+    grantVestedTokens(_poolC, 70000000 ether, vestingStarts, vestingStarts.add(7 years));
     grantVestedTokens(_poolD, 49000000 ether, vestingStarts, vestingStarts.add(4 years));
 
     token.burn(token.balanceOf(this));
@@ -181,97 +184,26 @@ contract TokenSale is Ownable, ITokenSale {
     return true;
   }
 
-  function addProxyContract(address _address) public onlyOwner {
-    proxies[_address] = true;
-  }
-
-  function ethPurchase(
-    address _beneficiary,
-    uint256 _vestingTime,
-    uint256 _discountBase
-  ) public validAddress(_beneficiary) payable returns (bool) {
-    require(proxies[msg.sender]);
-
+  function () public payable {
     uint256 usd = msg.value.div(weiUsdRate);
-
-    uint256 vestingEnds = vestingStarts.add(_vestingTime);
-
-    doPurchase(usd, msg.value, 0, _beneficiary, _discountBase, vestingEnds);
+    doPurchase(usd, msg.value, 0, msg.sender, vestingEnds);
     forwardFunds();
-
-    return true;
   }
 
   function btcPurchase(
       address _beneficiary,
-      uint256 _vestingTime,
-      uint256 _discountBase,
       uint256 _btcValue
-  ) public validAddress(_beneficiary) returns (bool) {
-    require(proxies[msg.sender]);
-
+  ) public onlyOwner validAddress(_beneficiary) {
     uint256 usd = _btcValue.div(btcUsdRate);
-
-    uint256 vestingEnds = vestingStarts.add(_vestingTime);
-
-    doPurchase(usd, 0, _btcValue, _beneficiary, _discountBase, vestingEnds);
-
-    return true;
+    doPurchase(usd, 0, _btcValue, _beneficiary, vestingEnds);
   }
 
   /**
   * @dev Number of tokens is given by:
-  * 70,000,000 ln((7,000,000 + raised + usd) / (7,000,000 + raised))
+  * usd * 100 ether / 14
   */
-  function computeTokens(uint256 usd) public view returns(uint256) {
-    require(usd > 0);
-
-    if (raised < 7000000) {
-      if (usd + raised <= 7000000) {
-        // all of the investment belongs to the linear function.
-        return linearSection(usd);
-      } else {
-        // the investment above 7000000 belongs to the non-linear function.
-        uint256 _usd = raised.add(usd).sub(7000000);
-        // only the investment needed to reach 7000000 belongs to the linear function.
-        usd = usd.sub(_usd);
-
-        return linearSection(usd).add(logarithmicSection(7000000, _usd));
-      }
-    } else {
-      return logarithmicSection(raised, usd);
-    }
-  }
-
-  /**
-   * @dev Number of tokens is given by:
-   * usd * 100 ether / 14
-   */
-  function linearSection(uint256 _usd) internal pure returns(uint256) {
+  function computeTokens(uint256 _usd) public pure returns(uint256) {
     return _usd.mul(100 ether).div(14);
-  }
-
-  /**
-   * @dev Number of tokens is given by:
-   * 70,000,000 ln((7,000,000 + raised + usd) / (7,000,000 + raised))
-   */
-  function logarithmicSection(uint256 _raised, uint256 _usd) internal pure returns(uint256) {
-    if (_usd < 50000) {
-      // for low investments we use a simplification of ln.
-      return simpleLogarithmicSection(_raised, _usd);
-    }
-    return ln(_raised.add(_usd).add(7000000).mul(1 ether)).sub(ln(_raised.add(7000000).mul(1 ether))).mul(70000000);
-  }
-
-  /**
-   * @dev Number of tokens is given by:
-   * 70,000,000 * (1 / (7,000,000 + raised + usd) + 1 / (7,000,000 + raised)) * usd / 2
-   */
-  function simpleLogarithmicSection(uint256 _raised, uint256 _usd) internal pure returns(uint256) {
-    uint256 seventyMillion = 70000000 ether;
-    return seventyMillion.div(_raised.add(7000000)).add(
-      seventyMillion.div(_raised.add(_usd).add(7000000))
-    ).mul(_usd).div(2);
   }
 
   function forwardFunds() internal {
@@ -285,14 +217,12 @@ contract TokenSale is Ownable, ITokenSale {
    * @param _btc amount invested in BTC y contribution was made in BTC, 0 otherwise
    * @param _address Address to send tokens to
    * @param _vestingEnds vesting finish timestamp
-   * @param _discountBase a multiplier for tokens based on a discount choosen and a vesting time
    */
   function doPurchase(
       uint256 _usd,
       uint256 _eth,
       uint256 _btc,
       address _address,
-      uint256 _discountBase,
       uint256 _vestingEnds
   )
       internal
@@ -303,8 +233,6 @@ contract TokenSale is Ownable, ITokenSale {
     require(_usd >= 10);
 
     uint256 soldAmount = computeTokens(_usd);
-
-    soldAmount = computeBonus(soldAmount, _discountBase);
 
     updateStats(_usd, soldAmount);
     grantVestedTokens(_address, soldAmount, vestingStarts, _vestingEnds);
@@ -320,58 +248,11 @@ contract TokenSale is Ownable, ITokenSale {
     raised = raised.add(usd);
     soldTokens = soldTokens.add(tokens);
 
-    require(soldTokens < hardcap);
+    require(soldTokens <= hardcap);
   }
 
   /**
-   * @dev Helper function to compute bonus amount
-   * @param _amount number of toknes before bonus
-   * @param _discountBase percentage of price after discount
-   * @notice 70 <= dicountBase <= 100
-   * @notice _discountBase is the resultant of (100 - discount)
-   */
-  function computeBonus(
-      uint256 _amount,
-      uint256 _discountBase
-  ) internal pure returns(uint256) {
-    require(_discountBase >= 70);
-    require(_discountBase <= 100);
-    return _amount.mul(100).div(_discountBase);
-  }
-
-  /**
-  * @dev Computes ln(x) with 18 artifical decimal places for input and output
-  * This algotihm uses a logarithm of the form
-    * ln(x) = ln(y * 1.5^k) = k ln(1.5) + ln(y)
-    * where ln(1.5) is a known value and ln(y) is computed with a tayilor series
-    * for 1 < y < 1.5 which is within radius of convergence of the Taylor series.
-    * https://en.wikipedia.org/wiki/Natural_logarithm#Derivative.2C_Taylor_series
-    */
-  function ln(uint256 x) internal pure returns(uint256 result) {
-    uint256 n = 1;
-    uint256 y;
-
-    while (x >= 1500000000000000000) {
-      result = result.add(405465108108164000); // ln(1.5) = 0.405465108108164
-      x = x.mul(2).div(3); // same as x / 1.5
-    }
-
-    x = x.sub(1 ether);
-    y = x;
-
-    while (n < 10) {
-      result = result.add(y.div(n));
-      n++;
-      y = y.mul(x).div(1 ether);
-      result = result.sub(y.div(n));
-      n++;
-      y = y.mul(x).div(1 ether);
-    }
-  }
-
-  /**
-   * @dev deploy the token itself
-   * @notice The owner of this contract is the owner of token's contract
+   * @dev grant vested tokens
    * @param _to Adress to grant vested tokens
    * @param _value number of tokens to grant
    * @param _start vesting start timestamp
@@ -386,4 +267,26 @@ contract TokenSale is Ownable, ITokenSale {
     token.transfer(vesting, _value);
     vesting.grantVestedTokens(_to, _value, _start, _vesting);
   }
+
+  //////////
+  // Safety Methods
+  //////////
+
+  /// @notice This method can be used by the controller to extract mistakenly
+  ///  sent tokens to this contract.
+  /// @param _token The address of the token contract that you want to recover
+  ///  set to 0 in case you want to extract ether.
+  function claimTokens(address _token) public onlyOwner {
+    if (_token == 0x0) {
+      owner.transfer(this.balance);
+      return;
+    }
+
+    ERC20Basic erc20token = ERC20Basic(_token);
+    uint256 balance = erc20token.balanceOf(this);
+    erc20token.transfer(owner, balance);
+    ClaimedTokens(_token, owner, balance);
+  }
+  event ClaimedTokens(address indexed _token, address indexed _controller, uint256 _amount);
+
 }

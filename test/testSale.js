@@ -1,11 +1,18 @@
 "use strict";
 
+const { latestTime, increaseTimeTo, duration } = require("./helpers/time.js");
+
 const TokenSale = artifacts.require("./TokenSale.sol");
-const SaleProxy = artifacts.require("./SaleProxy.sol");
+const Distribution = artifacts.require("./Distribution.sol");
 const SDT = artifacts.require("./SDT.sol");
 const TokenVesting = artifacts.require("./TokenVesting.sol");
 const assertJump = require("./helpers/assertJump");
 const math = require("mathjs");
+
+function checkMaxError(a, b, e) {
+  let diff = math.abs(a - b);
+  return diff / a < e;
+}
 
 contract("TokenSale", function(accounts) {
   let bought;
@@ -14,6 +21,13 @@ contract("TokenSale", function(accounts) {
   let collected;
   let preallocated;
   let presold;
+
+  let distRaisedETH;
+  let distRaisedUSD;
+  let distSold;
+  let distStageSold;
+  let acc6Bonus;
+  let acc7Bonus;
 
   before(async function() {
     this.currentDate = math.floor(Date.now() / 1000);
@@ -28,9 +42,9 @@ contract("TokenSale", function(accounts) {
     this.token = null;
   });
 
-  it("should fail if not active", async function() {
+  it("should fail", async function() {
     try {
-      await this.sale.btcPurchase(0x1, 5000, 100, 10);
+      await this.sale.btcPurchase(0x1, 10);
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
@@ -39,7 +53,13 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if not owner", async function() {
     try {
-      await this.sale.initialize(0x10, 0x20, 0x30, { from: accounts[1] });
+      await this.sale.initialize (
+        0x10, 
+        0x20, 
+        0x30, 
+        0x40, 
+        { from: accounts[1] }
+      );
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
@@ -49,6 +69,14 @@ contract("TokenSale", function(accounts) {
   it("should be possible to activate crowdsale", async function() {
     // Create token, should have 700M - 1% ICO reseve
     this.token = await SDT.new(this.sale.address);
+
+    this.distributionContract = await Distribution.new (
+      this.currentDate + 2000,
+      365,
+      86400,
+      this.token.address
+    );
+
     assert.equal(
       await this.token.balanceOf.call(this.sale.address),
       7 * 10 ** 26
@@ -63,14 +91,15 @@ contract("TokenSale", function(accounts) {
     await this.sale.setWeiUsdRate(100);
 
     // Initialize sale
-    await this.sale.initialize(this.token.address, this.vesting.address, 0x30);
+    await this.sale.initialize (
+      this.token.address, 
+      this.vesting.address, 
+      0x30, 
+      this.distributionContract.address
+    );
 
     // Whitelist an address
     await this.sale.allow(accounts[9]);
-
-    // Create a proxy contract
-    this.proxy = await SaleProxy.new(this.sale.address, 5000, 100);
-    await this.sale.addProxyContract(this.proxy.address);
 
     assert(await this.vesting.initialized.call());
     assert(await this.vesting.active.call());
@@ -79,6 +108,7 @@ contract("TokenSale", function(accounts) {
     assert.equal(await this.vesting.token.call(), await this.sale.token.call());
     assert(await this.sale.activated.call());
     assert.equal(await this.token.balanceOf.call(0x30), 7 * 10 ** 24);
+    assert.equal(await this.token.balanceOf.call(this.distributionContract.address), 161 * 10 ** 24)
 
     collected = await this.sale.raised.call();
     presold = await this.sale.raised.call();
@@ -88,7 +118,7 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if purchasing less than min", async function() {
     try {
-      await this.proxy.btcPurchase(accounts[9], 90);
+      await this.sale.btcPurchase(accounts[9], 90);
 
       assert.fail("should have thrown before");
     } catch (error) {
@@ -98,7 +128,7 @@ contract("TokenSale", function(accounts) {
 
   it("should fail if address not whitelisted", async function() {
     try {
-      await this.proxy.btcPurchase(accounts[8], 90);
+      await this.sale.btcPurchase(accounts[8], 90);
 
       assert.fail("should have thrown before");
     } catch (error) {
@@ -115,7 +145,7 @@ contract("TokenSale", function(accounts) {
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-    await this.proxy.btcPurchase(accounts[9], 100);
+    await this.sale.btcPurchase(accounts[9], 100);
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -143,7 +173,7 @@ contract("TokenSale", function(accounts) {
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-    await this.proxy.btcPurchase(accounts[9], 499900);
+    await this.sale.btcPurchase(accounts[9], 499900);
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -171,7 +201,7 @@ contract("TokenSale", function(accounts) {
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
 
-    await this.proxy.sendTransaction({
+    await this.sale.sendTransaction({
       from: accounts[9],
       value: (5950010 - presold) * 100
     });
@@ -193,110 +223,9 @@ contract("TokenSale", function(accounts) {
     assert.equal(await this.sale.soldTokens.call(), allocated.valueOf());
   });
 
-  it(
-    "[BTC] 2M USD with 6M and 10 USD sold," +
-      "should return 999990 USD 0.14 and 1000010 with incremental price formula," +
-      "with a maximum error of 0.001%",
-    async function() {
-      let val1 = 999990 / 0.14 * 10 ** 18;
-      let val2 = 70000000 * math.log(1.07142928571) * 10 ** 18;
-
-      bought = await this.sale.computeTokens.call(2000000);
-      error = math.abs(bought.valueOf() - val1 - val2);
-
-      //execute purchase
-      let circulatingSupply = await this.vesting.circulatingSupply.call();
-      let saleBalance = await this.token.balanceOf.call(this.sale.address);
-
-      await this.proxy.btcPurchase(accounts[9], 20000000);
-      let newCirculatingSupply = await this.vesting.circulatingSupply.call();
-      let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
-
-      let granted = await this.vesting.totalVestedTokens.call({
-        from: accounts[9]
-      });
-
-      allocated = allocated.plus(bought);
-      collected = collected.plus(2000000);
-
-      assert(error < bought.valueOf() * this.maxError);
-      assert.equal(granted.valueOf(), allocated.sub(preallocated));
-      assert.equal(newSaleBalance.valueOf(), saleBalance.sub(bought));
-      assert.equal(newCirculatingSupply.valueOf(), circulatingSupply.valueOf());
-      assert.equal(await this.sale.raised.call(), collected.valueOf());
-      assert.equal(await this.sale.soldTokens.call(), allocated.valueOf());
-    }
-  );
-
-  it(
-    "[ETH] 7M USD with 8M and 10 USD sold, should return the right amout " +
-      "with a maximum error of 0.001%",
-    async function() {
-      let val1 = 70000000 * math.log(1.46666635556) * 10 ** 18;
-
-      bought = await this.sale.computeTokens.call(7000000);
-      error = math.abs(bought.valueOf() - val1);
-
-      //execute purchase
-      let circulatingSupply = await this.vesting.circulatingSupply.call();
-      let saleBalance = await this.token.balanceOf.call(this.sale.address);
-
-      await this.proxy.sendTransaction({ from: accounts[9], value: 700000000 });
-      let newCirculatingSupply = await this.vesting.circulatingSupply.call();
-      let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
-
-      let granted = await this.vesting.totalVestedTokens.call({
-        from: accounts[9]
-      });
-
-      allocated = allocated.plus(bought);
-      collected = collected.plus(7000000);
-
-      assert(error < bought.valueOf() * this.maxError);
-      assert.equal(granted.valueOf(), allocated.sub(preallocated));
-      assert.equal(newSaleBalance.valueOf(), saleBalance.sub(bought));
-      assert.equal(newCirculatingSupply.valueOf(), circulatingSupply.valueOf());
-      assert.equal(await this.sale.raised.call(), collected.valueOf());
-      assert.equal(await this.sale.soldTokens.call(), allocated.valueOf());
-    }
-  );
-
-  it(
-    "[ETH] 49999 USD with 15M and 10 USD sold, should return the right amout " +
-      "with a maximum error of 0.001%",
-    async function() {
-      let val1 = 70000000 * math.log(1.00227268079) * 10 ** 18;
-
-      bought = await this.sale.computeTokens.call(49999);
-      error = math.abs(bought.valueOf() - val1);
-
-      //execute purchase
-      let circulatingSupply = await this.vesting.circulatingSupply.call();
-      let saleBalance = await this.token.balanceOf.call(this.sale.address);
-
-      await this.proxy.sendTransaction({ from: accounts[9], value: 4999900 });
-      let newCirculatingSupply = await this.vesting.circulatingSupply.call();
-      let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
-
-      let granted = await this.vesting.totalVestedTokens.call({
-        from: accounts[9]
-      });
-
-      allocated = allocated.plus(bought);
-      collected = collected.plus(49999);
-
-      assert(error < bought.valueOf() * this.maxError);
-      assert.equal(granted.valueOf(), allocated.sub(preallocated));
-      assert.equal(newSaleBalance.valueOf(), saleBalance.sub(bought));
-      assert.equal(newCirculatingSupply.valueOf(), circulatingSupply.valueOf());
-      assert.equal(await this.sale.raised.call(), collected.valueOf());
-      assert.equal(await this.sale.soldTokens.call(), allocated.valueOf());
-    }
-  );
-
   it("Should fail if no contract owner", async function() {
     try {
-      await this.proxy.btcPurchase(accounts[9], 20000000, {
+      await this.sale.btcPurchase(accounts[9], 20000000, {
         from: accounts[9]
       });
       assert.fail("should have thrown before");
@@ -308,7 +237,7 @@ contract("TokenSale", function(accounts) {
   it("Should be possible to stop the sale", async function() {
     this.sale.stop();
     try {
-      await this.proxy.btcPurchase(accounts[9], 70000000);
+      await this.sale.btcPurchase(accounts[9], 70000000);
       assert.fail("should have thrown before");
     } catch (error) {
       assertJump(error);
@@ -317,7 +246,7 @@ contract("TokenSale", function(accounts) {
 
   it("Should be possible to resume the sale", async function() {
     await this.sale.resume();
-    await this.proxy.btcPurchase(accounts[9], 70000000);
+    await this.sale.btcPurchase(accounts[9], 100000);
   });
 
   it("Should be possible finalize sale", async function() {
@@ -345,18 +274,18 @@ contract("TokenSale", function(accounts) {
     let supply = await this.token.totalSupply.call();
 
     let sold = await this.sale.soldTokens.call();
-    let total = 231000000 * 10 ** 18;
+    let total = 70000000 * 10 ** 18;
 
     let soldFraction = sold / total;
 
-    let poolA = soldFraction * 175000000 * 10 ** 18;
-    let poolB = soldFraction * 168000000 * 10 ** 18;
-    let poolC = soldFraction * 70000000 * 10 ** 18;
+    let poolA = 175000000 * 10 ** 18;
+    let poolB = 168000000 * 10 ** 18;
+    let poolC = 70000000 * 10 ** 18;
     let poolD = 49000000 * 10 ** 18;
 
     /* sold + allocated pools + 1% (7M) reserve allocated on sale init */
     let expectedSupply =
-      poolA + poolB + poolC + poolD + 7000000 * 10 ** 18 + sold.toNumber();
+      poolA + poolB + poolC + poolD + 7000000 * 10 ** 18 + sold.toNumber() + 161000000 * 10 ** 18;
 
     assert(math.abs(granted2 - poolA) < 1 * 10 ** 18); //1 SDT or error margin
     assert(math.abs(granted3 - poolB) < 1 * 10 ** 18); //1 SDT or error margin
@@ -366,52 +295,256 @@ contract("TokenSale", function(accounts) {
     assert(math.abs(supply - expectedSupply) < 1 * 10 ** 18); //1 SDT or error margin
   });
 
-  it("[BTC] Should allocate the right amount", async function() {
-    this.sale = await TokenSale.new(
-      this.currentDate - 1,
-      this.currentDate + 1000,
-      accounts[7],
-      this.currentDate + 100
-    );
-    this.vesting = await TokenVesting.new();
-    this.token = await SDT.new(this.sale.address);
-    await this.vesting.init(this.token.address, this.sale.address);
-    await this.sale.initialize(this.token.address, this.vesting.address, 0x30);
-    await this.sale.allow(accounts[9]);
-    this.proxy = await SaleProxy.new(this.sale.address, 5000, 100);
-    await this.sale.addProxyContract(this.proxy.address);
+  it("Should fail if distribution not started", async function() {
+    try {
+      await this.distributionContract.getStage.call();
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
 
-    assert(await this.sale.activated.call());
+  it("Stage should be 0", async function() {
+    await increaseTimeTo(latestTime() + 2001);
+    assert.equal((await this.distributionContract.getStage.call()), 0);
+  });
 
-    await this.sale.setBtcUsdRate(10);
-    await this.sale.setWeiUsdRate(100);
-    await this.proxy.btcPurchase(
-      accounts[9],
-      69999990 - presold.toNumber() * 10
-    );
+  it("Stage should be 1", async function() {
+    await increaseTimeTo(latestTime() + 86400);
+    assert.equal((await this.distributionContract.getStage.call()).toString(), 1);
+  });
 
-    //Calculate tokens
-    bought = await this.sale.computeTokens.call(49999);
-    error = math.abs(
-      bought.valueOf() -
-        1 / 0.14 * 10 ** 18 -
-        70000000 * math.log(1.00357128597) * 10 ** 18
-    );
+  it("Stage should be 2", async function() {
+    await increaseTimeTo(latestTime() + 86400);
+    assert.equal((await this.distributionContract.getStage.call()).toString(), 2);
+  });
 
-    //execute purchase
-    let circulatingSupply = await this.vesting.circulatingSupply.call();
-    let saleBalance = await this.token.balanceOf.call(this.sale.address);
+  it("Should fail if not wei/usd rate", async function() {
+    try {
+      await this.distributionContract.sendTransaction({
+        from: accounts[7],
+        value: 4000
+      });
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
 
-    await this.proxy.sendTransaction({ from: accounts[9], value: 499990 });
-    let newCirculatingSupply = await this.vesting.circulatingSupply.call();
-    let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
+  it("should fail if not owner", async function() {
+    try {
+      await this.distributionContract.setWeiUsdRate.call(10, {from: accounts[1]});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
 
-    let granted = await this.vesting.totalVestedTokens.call({
-      from: accounts[9]
+  it("should fail if not initialized", async function() {
+    await this.distributionContract.setWeiUsdRate(10);
+    try {
+      await this.distributionContract.sendTransaction({
+        from: accounts[7],
+        value: 4000
+      });
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("4000 wei @ 10 wei/usd, @ 0.20 usd/sdt", async function() {
+    await this.distributionContract.init(161000000 * 10 ** 18);
+    await this.distributionContract.sendTransaction({
+      from: accounts[7],
+      value: 4000
     });
 
-    collected = 6999999 + 49999;
+    distRaisedUSD = 400;
+    distRaisedETH = 4000;
+    distSold = 2000 * 10 ** 18;
 
-    assert(error < bought.valueOf() * this.maxError);
+    assert.equal(await this.token.balanceOf.call(accounts[7]), distSold);
+    assert.equal(await this.distributionContract.raisedUSD.call(), distRaisedUSD);
+    assert.equal(await this.distributionContract.raisedETH.call(), distRaisedETH);
+    assert.equal(await this.distributionContract.soldTokens.call(), distSold);
+    assert.equal(await this.distributionContract.sold.call(2), distSold);
+    assert.equal(await this.distributionContract.contributions.call(accounts[7], 2), distSold);
   });
+
+  it("4000 wei", async function() {
+    await this.distributionContract.sendTransaction({
+      from: accounts[7],
+      value: 4000
+    });
+
+    let price = 0.2 + (19.8 * (distSold / 10 ** 18) / 161000000);
+    let sold = 400 * 10 ** 18 / price;
+
+    distRaisedUSD += 400;
+    distRaisedETH += 4000;
+    distSold += sold;
+
+    assert.equal(await this.token.balanceOf.call(accounts[7]), distSold);
+    assert.equal(await this.distributionContract.raisedUSD.call(), distRaisedUSD);
+    assert.equal(await this.distributionContract.raisedETH.call(), distRaisedETH);
+    assert.equal(await this.distributionContract.soldTokens.call(), distSold);
+    assert.equal(await this.distributionContract.sold.call(2), distSold);
+    assert.equal(await this.distributionContract.contributions.call(accounts[7], 2), distSold);
+  });
+
+  it("4000 wei on next stage", async function() {
+    await increaseTimeTo(latestTime() + 86400);
+
+    await this.distributionContract.sendTransaction({
+      from: accounts[7],
+      value: 4000
+    });
+
+    let price = 0.2 + (19.8 * (distSold / 10 ** 18) / 161000000);
+    let sold = 400 * 10 ** 18 / price;
+
+    distRaisedUSD += 400;
+    distRaisedETH += 4000;
+    distSold += sold;
+    distStageSold = sold;
+
+    assert(checkMaxError(await this.token.balanceOf.call(accounts[7]), distSold, this.maxError));
+    assert.equal(await this.distributionContract.raisedUSD.call(), distRaisedUSD);
+    assert.equal(await this.distributionContract.raisedETH.call(), distRaisedETH);
+    assert(checkMaxError(await this.distributionContract.soldTokens.call(), distSold, this.maxError));
+    assert(checkMaxError(await this.distributionContract.sold.call(3), sold, this.maxError));
+    assert(checkMaxError(await this.distributionContract.contributions.call(accounts[7], 3), sold, this.maxError));
+  });
+
+  it("80000 wei from another account", async function() {
+    await this.distributionContract.sendTransaction({
+      from: accounts[6],
+      value: 80000
+    });
+
+    let price = 0.2 + (19.8 * (distSold / 10 ** 18) / 161000000);
+    let sold = 8000 * 10 ** 18 / price;
+
+    distRaisedUSD += 8000;
+    distRaisedETH += 80000;
+    distSold += sold;
+    distStageSold += sold;
+
+    let bonus = 0.1 - (distStageSold / 10 ** 18) / 4410958.90411;
+    acc6Bonus = sold * bonus;
+    acc7Bonus = (distStageSold - sold) * bonus;
+
+    assert(checkMaxError(await this.token.balanceOf.call(accounts[6]), sold, this.maxError));
+    assert.equal(await this.distributionContract.raisedUSD.call(), distRaisedUSD);
+    assert.equal(await this.distributionContract.raisedETH.call(), distRaisedETH);
+    assert(checkMaxError(await this.distributionContract.soldTokens.call(), distSold, this.maxError));
+    assert(checkMaxError(await this.distributionContract.sold.call(3), distStageSold, this.maxError));
+    assert(checkMaxError(await this.distributionContract.contributions.call(accounts[6], 3), sold, this.maxError));
+  });
+
+  it("cant claim bonus if stage not finished", async function() {
+    try {
+      await this.distributionContract.claimBonus(3, {from: accounts[6]});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    } 
+  });
+
+  it("should fail if exceeds the amount", async function() {
+    try {
+      await this.distributionContract.sendTransaction({
+        from: accounts[7],
+        value: 900000
+      });
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
+  });
+
+  it("should allow up to the last stage", async function() {
+    await increaseTimeTo(latestTime() + 86400 * 361);
+    await this.distributionContract.sendTransaction({
+      from: accounts[7],
+      value: 900
+    });
+  });
+
+  it("should fail if latest stage finished", async function() {
+    await increaseTimeTo(latestTime() + 86400);
+    try {
+      await this.distributionContract.sendTransaction({
+        from: accounts[7],
+        value: 900
+      });
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    } 
+  });
+
+  it("claim bonus", async function() {
+    let supply = await this.token.totalSupply.call();
+
+    let acc6 = await this.token.balanceOf.call(accounts[6]);
+    let acc7 = await this.token.balanceOf.call(accounts[7]);
+
+    let expectedSupply = supply.toNumber() - ((await this.distributionContract.stageCap.call()).toNumber() - acc6Bonus - acc7Bonus - (await this.distributionContract.sold.call(3)).toNumber());
+
+    await this.distributionContract.claimBonus(3, {from: accounts[6]});
+
+    //Should burn tokens on first claim
+    assert(
+      checkMaxError(
+        (await this.token.totalSupply.call()), 
+        expectedSupply,
+        this.maxError
+      )
+    );
+
+    await this.distributionContract.claimBonus(3, {from: accounts[7]});
+
+    //Should not burn on second claim
+    assert(
+      checkMaxError(
+        (await this.token.totalSupply.call()),
+        expectedSupply,
+        this.maxError
+      )
+    );
+
+    assert(checkMaxError((await this.token.balanceOf(accounts[6])), acc6.toNumber() + acc6Bonus, this.maxError));
+    assert(checkMaxError((await this.token.balanceOf(accounts[7])), acc7.toNumber() + acc7Bonus, this.maxError));
+  });
+
+  it("cant claim twice for the same stage", async function() {
+    try {
+      await this.distributionContract.claimBonus(3, {from: accounts[6]});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    } 
+  });
+
+  it("should be possible to retrieve ETH", async function() {
+    let ap = web3.eth.getBalance(accounts[5]).toNumber();
+    let ac = web3.eth.getBalance(this.distributionContract.address).toNumber();
+
+    await this.distributionContract.forwardFunds(10, accounts[5]);
+
+    assert.equal(web3.eth.getBalance(accounts[5]).toNumber(), ap + 10);
+    assert.equal(web3.eth.getBalance(this.distributionContract.address).toNumber(), ac - 10);
+  });
+
+  it("should fail if not owner", async function() {
+    try {
+      await this.distributionContract.forwardFunds(10, accounts[5], {from: accounts[5]});
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    } 
+  });
+
 });
