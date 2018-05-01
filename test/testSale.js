@@ -71,7 +71,6 @@ contract("TokenSale", function(accounts) {
     this.token = await SDT.new(this.sale.address);
 
     this.distributionContract = await Distribution.new (
-      this.currentDate + 2000,
       365,
       86400,
       this.token.address
@@ -98,9 +97,6 @@ contract("TokenSale", function(accounts) {
       this.distributionContract.address
     );
 
-    // Whitelist an address
-    await this.sale.allow(accounts[9]);
-
     assert(await this.vesting.initialized.call());
     assert(await this.vesting.active.call());
     assert.equal(await this.vesting.owner.call(), accounts[0]);
@@ -119,16 +115,6 @@ contract("TokenSale", function(accounts) {
   it("should fail if purchasing less than min", async function() {
     try {
       await this.sale.btcPurchase(accounts[9], 90);
-
-      assert.fail("should have thrown before");
-    } catch (error) {
-      assertJump(error);
-    }
-  });
-
-  it("should fail if address not whitelisted", async function() {
-    try {
-      await this.sale.btcPurchase(accounts[8], 90);
 
       assert.fail("should have thrown before");
     } catch (error) {
@@ -249,7 +235,7 @@ contract("TokenSale", function(accounts) {
     await this.sale.btcPurchase(accounts[9], 100000);
   });
 
-  it("Should be possible finalize sale", async function() {
+  it("Should be possible to finalize sale", async function() {
     await this.sale.finalize(
       accounts[2],
       accounts[3],
@@ -281,7 +267,7 @@ contract("TokenSale", function(accounts) {
     let poolA = 175000000 * 10 ** 18;
     let poolB = 168000000 * 10 ** 18;
     let poolC = 70000000 * 10 ** 18;
-    let poolD = 49000000 * 10 ** 18;
+    let poolD = 48999990 * 10 ** 18;
 
     /* sold + allocated pools + 1% (7M) reserve allocated on sale init */
     let expectedSupply =
@@ -296,6 +282,7 @@ contract("TokenSale", function(accounts) {
   });
 
   it("Should fail if distribution not started", async function() {
+    await this.distributionContract.init(161000000 * 10 ** 18, this.currentDate + 2000);
     try {
       await this.distributionContract.getStage.call();
       assert.fail("should have thrown before");
@@ -340,21 +327,8 @@ contract("TokenSale", function(accounts) {
     }
   });
 
-  it("should fail if not initialized", async function() {
-    await this.distributionContract.setWeiUsdRate(10);
-    try {
-      await this.distributionContract.sendTransaction({
-        from: accounts[7],
-        value: 4000
-      });
-      assert.fail("should have thrown before");
-    } catch (error) {
-      assertJump(error);
-    }
-  });
-
   it("4000 wei @ 10 wei/usd, @ 0.20 usd/sdt", async function() {
-    await this.distributionContract.init(161000000 * 10 ** 18);
+    await this.distributionContract.setWeiUsdRate(10);
     await this.distributionContract.sendTransaction({
       from: accounts[7],
       value: 4000

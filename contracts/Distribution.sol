@@ -46,17 +46,12 @@ contract Distribution is Ownable {
   );
 
   function Distribution(
-      uint256 _startTime,
       uint16 _stages,
       uint256 _stageDuration,
       address _token
   ) public {
-    require(_startTime > block.timestamp);
-
-    startTime = _startTime;
     stages = _stages;
     stageDuration = _stageDuration;
-
     isActive = false;
     token = BurnableToken(_token);
   }
@@ -65,8 +60,12 @@ contract Distribution is Ownable {
    * @dev Initialize distribution
    * @param _cap uint256 The amount of tokens for distribution
    */
-  function init(uint256 _cap) public onlyOwner {
-   require (token.balanceOf(this) == _cap);
+  function init(uint256 _cap, uint256 _startTime) public onlyOwner {
+    require (!isActive);
+    require (token.balanceOf(this) == _cap);
+    require (_startTime > block.timestamp);
+
+    startTime = _startTime;
     cap = _cap;
     stageCap = cap / stages;
     isActive = true;
@@ -84,13 +83,13 @@ contract Distribution is Ownable {
     uint256 tokens = computeTokens(usd);
     uint16 stage = getStage();
 
-    sold[stage] += tokens;
+    sold[stage] = sold[stage].add(tokens);
     require (sold[stage] < stageCap);
 
-    contributions[msg.sender][stage] += tokens;
-    soldTokens += tokens;
-    raisedETH += msg.value;
-    raisedUSD += usd;
+    contributions[msg.sender][stage] = contributions[msg.sender][stage].add(tokens);
+    soldTokens = soldTokens.add(tokens);
+    raisedETH = raisedETH.add(msg.value);
+    raisedUSD = raisedUSD.add(usd);
 
     NewPurchase(msg.sender, tokens, usd, msg.value);
     token.transfer(msg.sender, tokens);
@@ -105,13 +104,13 @@ contract Distribution is Ownable {
     require (getStage() > _stage);
 
     if (!burned[_stage]) {
-      token.burn(stageCap - sold[_stage] - sold[_stage] * computeBonus(_stage) / 1000000000000000000);
+      token.burn(stageCap.sub(sold[_stage]).sub(sold[_stage].mul(computeBonus(_stage)).div(1000000000000000000)));
       burned[_stage] = true;
     }
 
   	uint256 tokens = computeAddressBonus(_stage);
   	token.transfer(msg.sender, tokens);
-  	bonusClaimedTokens += tokens;
+  	bonusClaimedTokens = bonusClaimedTokens.add(tokens);
   	claimed[msg.sender][_stage] = true;
 
   	NewBonusClaim(msg.sender, tokens);
@@ -140,7 +139,7 @@ contract Distribution is Ownable {
    * @param _usd uint256 Value in USD
    */
   function computeTokens(uint256 _usd) public view returns(uint256) {
-  	return _usd * 1000000000000000000000000000000000000 / (200000000000000000 + 19800000000000000000 * soldTokens / cap);
+    return _usd.mul(1000000000000000000000000000000000000).div(soldTokens.mul(19800000000000000000).div(cap).add(200000000000000000));
   }
 
   /**
@@ -148,7 +147,7 @@ contract Distribution is Ownable {
    */
   function getStage() public view returns(uint16) {
     require (block.timestamp >= startTime);
-  	return uint16((block.timestamp - startTime) / stageDuration);
+  	return uint16(uint256(block.timestamp).sub(startTime).div(stageDuration));
   }
 
   /**
@@ -156,7 +155,7 @@ contract Distribution is Ownable {
    * @param _stage uint16 The stage
    */
   function computeBonus(uint16 _stage) public view returns(uint256) {
-  	return (100000000000000000 - (sold[_stage] * 100000 / 441095890411));
+  	return uint256(100000000000000000).sub(sold[_stage].mul(100000).div(441095890411));
   }
 
   /**
@@ -164,6 +163,29 @@ contract Distribution is Ownable {
    * @param _stage uint16 The stage
    */
   function computeAddressBonus(uint16 _stage) public view returns(uint256) {
-  	return contributions[msg.sender][_stage] * computeBonus(_stage) / 1000000000000000000;
+  	return contributions[msg.sender][_stage].mul(computeBonus(_stage)).div(1000000000000000000);
   }
+
+  //////////
+  // Safety Methods
+  //////////
+
+  /// @notice This method can be used by the controller to extract mistakenly
+  ///  sent tokens to this contract.
+  /// @param _token The address of the token contract that you want to recover
+  ///  set to 0 in case you want to extract ether.
+  function claimTokens(address _token) public onlyOwner {
+    if (_token == 0x0) {
+      owner.transfer(this.balance);
+      return;
+    }
+
+    ERC20Basic erc20token = ERC20Basic(_token);
+    uint256 balance = erc20token.balanceOf(this);
+    erc20token.transfer(owner, balance);
+    ClaimedTokens(_token, owner, balance);
+  }
+  event ClaimedTokens(address indexed _token, address indexed _controller, uint256 _amount);
+
+
 }

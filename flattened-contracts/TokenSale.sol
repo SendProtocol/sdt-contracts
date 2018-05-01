@@ -412,8 +412,6 @@ contract TokenSale is Ownable {
   BurnableToken public token;
   TokenVesting public vesting;
 
-  mapping (address => bool) public allowed;
-
   event NewBuyer(
     address indexed holder,
     uint256 sndAmount,
@@ -469,14 +467,6 @@ contract TokenSale is Ownable {
   function setBtcUsdRate(uint256 _rate) public onlyOwner {
     require(_rate > 0);
     btcUsdRate = _rate;
-  }
-
-  /**
-   * @dev Allow an address to send ETH purchases
-   * @param _address address The address to whitelist
-   */
-  function allow(address _address) public onlyOwner {
-    allowed[_address] = true;
   }
 
   /**
@@ -543,7 +533,7 @@ contract TokenSale is Ownable {
     grantVestedTokens(_poolA, 175000000 ether, vestingStarts, vestingStarts.add(7 years));
     grantVestedTokens(_poolB, 168000000 ether, vestingStarts, vestingStarts.add(7 years));
     grantVestedTokens(_poolC, 70000000 ether, vestingStarts, vestingStarts.add(7 years));
-    grantVestedTokens(_poolD, 49000000 ether, vestingStarts, vestingStarts.add(4 years));
+    grantVestedTokens(_poolD, 48999990 ether, vestingStarts, vestingStarts.add(4 years));
 
     token.burn(token.balanceOf(this));
   }
@@ -604,7 +594,6 @@ contract TokenSale is Ownable {
       isActive
       returns(uint256)
   {
-    require(allowed[_address]);
     require(_usd >= 10);
 
     uint256 soldAmount = computeTokens(_usd);
