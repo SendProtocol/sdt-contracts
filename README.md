@@ -5,13 +5,13 @@
 
 Send (SDT) is 7-day price-stable crypto token that discovers a new market price once a week based on cross-border transaction volume and network liquidity. Send (SDT) is on track to use the largest network of decentralized agents to support increased liquidity for migrant corridors starting in the Americas and Africa. SDT will operate as the stable unit of exchange within the Send ecosystem without the daily volatility.
 
-For more information about Send (SDT) check our website: https://send.sd
+For more information about Send (SDT) check our website: https://www.sendprotocol.com
 
 ---------------------------------
 
 ## Smart Contracts
 
-Contracts for Send Token (SDT) as described in Send's [Token Sale Details](https://send.sd) (Document still not approved for public release) and [Whitepaper](https://send.sd) (Document still not approved for public release)
+Contracts for Send Token (SDT) as described in Send's [Token Economics](https://www.sendprotocol.com/documents/economics.pdf) and [Whitepaper](https://www.sendprotocol.com/documents/whitepaper.pdf)
 
 ### Token 
 [Snapshot.sol](contracts/SnapshotToken.sol) A token with an efficient mechanism to store balance snapshots.
@@ -22,9 +22,9 @@ Contracts for Send Token (SDT) as described in Send's [Token Sale Details](https
 
 ### Crowdsale
 
-[TokenSale.sol](contracts/TokenSale.sol) A sale contract as described in [Token Sale Details](https://send.sd) (Document still not approved for public release)
+[TokenSale.sol](contracts/TokenSale.sol) A sale contract as described in Send's [Token Economics](https://www.sendprotocol.com/documents/economics.pdf) 
 
-[Distribution.sol](contracts/Distribution.sol) A contract to handle SDT's distribution process as described in [Token Sale Details](https://send.sd) (Document still not approved for public release).
+[Distribution.sol](contracts/Distribution.sol) A contract to handle SDT's distribution process as described in Send's [Token Economics](https://www.sendprotocol.com/documents/economics.pdf) 
 
 [TokenVestg.sol](contracts/TokenVesting.sol) A contract to store vested SDT tokens. Users can claim vested tokens if whitelisted by Send.
 
