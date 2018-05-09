@@ -15,8 +15,8 @@ contract TokenSale is Ownable {
 
   /* Leave 10 tokens margin error in order to succedd
   with last pool allocation in case hard cap is reached */
-  uint256 public hardcap = 70000000 ether;
-  uint256 public vestingTime = 7776000;
+  uint256 constant public HARD_CAP = 70000000 ether;
+  uint256 constant public VESTING_TIME = 90 days;
   uint256 public weiUsdRate = 1;
   uint256 public btcUsdRate = 1;
 
@@ -76,7 +76,7 @@ contract TokenSale is Ownable {
     require(_vestingStarts > startTime);
 
     vestingStarts = _vestingStarts;
-    vestingEnds = vestingStarts.add(vestingTime);
+    vestingEnds = vestingStarts.add(VESTING_TIME);
     startTime = _startTime;
     endTime = _endTime;
     wallet = _wallet;
@@ -261,7 +261,7 @@ contract TokenSale is Ownable {
     raised = raised.add(usd);
     soldTokens = soldTokens.add(tokens);
 
-    require(soldTokens <= hardcap);
+    require(soldTokens <= HARD_CAP);
   }
 
   /**
