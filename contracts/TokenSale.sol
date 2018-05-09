@@ -45,6 +45,12 @@ contract TokenSale is Ownable {
     uint256 btcAmount
   );
 
+  event ClaimedTokens(
+    address indexed _token,
+    address indexed _controller,
+    uint256 _amount
+  );
+
   modifier validAddress(address _address) {
     require(_address != address(0x0));
     _;
@@ -195,6 +201,25 @@ contract TokenSale is Ownable {
     return _usd.mul(100 ether).div(14);
   }
 
+  //////////
+  // Safety Methods
+  //////////
+  /// @notice This method can be used by the controller to extract mistakenly
+  ///  sent tokens to this contract.
+  /// @param _token The address of the token contract that you want to recover
+  ///  set to 0 in case you want to extract ether.
+  function claimTokens(address _token) public onlyOwner {
+    if (_token == 0x0) {
+      owner.transfer(this.balance);
+      return;
+    }
+
+    ERC20Basic erc20token = ERC20Basic(_token);
+    uint256 balance = erc20token.balanceOf(this);
+    erc20token.transfer(owner, balance);
+    ClaimedTokens(_token, owner, balance);
+  }
+
   function forwardFunds() internal {
     wallet.transfer(msg.value);
   }
@@ -255,26 +280,4 @@ contract TokenSale is Ownable {
     token.transfer(vesting, _value);
     vesting.grantVestedTokens(_to, _value, _start, _vesting);
   }
-
-  //////////
-  // Safety Methods
-  //////////
-
-  /// @notice This method can be used by the controller to extract mistakenly
-  ///  sent tokens to this contract.
-  /// @param _token The address of the token contract that you want to recover
-  ///  set to 0 in case you want to extract ether.
-  function claimTokens(address _token) public onlyOwner {
-    if (_token == 0x0) {
-      owner.transfer(this.balance);
-      return;
-    }
-
-    ERC20Basic erc20token = ERC20Basic(_token);
-    uint256 balance = erc20token.balanceOf(this);
-    erc20token.transfer(owner, balance);
-    ClaimedTokens(_token, owner, balance);
-  }
-  event ClaimedTokens(address indexed _token, address indexed _controller, uint256 _amount);
-
 }

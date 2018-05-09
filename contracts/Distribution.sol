@@ -58,21 +58,6 @@ contract Distribution is Ownable {
   }
 
   /**
-   * @dev Initialize distribution
-   * @param _cap uint256 The amount of tokens for distribution
-   */
-  function init(uint256 _cap, uint256 _startTime) public onlyOwner {
-    require (!isActive);
-    require (token.balanceOf(this) == _cap);
-    require (_startTime > block.timestamp);
-
-    startTime = _startTime;
-    cap = _cap;
-    stageCap = cap / stages;
-    isActive = true;
-  }
-
-  /**
    * @dev contribution function
    */
   function () external payable {
@@ -94,6 +79,21 @@ contract Distribution is Ownable {
 
     NewPurchase(msg.sender, tokens, usd, msg.value);
     token.transfer(msg.sender, tokens);
+  }
+
+  /**
+   * @dev Initialize distribution
+   * @param _cap uint256 The amount of tokens for distribution
+   */
+  function init(uint256 _cap, uint256 _startTime) public onlyOwner {
+    require(!isActive);
+    require(token.balanceOf(this) == _cap);
+    require(_startTime > block.timestamp);
+
+    startTime = _startTime;
+    cap = _cap;
+    stageCap = cap / stages;
+    isActive = true;
   }
 
   /**
