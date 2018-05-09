@@ -110,6 +110,7 @@ contract TokenSale is Ownable {
       address _distributionContract
   ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     require(!activated);
+    activated = true;
 
     token = BurnableToken(_sdt);
     vesting = TokenVesting(_vestingContract);
@@ -144,7 +145,6 @@ contract TokenSale is Ownable {
     grantVestedTokens(0x93C77A6DC1fe12D64F4d97E96c6672FE517eb0Bb, 1950000 ether, vestingStarts, threeMonths);
     grantVestedTokens(0x675F249E78ca19367b9e26B206B9Bc519195De94, 1950000 ether, vestingStarts, twoYears);
     grantVestedTokens(0xb93151f6f5Cf1F416CdBE8C76745D18CDfe83395, 1950000 ether, vestingStarts, twoYears);
-    activated = true;
   }
 
   function finalize(
