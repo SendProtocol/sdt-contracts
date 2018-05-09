@@ -324,7 +324,15 @@
 279
 280
 281
-282</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+282
+283
+284</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -430,6 +438,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
@@ -438,12 +451,6 @@
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
@@ -523,6 +530,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -583,28 +609,6 @@
 <span class="cline-any cline-yes">29×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.18;
 &nbsp;
 import "./TokenVesting.sol";
@@ -622,8 +626,8 @@ contract TokenSale is Ownable {
 &nbsp;
   /* Leave 10 tokens margin error in order to succedd
   with last pool allocation in case hard cap is reached */
-  uint256 public hardcap = 70000000 ether;
-  uint256 public vestingTime = 7776000;
+  uint256 constant public HARD_CAP = 70000000 ether;
+  uint256 constant public VESTING_TIME = 90 days;
   uint256 public weiUsdRate = 1;
   uint256 public btcUsdRate = 1;
 &nbsp;
@@ -652,6 +656,12 @@ contract TokenSale is Ownable {
     uint256 btcAmount
   );
 &nbsp;
+  event ClaimedTokens(
+    address indexed _token,
+    address indexed _controller,
+    uint256 _amount
+  );
+&nbsp;
   modifier validAddress(address _address) {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(_address != address(0x0));
     _;
@@ -677,7 +687,7 @@ contract TokenSale is Ownable {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(_vestingStarts &gt; startTime);
 &nbsp;
     vestingStarts = _vestingStarts;
-    vestingEnds = vestingStarts.add(vestingTime);
+    vestingEnds = vestingStarts.add(VESTING_TIME);
     startTime = _startTime;
     endTime = _endTime;
     wallet = _wallet;
@@ -711,6 +721,7 @@ contract TokenSale is Ownable {
       address _distributionContract
   ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     <span class="missing-if-branch" title="else path not taken" >E</span>require(!activated);
+    activated = true;
 &nbsp;
     token = BurnableToken(_sdt);
     vesting = TokenVesting(_vestingContract);
@@ -720,7 +731,6 @@ contract TokenSale is Ownable {
     token.transfer(_distributionContract, 161000000 ether);
 &nbsp;
     //rearly backers allocation
-&nbsp;
     uint256 threeMonths = vestingStarts.add(90 days);
     uint256 twoYears = vestingStarts.add(2 years);
 &nbsp;
@@ -746,7 +756,6 @@ contract TokenSale is Ownable {
     grantVestedTokens(0x93C77A6DC1fe12D64F4d97E96c6672FE517eb0Bb, 1950000 ether, vestingStarts, threeMonths);
     grantVestedTokens(0x675F249E78ca19367b9e26B206B9Bc519195De94, 1950000 ether, vestingStarts, twoYears);
     grantVestedTokens(0xb93151f6f5Cf1F416CdBE8C76745D18CDfe83395, 1950000 ether, vestingStarts, twoYears);
-    activated = true;
   }
 &nbsp;
   function finalize(
@@ -803,6 +812,25 @@ contract TokenSale is Ownable {
     return _usd.mul(100 ether).div(14);
   }
 &nbsp;
+  //////////
+  // Safety Methods
+  //////////
+  /// @notice This method can be used by the controller to extract mistakenly
+  ///  sent tokens to this contract.
+  /// @param _token The address of the token contract that you want to recover
+  ///  set to 0 in case you want to extract ether.
+<span class="fstat-no" title="function not covered" >  function claimTokens(address _token) public onlyOwner </span>{
+<span class="cstat-no" title="statement not covered" >    if (_token == 0x0) {</span>
+      owner.transfer(this.balance);
+<span class="cstat-no" title="statement not covered" >      return;</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    ERC20Basic erc20token = ERC20Basic(_token)</span>;
+<span class="cstat-no" title="statement not covered" >    uint256 balance = erc20token.balanceOf(this)</span>;
+    erc20token.transfer(owner, balance);
+<span class="cstat-no" title="statement not covered" >    ClaimedTokens(_token, owner, balance)</span>;
+  }
+&nbsp;
   function forwardFunds() internal {
     wallet.transfer(msg.value);
   }
@@ -844,7 +872,7 @@ contract TokenSale is Ownable {
     raised = raised.add(usd);
     soldTokens = soldTokens.add(tokens);
 &nbsp;
-    <span class="missing-if-branch" title="else path not taken" >E</span>require(soldTokens &lt;= hardcap);
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(soldTokens &lt;= HARD_CAP);
   }
 &nbsp;
   /**
@@ -863,28 +891,6 @@ contract TokenSale is Ownable {
     token.transfer(vesting, _value);
     vesting.grantVestedTokens(_to, _value, _start, _vesting);
   }
-&nbsp;
-  //////////
-  // Safety Methods
-  //////////
-&nbsp;
-  /// @notice This method can be used by the controller to extract mistakenly
-  ///  sent tokens to this contract.
-  /// @param _token The address of the token contract that you want to recover
-  ///  set to 0 in case you want to extract ether.
-<span class="fstat-no" title="function not covered" >  function claimTokens(address _token) public onlyOwner </span>{
-<span class="cstat-no" title="statement not covered" >    if (_token == 0x0) {</span>
-      owner.transfer(this.balance);
-<span class="cstat-no" title="statement not covered" >      return;</span>
-    }
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    ERC20Basic erc20token = ERC20Basic(_token)</span>;
-<span class="cstat-no" title="statement not covered" >    uint256 balance = erc20token.balanceOf(this)</span>;
-    erc20token.transfer(owner, balance);
-<span class="cstat-no" title="statement not covered" >    ClaimedTokens(_token, owner, balance)</span>;
-  }
-  event ClaimedTokens(address indexed _token, address indexed _controller, uint256 _amount);
-&nbsp;
 }
 &nbsp;</pre></td></tr>
 </table></pre>
@@ -892,7 +898,7 @@ contract TokenSale is Ownable {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue May 01 2018 11:52:42 GMT-0500 (-05)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed May 09 2018 22:42:00 GMT+1200 (NZST)
 </div>
 </div>
 <script src="../prettify.js"></script>

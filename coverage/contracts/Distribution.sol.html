@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">88.64% </span>
+        <span class="strong">86.67% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>39/44</span>
+        <span class='fraction'>39/45</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">73.08% </span>
+        <span class="strong">67.86% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>19/26</span>
+        <span class='fraction'>19/28</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">90.91% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>10/11</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">86% </span>
+        <span class="strong">84.31% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>43/50</span>
+        <span class='fraction'>43/51</span>
       </div>
     </div>
   </div>
@@ -233,7 +233,15 @@
 188
 189
 190
-191</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+191
+192
+193
+194
+195
+196
+197
+198
+199</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -285,20 +293,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-yes">1×</span>
-<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
@@ -328,6 +322,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5×</span>
 <span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -381,6 +390,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">20×</span>
 <span class="cline-any cline-yes">19×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -413,12 +424,17 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -429,6 +445,7 @@ import "zeppelin-solidity/contracts/token/BurnableToken.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 &nbsp;
+&nbsp;
 /**
  * @title Distribution contract
  * @dev see https://send.sd/distribution
@@ -436,8 +453,8 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 contract Distribution is Ownable {
   using SafeMath for uint256;
 &nbsp;
-  uint16 public stages; 
-  uint256 public stageDuration; 
+  uint16 public stages;
+  uint256 public stageDuration;
   uint256 public startTime;
 &nbsp;
   uint256 public soldTokens;
@@ -482,34 +499,19 @@ contract Distribution is Ownable {
   }
 &nbsp;
   /**
-   * @dev Initialize distribution
-   * @param _cap uint256 The amount of tokens for distribution
-   */
-  function init(uint256 _cap, uint256 _startTime) public onlyOwner {
-    <span class="missing-if-branch" title="else path not taken" >E</span>require (!isActive);
-    <span class="missing-if-branch" title="else path not taken" >E</span>require (token.balanceOf(this) == _cap);
-    <span class="missing-if-branch" title="else path not taken" >E</span>require (_startTime &gt; block.timestamp);
-&nbsp;
-    startTime = _startTime;
-    cap = _cap;
-    stageCap = cap / stages;
-    isActive = true;
-  }
-&nbsp;
-  /**
    * @dev contribution function
    */
   function () external payable {
-    <span class="missing-if-branch" title="else path not taken" >E</span>require (isActive);
-    require (weiUsdRate &gt; 0);
-    require (getStage() &lt; stages);
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(isActive);
+    require(weiUsdRate &gt; 0);
+    require(getStage() &lt; stages);
 &nbsp;
     uint256 usd = msg.value / weiUsdRate;
     uint256 tokens = computeTokens(usd);
     uint16 stage = getStage();
 &nbsp;
     sold[stage] = sold[stage].add(tokens);
-    require (sold[stage] &lt; stageCap);
+    require(sold[stage] &lt; stageCap);
 &nbsp;
     contributions[msg.sender][stage] = contributions[msg.sender][stage].add(tokens);
     soldTokens = soldTokens.add(tokens);
@@ -521,24 +523,39 @@ contract Distribution is Ownable {
   }
 &nbsp;
   /**
+   * @dev Initialize distribution
+   * @param _cap uint256 The amount of tokens for distribution
+   */
+  function init(uint256 _cap, uint256 _startTime) public onlyOwner {
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(!isActive);
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(token.balanceOf(this) == _cap);
+    <span class="missing-if-branch" title="else path not taken" >E</span>require(_startTime &gt; block.timestamp);
+&nbsp;
+    startTime = _startTime;
+    cap = _cap;
+    stageCap = cap / stages;
+    isActive = true;
+  }
+&nbsp;
+  /**
    * @dev retrieve bonus from specified stage
    * @param _stage uint16 The stage
    */
   function claimBonus(uint16 _stage) public {
     require(!claimed[msg.sender][_stage]);
-    require (getStage() &gt; _stage);
+    require(getStage() &gt; _stage);
 &nbsp;
     if (!burned[_stage]) {
-      token.burn(stageCap.sub(sold[_stage]).sub(sold[_stage].mul(computeBonus(_stage)).div(1000000000000000000)));
+      token.burn(stageCap.sub(sold[_stage]).sub(sold[_stage].mul(computeBonus(_stage)).div(1 ether)));
       burned[_stage] = true;
     }
 &nbsp;
-  	uint256 tokens = computeAddressBonus(_stage);
-  	token.transfer(msg.sender, tokens);
-  	bonusClaimedTokens = bonusClaimedTokens.add(tokens);
-  	claimed[msg.sender][_stage] = true;
+    uint256 tokens = computeAddressBonus(_stage);
+    token.transfer(msg.sender, tokens);
+    bonusClaimedTokens = bonusClaimedTokens.add(tokens);
+    claimed[msg.sender][_stage] = true;
 &nbsp;
-  	NewBonusClaim(msg.sender, tokens);
+    NewBonusClaim(msg.sender, tokens);
   }
 &nbsp;
   /**
@@ -551,7 +568,7 @@ contract Distribution is Ownable {
   }
 &nbsp;
   /**
-   * @dev retrieve ETH 
+   * @dev retrieve ETH
    * @param _amount uint256 The new exchange rate
    * @param _address address The address to receive ETH
    */
@@ -564,15 +581,17 @@ contract Distribution is Ownable {
    * @param _usd uint256 Value in USD
    */
   function computeTokens(uint256 _usd) public view returns(uint256) {
-    return _usd.mul(1000000000000000000000000000000000000).div(soldTokens.mul(19800000000000000000).div(cap).add(200000000000000000));
+    return _usd.mul(1000000000000000000 ether).div(
+      soldTokens.mul(19800000000000000000).div(cap).add(200000000000000000)
+    );
   }
 &nbsp;
   /**
    * @dev current stage
    */
   function getStage() public view returns(uint16) {
-    require (block.timestamp &gt;= startTime);
-  	return uint16(uint256(block.timestamp).sub(startTime).div(stageDuration));
+    require(block.timestamp &gt;= startTime);
+    return uint16(uint256(block.timestamp).sub(startTime).div(stageDuration));
   }
 &nbsp;
   /**
@@ -580,7 +599,7 @@ contract Distribution is Ownable {
    * @param _stage uint16 The stage
    */
   function computeBonus(uint16 _stage) public view returns(uint256) {
-  	return uint256(100000000000000000).sub(sold[_stage].mul(100000).div(441095890411));
+    return uint256(100000000000000000).sub(sold[_stage].mul(100000).div(441095890411));
   }
 &nbsp;
   /**
@@ -588,18 +607,19 @@ contract Distribution is Ownable {
    * @param _stage uint16 The stage
    */
   function computeAddressBonus(uint16 _stage) public view returns(uint256) {
-  	return contributions[msg.sender][_stage].mul(computeBonus(_stage)).div(1000000000000000000);
+    return contributions[msg.sender][_stage].mul(computeBonus(_stage)).div(1 ether);
   }
 &nbsp;
   //////////
   // Safety Methods
   //////////
-&nbsp;
   /// @notice This method can be used by the controller to extract mistakenly
   ///  sent tokens to this contract.
   /// @param _token The address of the token contract that you want to recover
   ///  set to 0 in case you want to extract ether.
 <span class="fstat-no" title="function not covered" >  function claimTokens(address _token) public onlyOwner </span>{
+    // owner can claim any token but SDT
+<span class="cstat-no" title="statement not covered" >    require(_token != address(token))</span>;
 <span class="cstat-no" title="statement not covered" >    if (_token == 0x0) {</span>
       owner.transfer(this.balance);
 <span class="cstat-no" title="statement not covered" >      return;</span>
@@ -610,16 +630,20 @@ contract Distribution is Ownable {
     erc20token.transfer(owner, balance);
 <span class="cstat-no" title="statement not covered" >    ClaimedTokens(_token, owner, balance)</span>;
   }
-  event ClaimedTokens(address indexed _token, address indexed _controller, uint256 _amount);
 &nbsp;
-&nbsp;
-}</pre></td></tr>
+  event ClaimedTokens(
+    address indexed _token,
+    address indexed _controller,
+    uint256 _amount
+  );
+}
+&nbsp;</pre></td></tr>
 </table></pre>
 <div class='push'></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue May 01 2018 11:52:42 GMT-0500 (-05)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed May 09 2018 22:42:00 GMT+1200 (NZST)
 </div>
 </div>
 <script src="../prettify.js"></script>
