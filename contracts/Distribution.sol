@@ -175,6 +175,8 @@ contract Distribution is Ownable {
   /// @param _token The address of the token contract that you want to recover
   ///  set to 0 in case you want to extract ether.
   function claimTokens(address _token) public onlyOwner {
+    // owner can claim any token but SDT
+    require(_token != address(token));
     if (_token == 0x0) {
       owner.transfer(this.balance);
       return;
@@ -185,7 +187,10 @@ contract Distribution is Ownable {
     erc20token.transfer(owner, balance);
     ClaimedTokens(_token, owner, balance);
   }
-  event ClaimedTokens(address indexed _token, address indexed _controller, uint256 _amount);
 
-
+  event ClaimedTokens(
+    address indexed _token,
+    address indexed _controller,
+    uint256 _amount
+  );
 }
