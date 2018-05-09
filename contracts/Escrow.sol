@@ -177,7 +177,7 @@ contract Escrow is IEscrow, Ownable {
    This function is a way to get other ETC20 tokens
    back to their rightful owner if sent by mistake
    */
-  function transferToken(address _tokenAddress, address _transferTo, uint256 _value) onlyOwner external {
+  function transferToken(address _tokenAddress, address _transferTo, uint256 _value) public onlyOwner {
     require(_tokenAddress != address(token));
 
     ISendToken erc20Token = ISendToken(_tokenAddress);
