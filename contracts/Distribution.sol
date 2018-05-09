@@ -105,7 +105,7 @@ contract Distribution is Ownable {
     require(getStage() > _stage);
 
     if (!burned[_stage]) {
-      token.burn(stageCap.sub(sold[_stage]).sub(sold[_stage].mul(computeBonus(_stage)).div(1000000000000000000)));
+      token.burn(stageCap.sub(sold[_stage]).sub(sold[_stage].mul(computeBonus(_stage)).div(1 ether)));
       burned[_stage] = true;
     }
 
@@ -140,7 +140,9 @@ contract Distribution is Ownable {
    * @param _usd uint256 Value in USD
    */
   function computeTokens(uint256 _usd) public view returns(uint256) {
-    return _usd.mul(1000000000000000000000000000000000000).div(soldTokens.mul(19800000000000000000).div(cap).add(200000000000000000));
+    return _usd.mul(1000000000000000000 ether).div(
+      soldTokens.mul(19800000000000000000).div(cap).add(200000000000000000)
+    );
   }
 
   /**
