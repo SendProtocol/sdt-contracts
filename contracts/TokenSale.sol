@@ -209,6 +209,7 @@ contract TokenSale is Ownable {
   /// @param _token The address of the token contract that you want to recover
   ///  set to 0 in case you want to extract ether.
   function claimTokens(address _token) public onlyOwner {
+    require(_token != address(token));
     if (_token == 0x0) {
       owner.transfer(this.balance);
       return;
