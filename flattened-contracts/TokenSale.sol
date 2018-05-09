@@ -390,8 +390,8 @@ contract TokenSale is Ownable {
 
   /* Leave 10 tokens margin error in order to succedd
   with last pool allocation in case hard cap is reached */
-  uint256 public hardcap = 70000000 ether;
-  uint256 public vestingTime = 7776000;
+  uint256 constant public HARD_CAP = 70000000 ether;
+  uint256 constant public VESTING_TIME = 90 days;
   uint256 public weiUsdRate = 1;
   uint256 public btcUsdRate = 1;
 
@@ -420,6 +420,12 @@ contract TokenSale is Ownable {
     uint256 btcAmount
   );
 
+  event ClaimedTokens(
+    address indexed _token,
+    address indexed _controller,
+    uint256 _amount
+  );
+
   modifier validAddress(address _address) {
     require(_address != address(0x0));
     _;
@@ -445,7 +451,7 @@ contract TokenSale is Ownable {
     require(_vestingStarts > startTime);
 
     vestingStarts = _vestingStarts;
-    vestingEnds = vestingStarts.add(vestingTime);
+    vestingEnds = vestingStarts.add(VESTING_TIME);
     startTime = _startTime;
     endTime = _endTime;
     wallet = _wallet;
@@ -479,6 +485,7 @@ contract TokenSale is Ownable {
       address _distributionContract
   ) public validAddress(_sdt) validAddress(_vestingContract) onlyOwner {
     require(!activated);
+    activated = true;
 
     token = BurnableToken(_sdt);
     vesting = TokenVesting(_vestingContract);
@@ -488,7 +495,6 @@ contract TokenSale is Ownable {
     token.transfer(_distributionContract, 161000000 ether);
 
     //rearly backers allocation
-
     uint256 threeMonths = vestingStarts.add(90 days);
     uint256 twoYears = vestingStarts.add(2 years);
 
@@ -514,7 +520,6 @@ contract TokenSale is Ownable {
     grantVestedTokens(0x93C77A6DC1fe12D64F4d97E96c6672FE517eb0Bb, 1950000 ether, vestingStarts, threeMonths);
     grantVestedTokens(0x675F249E78ca19367b9e26B206B9Bc519195De94, 1950000 ether, vestingStarts, twoYears);
     grantVestedTokens(0xb93151f6f5Cf1F416CdBE8C76745D18CDfe83395, 1950000 ether, vestingStarts, twoYears);
-    activated = true;
   }
 
   function finalize(
@@ -571,6 +576,26 @@ contract TokenSale is Ownable {
     return _usd.mul(100 ether).div(14);
   }
 
+  //////////
+  // Safety Methods
+  //////////
+  /// @notice This method can be used by the controller to extract mistakenly
+  ///  sent tokens to this contract.
+  /// @param _token The address of the token contract that you want to recover
+  ///  set to 0 in case you want to extract ether.
+  function claimTokens(address _token) public onlyOwner {
+    require(_token != address(token));
+    if (_token == 0x0) {
+      owner.transfer(this.balance);
+      return;
+    }
+
+    ERC20Basic erc20token = ERC20Basic(_token);
+    uint256 balance = erc20token.balanceOf(this);
+    erc20token.transfer(owner, balance);
+    ClaimedTokens(_token, owner, balance);
+  }
+
   function forwardFunds() internal {
     wallet.transfer(msg.value);
   }
@@ -612,7 +637,7 @@ contract TokenSale is Ownable {
     raised = raised.add(usd);
     soldTokens = soldTokens.add(tokens);
 
-    require(soldTokens <= hardcap);
+    require(soldTokens <= HARD_CAP);
   }
 
   /**
@@ -631,26 +656,4 @@ contract TokenSale is Ownable {
     token.transfer(vesting, _value);
     vesting.grantVestedTokens(_to, _value, _start, _vesting);
   }
-
-  //////////
-  // Safety Methods
-  //////////
-
-  /// @notice This method can be used by the controller to extract mistakenly
-  ///  sent tokens to this contract.
-  /// @param _token The address of the token contract that you want to recover
-  ///  set to 0 in case you want to extract ether.
-  function claimTokens(address _token) public onlyOwner {
-    if (_token == 0x0) {
-      owner.transfer(this.balance);
-      return;
-    }
-
-    ERC20Basic erc20token = ERC20Basic(_token);
-    uint256 balance = erc20token.balanceOf(this);
-    erc20token.transfer(owner, balance);
-    ClaimedTokens(_token, owner, balance);
-  }
-  event ClaimedTokens(address indexed _token, address indexed _controller, uint256 _amount);
-
 }

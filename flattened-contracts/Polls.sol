@@ -98,6 +98,7 @@ contract Polls is Ownable {
     require(_token != 0x0);
     token = ISnapshotToken(_token);
   }
+
   /**
    * @dev Create a poll
    * @dev _question and _options parameters are only for logging

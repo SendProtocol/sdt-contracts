@@ -166,8 +166,8 @@ contract BurnableToken is BasicToken {
 contract Distribution is Ownable {
   using SafeMath for uint256;
 
-  uint16 public stages; 
-  uint256 public stageDuration; 
+  uint16 public stages;
+  uint256 public stageDuration;
   uint256 public startTime;
 
   uint256 public soldTokens;
@@ -212,34 +212,19 @@ contract Distribution is Ownable {
   }
 
   /**
-   * @dev Initialize distribution
-   * @param _cap uint256 The amount of tokens for distribution
-   */
-  function init(uint256 _cap, uint256 _startTime) public onlyOwner {
-    require (!isActive);
-    require (token.balanceOf(this) == _cap);
-    require (_startTime > block.timestamp);
-
-    startTime = _startTime;
-    cap = _cap;
-    stageCap = cap / stages;
-    isActive = true;
-  }
-
-  /**
    * @dev contribution function
    */
   function () external payable {
-    require (isActive);
-    require (weiUsdRate > 0);
-    require (getStage() < stages);
+    require(isActive);
+    require(weiUsdRate > 0);
+    require(getStage() < stages);
 
     uint256 usd = msg.value / weiUsdRate;
     uint256 tokens = computeTokens(usd);
     uint16 stage = getStage();
 
     sold[stage] = sold[stage].add(tokens);
-    require (sold[stage] < stageCap);
+    require(sold[stage] < stageCap);
 
     contributions[msg.sender][stage] = contributions[msg.sender][stage].add(tokens);
     soldTokens = soldTokens.add(tokens);
@@ -251,24 +236,39 @@ contract Distribution is Ownable {
   }
 
   /**
+   * @dev Initialize distribution
+   * @param _cap uint256 The amount of tokens for distribution
+   */
+  function init(uint256 _cap, uint256 _startTime) public onlyOwner {
+    require(!isActive);
+    require(token.balanceOf(this) == _cap);
+    require(_startTime > block.timestamp);
+
+    startTime = _startTime;
+    cap = _cap;
+    stageCap = cap / stages;
+    isActive = true;
+  }
+
+  /**
    * @dev retrieve bonus from specified stage
    * @param _stage uint16 The stage
    */
   function claimBonus(uint16 _stage) public {
     require(!claimed[msg.sender][_stage]);
-    require (getStage() > _stage);
+    require(getStage() > _stage);
 
     if (!burned[_stage]) {
-      token.burn(stageCap.sub(sold[_stage]).sub(sold[_stage].mul(computeBonus(_stage)).div(1000000000000000000)));
+      token.burn(stageCap.sub(sold[_stage]).sub(sold[_stage].mul(computeBonus(_stage)).div(1 ether)));
       burned[_stage] = true;
     }
 
-  	uint256 tokens = computeAddressBonus(_stage);
-  	token.transfer(msg.sender, tokens);
-  	bonusClaimedTokens = bonusClaimedTokens.add(tokens);
-  	claimed[msg.sender][_stage] = true;
+    uint256 tokens = computeAddressBonus(_stage);
+    token.transfer(msg.sender, tokens);
+    bonusClaimedTokens = bonusClaimedTokens.add(tokens);
+    claimed[msg.sender][_stage] = true;
 
-  	NewBonusClaim(msg.sender, tokens);
+    NewBonusClaim(msg.sender, tokens);
   }
 
   /**
@@ -281,7 +281,7 @@ contract Distribution is Ownable {
   }
 
   /**
-   * @dev retrieve ETH 
+   * @dev retrieve ETH
    * @param _amount uint256 The new exchange rate
    * @param _address address The address to receive ETH
    */
@@ -294,15 +294,17 @@ contract Distribution is Ownable {
    * @param _usd uint256 Value in USD
    */
   function computeTokens(uint256 _usd) public view returns(uint256) {
-    return _usd.mul(1000000000000000000000000000000000000).div(soldTokens.mul(19800000000000000000).div(cap).add(200000000000000000));
+    return _usd.mul(1000000000000000000 ether).div(
+      soldTokens.mul(19800000000000000000).div(cap).add(200000000000000000)
+    );
   }
 
   /**
    * @dev current stage
    */
   function getStage() public view returns(uint16) {
-    require (block.timestamp >= startTime);
-  	return uint16(uint256(block.timestamp).sub(startTime).div(stageDuration));
+    require(block.timestamp >= startTime);
+    return uint16(uint256(block.timestamp).sub(startTime).div(stageDuration));
   }
 
   /**
@@ -310,7 +312,7 @@ contract Distribution is Ownable {
    * @param _stage uint16 The stage
    */
   function computeBonus(uint16 _stage) public view returns(uint256) {
-  	return uint256(100000000000000000).sub(sold[_stage].mul(100000).div(441095890411));
+    return uint256(100000000000000000).sub(sold[_stage].mul(100000).div(441095890411));
   }
 
   /**
@@ -318,18 +320,19 @@ contract Distribution is Ownable {
    * @param _stage uint16 The stage
    */
   function computeAddressBonus(uint16 _stage) public view returns(uint256) {
-  	return contributions[msg.sender][_stage].mul(computeBonus(_stage)).div(1000000000000000000);
+    return contributions[msg.sender][_stage].mul(computeBonus(_stage)).div(1 ether);
   }
 
   //////////
   // Safety Methods
   //////////
-
   /// @notice This method can be used by the controller to extract mistakenly
   ///  sent tokens to this contract.
   /// @param _token The address of the token contract that you want to recover
   ///  set to 0 in case you want to extract ether.
   function claimTokens(address _token) public onlyOwner {
+    // owner can claim any token but SDT
+    require(_token != address(token));
     if (_token == 0x0) {
       owner.transfer(this.balance);
       return;
@@ -340,7 +343,10 @@ contract Distribution is Ownable {
     erc20token.transfer(owner, balance);
     ClaimedTokens(_token, owner, balance);
   }
-  event ClaimedTokens(address indexed _token, address indexed _controller, uint256 _amount);
 
-
+  event ClaimedTokens(
+    address indexed _token,
+    address indexed _controller,
+    uint256 _amount
+  );
 }
