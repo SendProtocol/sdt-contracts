@@ -4,6 +4,7 @@ import './ISnapshotToken.sol';
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'zeppelin-solidity/contracts/token/StandardToken.sol';
 
+
 /**
  * @title Snapshot Token
  *

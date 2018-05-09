@@ -3,6 +3,7 @@ pragma solidity ^0.4.18;
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import './ISnapshotToken.sol';
 
+
 /**
  * @title Send token
  *
@@ -42,6 +43,7 @@ contract Polls is Ownable {
     require(_token != 0x0);
     token = ISnapshotToken(_token);
   }
+
   /**
    * @dev Create a poll
    * @dev _question and _options parameters are only for logging

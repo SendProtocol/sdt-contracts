@@ -2,6 +2,7 @@ pragma solidity ^0.4.18;
 
 import './SendToken.sol';
 
+
 /**
  * @title To instance SendToken for SEND foundation crowdasale
  * @dev see https://send.sd/token

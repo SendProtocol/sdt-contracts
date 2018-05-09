@@ -113,7 +113,6 @@ contract TokenSale is Ownable {
     token.transfer(_distributionContract, 161000000 ether);
 
     //rearly backers allocation
-
     uint256 threeMonths = vestingStarts.add(90 days);
     uint256 twoYears = vestingStarts.add(2 years);
 

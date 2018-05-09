@@ -4,6 +4,7 @@ import "zeppelin-solidity/contracts/token/BurnableToken.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
+
 /**
  * @title Distribution contract
  * @dev see https://send.sd/distribution
@@ -11,8 +12,8 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 contract Distribution is Ownable {
   using SafeMath for uint256;
 
-  uint16 public stages; 
-  uint256 public stageDuration; 
+  uint16 public stages;
+  uint256 public stageDuration;
   uint256 public startTime;
 
   uint256 public soldTokens;
@@ -75,16 +76,16 @@ contract Distribution is Ownable {
    * @dev contribution function
    */
   function () external payable {
-    require (isActive);
-    require (weiUsdRate > 0);
-    require (getStage() < stages);
+    require(isActive);
+    require(weiUsdRate > 0);
+    require(getStage() < stages);
 
     uint256 usd = msg.value / weiUsdRate;
     uint256 tokens = computeTokens(usd);
     uint16 stage = getStage();
 
     sold[stage] = sold[stage].add(tokens);
-    require (sold[stage] < stageCap);
+    require(sold[stage] < stageCap);
 
     contributions[msg.sender][stage] = contributions[msg.sender][stage].add(tokens);
     soldTokens = soldTokens.add(tokens);
@@ -101,19 +102,19 @@ contract Distribution is Ownable {
    */
   function claimBonus(uint16 _stage) public {
     require(!claimed[msg.sender][_stage]);
-    require (getStage() > _stage);
+    require(getStage() > _stage);
 
     if (!burned[_stage]) {
       token.burn(stageCap.sub(sold[_stage]).sub(sold[_stage].mul(computeBonus(_stage)).div(1000000000000000000)));
       burned[_stage] = true;
     }
 
-  	uint256 tokens = computeAddressBonus(_stage);
-  	token.transfer(msg.sender, tokens);
-  	bonusClaimedTokens = bonusClaimedTokens.add(tokens);
-  	claimed[msg.sender][_stage] = true;
+    uint256 tokens = computeAddressBonus(_stage);
+    token.transfer(msg.sender, tokens);
+    bonusClaimedTokens = bonusClaimedTokens.add(tokens);
+    claimed[msg.sender][_stage] = true;
 
-  	NewBonusClaim(msg.sender, tokens);
+    NewBonusClaim(msg.sender, tokens);
   }
 
   /**
@@ -126,7 +127,7 @@ contract Distribution is Ownable {
   }
 
   /**
-   * @dev retrieve ETH 
+   * @dev retrieve ETH
    * @param _amount uint256 The new exchange rate
    * @param _address address The address to receive ETH
    */
@@ -146,8 +147,8 @@ contract Distribution is Ownable {
    * @dev current stage
    */
   function getStage() public view returns(uint16) {
-    require (block.timestamp >= startTime);
-  	return uint16(uint256(block.timestamp).sub(startTime).div(stageDuration));
+    require(block.timestamp >= startTime);
+    return uint16(uint256(block.timestamp).sub(startTime).div(stageDuration));
   }
 
   /**
@@ -155,7 +156,7 @@ contract Distribution is Ownable {
    * @param _stage uint16 The stage
    */
   function computeBonus(uint16 _stage) public view returns(uint256) {
-  	return uint256(100000000000000000).sub(sold[_stage].mul(100000).div(441095890411));
+    return uint256(100000000000000000).sub(sold[_stage].mul(100000).div(441095890411));
   }
 
   /**
@@ -163,13 +164,12 @@ contract Distribution is Ownable {
    * @param _stage uint16 The stage
    */
   function computeAddressBonus(uint16 _stage) public view returns(uint256) {
-  	return contributions[msg.sender][_stage].mul(computeBonus(_stage)).div(1000000000000000000);
+    return contributions[msg.sender][_stage].mul(computeBonus(_stage)).div(1 ether);
   }
 
   //////////
   // Safety Methods
   //////////
-
   /// @notice This method can be used by the controller to extract mistakenly
   ///  sent tokens to this contract.
   /// @param _token The address of the token contract that you want to recover
