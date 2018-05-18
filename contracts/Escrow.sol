@@ -3,12 +3,15 @@ pragma solidity ^0.4.18;
 import './ISendToken.sol';
 import './IEscrow.sol';
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title Vesting contract for SDT
  * @dev see https://send.sd/token
  */
 contract Escrow is IEscrow, Ownable {
+  using SafeMath for uint256;
+
   ISendToken public token;
 
   struct Lock {
@@ -148,7 +151,7 @@ contract Escrow is IEscrow, Ownable {
 
     delete escrows[_arbitrator][_transactionId];
 
-    token.transfer(msg.sender, lock.value + lock.fee);
+    token.transfer(msg.sender, lock.value.add(lock.fee));
 
     Released(
       _arbitrator,
