@@ -83,6 +83,41 @@ interface ISendToken {
   );
 }
 
+// File: zeppelin-solidity/contracts/math/SafeMath.sol
+
+/**
+ * @title SafeMath
+ * @dev Math operations with safety checks that throw on error
+ */
+library SafeMath {
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    if (a == 0) {
+      return 0;
+    }
+    uint256 c = a * b;
+    assert(c / a == b);
+    return c;
+  }
+
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return c;
+  }
+
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }
+}
+
 // File: zeppelin-solidity/contracts/ownership/Ownable.sol
 
 /**
@@ -134,6 +169,8 @@ contract Ownable {
  * @dev see https://send.sd/token
  */
 contract Escrow is IEscrow, Ownable {
+  using SafeMath for uint256;
+
   ISendToken public token;
 
   struct Lock {
@@ -273,7 +310,7 @@ contract Escrow is IEscrow, Ownable {
 
     delete escrows[_arbitrator][_transactionId];
 
-    token.transfer(msg.sender, lock.value + lock.fee);
+    token.transfer(msg.sender, lock.value.add(lock.fee));
 
     Released(
       _arbitrator,

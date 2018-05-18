@@ -536,7 +536,7 @@ contract SendToken is ISendToken, SnapshotToken, BurnableToken {
   }
 
   /**
-   * @dev create an escrow transfer
+   * @dev create an escrow transfer being the arbitrator
    * @param _sender Address to send tokens
    * @param _recipient Address to receive tokens
    * @param _transactionId internal ID for arbitrator
@@ -577,7 +577,7 @@ contract SendToken is ISendToken, SnapshotToken, BurnableToken {
       uint256 _tokens,
       uint256 _fee
   ) public {
-    uint256 total = _tokens + _fee;
+    uint256 total = _tokens.add(_fee);
     transfer(escrow, total);
 
     escrow.fund(
