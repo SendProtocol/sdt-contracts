@@ -178,19 +178,24 @@ contract("TokenSale", function(accounts) {
     assert.equal(await this.sale.soldTokens.call(), allocated.valueOf());
   });
 
-  it("[ETH] 5,950,010 USD at 0.14 - should return right amount with a maximum error of 0.001%", async function() {
+  it("[ETH] buy all - should return right amount with a maximum error of 0.001%", async function() {
+    let tokens = 70000000 * 10 ** 18 - allocated;
+    let value = tokens / (10 ** 18) * 0.14;
+ 
     //Calculate tokens
-    bought = await this.sale.computeTokens.call(5950010 - presold);
-    error = math.abs(bought.valueOf() - (5950010 - presold) / 0.14 * 10 ** 18);
+    bought = await this.sale.computeTokens.call(value);
+    error = math.abs(bought.valueOf() - value / 0.14 * 10 ** 18);
 
     //execute purchase
     let circulatingSupply = await this.vesting.circulatingSupply.call();
     let saleBalance = await this.token.balanceOf.call(this.sale.address);
+    let tval = value * 100;
 
     await this.sale.sendTransaction({
       from: accounts[9],
-      value: (5950010 - presold) * 100
+      value: 367572298
     });
+
     let newCirculatingSupply = await this.vesting.circulatingSupply.call();
     let newSaleBalance = await this.token.balanceOf.call(this.sale.address);
 
@@ -199,14 +204,30 @@ contract("TokenSale", function(accounts) {
     });
 
     allocated = allocated.plus(bought);
-    collected = collected.plus(5950010 - presold);
+    collected = collected.plus(3675722);
 
     assert(error < bought.valueOf() * this.maxError);
     assert.equal(granted.valueOf(), allocated.sub(preallocated));
     assert.equal(newSaleBalance.valueOf(), saleBalance.sub(bought));
     assert.equal(newCirculatingSupply.valueOf(), circulatingSupply.valueOf());
+
+    let a = await this.sale.raised.call()
+    let b = await this.sale.soldTokens.call()
+
     assert.equal(await this.sale.raised.call(), collected.valueOf());
     assert.equal(await this.sale.soldTokens.call(), allocated.valueOf());
+  });
+
+  it("[ETH] Should fail if cap reached", async function() {
+    try {
+      await this.sale.sendTransaction({
+        from: accounts[9],
+        value: 100
+      });
+      assert.fail("should have thrown before");
+    } catch (error) {
+      assertJump(error);
+    }
   });
 
   it("Should fail if no contract owner", async function() {
@@ -232,7 +253,6 @@ contract("TokenSale", function(accounts) {
 
   it("Should be possible to resume the sale", async function() {
     await this.sale.resume();
-    await this.sale.btcPurchase(accounts[9], 100000);
   });
 
   it("Should be possible to finalize sale", async function() {
