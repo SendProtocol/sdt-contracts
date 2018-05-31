@@ -107,7 +107,6 @@ contract TokenVesting is Ownable {
   bool public active;
   ERC20Basic public token;
   mapping (address => TokenGrant[]) public grants;
-  mapping (address => bool) public allowed;
 
   uint256 public circulatingSupply = 0;
 
@@ -159,14 +158,6 @@ contract TokenVesting is Ownable {
     require(!active);
     require(initialized);
     active = true;
-  }
-
-  function allow(address _address) public onlyOwner {
-    allowed[_address] = true;
-  }
-
-  function revoke(address _address) public onlyOwner {
-    allowed[_address] = false;
   }
 
   /**
@@ -287,8 +278,6 @@ contract TokenVesting is Ownable {
   * @dev Claim all vested tokens up to current date
   */
   function claim(address _to) internal {
-    require(allowed[_to]);
-
     uint256 numberOfGrants = grants[_to].length;
 
     if (numberOfGrants == 0) {
@@ -494,32 +483,23 @@ contract TokenSale is Ownable {
     token.transfer(_icoCostsPool, 7000000 ether);
     token.transfer(_distributionContract, 161000000 ether);
 
-    //rearly backers allocation
+    //early backers allocation
     uint256 threeMonths = vestingStarts.add(90 days);
-    uint256 twoYears = vestingStarts.add(2 years);
 
-    updateStats(1016000, 17310000 ether);
-    grantVestedTokens(0xd6E722A6bae8E62d1034d4620CA898601AC9350b, 860000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0xacC37F88e93ae2FD1E371f76912785E3B21A8a73, 100000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x005B9E744b0e2Ff467D748CE228694D306670c35, 100000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x7A6720b291cd2e806d7B86aD279a6de109fE002a, 180000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x90dF318D244F170F57B3669e7646C2bb693Ceb54, 100000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0xfB4EEAa3056e5d77499fa52897d4E1ef996E06DC, 100000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x93934523F6f56Ff139d6B14AF71cA759A3b8c1a0, 100000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x10eC5d603Fb471d5C0A9d4a2753dA810f4c3Ba54, 100000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0xbF85462eB89308A328882f6a66aD11FF070c1eA9, 150000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x11e64d7bc1368cCa98270290Ee574E690C82B765, 200000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x08F77e15f4f756a7C9F77dFA28847e0f5488e9B2, 860000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0xA4E2f15a770DDDC064D29f5311b3e17E24681dE0, 200000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0xaf10CcBAA460626ebA1aFfe324168624C2B568eA, 400000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x6C261AeD58bE6cf65afABA1bA45E8DbBe32382fA, 400000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x323B1A13f3DD40Db10ddc125f07DDcF021b040E0, 600000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0xd4fa81451EB5bB0E99bA56B5Fda8d804aC91D3D6, 2700000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x4571F12E28b45d5D3AdE71e368739B6216485962, 2360000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x2059236Bff26556d43772e7Cd613136025dA601b, 1950000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x93C77A6DC1fe12D64F4d97E96c6672FE517eb0Bb, 1950000 ether, vestingStarts, threeMonths);
-    grantVestedTokens(0x675F249E78ca19367b9e26B206B9Bc519195De94, 1950000 ether, vestingStarts, twoYears);
-    grantVestedTokens(0xb93151f6f5Cf1F416CdBE8C76745D18CDfe83395, 1950000 ether, vestingStarts, twoYears);
+    updateStats(0, 43387693 ether);
+    grantVestedTokens(0x02f807E6a1a59F8714180B301Cba84E76d3B4d06, 22572063 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x3A1e89dD9baDe5985E7Eb36E9AFd200dD0E20613, 15280000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xA61c9A0E96eC7Ceb67586fC8BFDCE009395D9b21, 250000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x26C9899eA2F8940726BbCC79483F2ce07989314E, 100000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xC88d5031e00BC316bE181F0e60971e8fEdB9223b, 1360000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x38f4cAD7997907741FA0D912422Ae59aC6b83dD1, 250000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x2b2992e51E86980966c42736C458e2232376a044, 105000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xdD0F60610052bE0976Cf8BEE576Dbb3a1621a309, 140000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xd61B4F33D3413827baa1425E2FDa485913C9625B, 740000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0xE6D4a77D01C680Ebbc0c84393ca598984b3F45e3, 505630 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x35D3648c29Ac180D5C7Ef386D52de9539c9c487a, 150000 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x344a6130d187f51ef0DAb785e10FaEA0FeE4b5dE, 967500 ether, vestingStarts, threeMonths);
+    grantVestedTokens(0x026cC76a245987f3420D0FE30070B568b4b46F68, 967500 ether, vestingStarts, threeMonths);
   }
 
   function finalize(
