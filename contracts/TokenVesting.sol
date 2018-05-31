@@ -17,7 +17,6 @@ contract TokenVesting is Ownable {
   bool public active;
   ERC20Basic public token;
   mapping (address => TokenGrant[]) public grants;
-  mapping (address => bool) public allowed;
 
   uint256 public circulatingSupply = 0;
 
@@ -69,14 +68,6 @@ contract TokenVesting is Ownable {
     require(!active);
     require(initialized);
     active = true;
-  }
-
-  function allow(address _address) public onlyOwner {
-    allowed[_address] = true;
-  }
-
-  function revoke(address _address) public onlyOwner {
-    allowed[_address] = false;
   }
 
   /**
@@ -197,8 +188,6 @@ contract TokenVesting is Ownable {
   * @dev Claim all vested tokens up to current date
   */
   function claim(address _to) internal {
-    require(allowed[_to]);
-
     uint256 numberOfGrants = grants[_to].length;
 
     if (numberOfGrants == 0) {

@@ -105,7 +105,6 @@ contract("TokenVesting", function(accounts) {
   });
 
   it("User can claim tokens for himself", async function() {
-    await this.vesting.allow(this.tokenRecipient);
     await increaseTimeTo(this.end - duration.hours(1));
 
     let claimable = await this.vesting.claimableTokens.call({
@@ -127,7 +126,6 @@ contract("TokenVesting", function(accounts) {
   });
 
   it("claiming tokens with no grants should mnot change balance", async function() {
-    await this.vesting.allow(this.tokenHolder);
     await increaseTimeTo(this.end - duration.hours(1));
 
     let balanceBefore = await this.token.balanceOf.call(this.tokenHolder);
@@ -138,8 +136,6 @@ contract("TokenVesting", function(accounts) {
   });
 
   it("Owner can claim tokens in behalf of an user", async function() {
-    await this.vesting.allow(this.tokenRecipient);
-
     await increaseTimeTo(this.end - duration.hours(1));
 
     let claimable = await this.vesting.claimableTokens.call({
@@ -158,38 +154,6 @@ contract("TokenVesting", function(accounts) {
     assert(vestingBalance.sub(rest).abs() < error);
     assert(recipientBalance.sub(claimable).abs() < error);
     assert(claimableAfter < claimable);
-  });
-
-  it("Should fail if not whitelisted", async function() {
-    await increaseTimeTo(this.end - duration.hours(1));
-    try {
-      await this.vesting.claimTokens({ from: this.tokenRecipient });
-      assert.fail("should have thrown before");
-    } catch (error) {
-      assertJump(error);
-    }
-  });
-
-  it("Should fail if not whitelisted", async function() {
-    await increaseTimeTo(this.end - duration.hours(1));
-    try {
-      await this.vesting.claimTokensFor(this.tokenRecipient);
-      assert.fail("should have thrown before");
-    } catch (error) {
-      assertJump(error);
-    }
-  });
-
-  it("Should be possible to revoke whitelisted status", async function() {
-    await this.vesting.allow(this.tokenRecipient);
-    await this.vesting.revoke(this.tokenRecipient);
-    await increaseTimeTo(this.end - duration.hours(1));
-    try {
-      await this.vesting.claimTokens({ from: this.tokenRecipient });
-      assert.fail("should have thrown before");
-    } catch (error) {
-      assertJump(error);
-    }
   });
 
   it("Should fail if not owner", async function() {
