@@ -426,7 +426,7 @@ contract("SDT", function(accounts) {
       );
     });
 
-    it("should return tokens to owner except fee", async function() {
+    it("should return tokens to owner including fee", async function() {
 
       await increaseTimeTo(latestTime() + duration.hours(2));
 
@@ -451,12 +451,12 @@ contract("SDT", function(accounts) {
       escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
 
       assert.equal(
-        accountBalanceBefore.add(tokens).valueOf(),
+        accountBalanceBefore.add(tokens).add(fee).valueOf(),
         accountBalanceAfter.valueOf()
       );
       assert.equal(
         authBalanceAfter.valueOf(),
-        authBalanceBefore.add(fee).valueOf()
+        authBalanceBefore.valueOf()
       );
       assert.equal(destBalanceAfter.valueOf(), destBalanceBefore.valueOf());
       assert.equal(
@@ -664,6 +664,206 @@ contract("SDT", function(accounts) {
       );
     });
   });
+
+
+
+
+  describe("unlcoked escrow success", function() {
+    let tokens = 100;
+    let fee = 1;
+    let exchangeRate = 0;
+
+    before(async function() {
+      this.token = await SDT.new(accounts[0]);
+      this.escrow = await Escrow.new(this.token.address);
+      this.token.setEscrow(this.escrow.address);
+    });
+
+    it("should lock amount + fee", async function() {
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
+
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[9],
+        1,
+        tokens,
+        fee,
+        1,
+        {from: accounts[1]}
+      );
+
+      await this.token.fundEscrow(
+        accounts[1],
+        1,
+        tokens,
+        fee
+      )
+
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
+
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .add(tokens)
+          .add(fee)
+          .valueOf()
+      );
+      assert.equal(
+        accountBalanceAfter.valueOf(),
+        accountBalanceBefore
+          .sub(tokens)
+          .sub(fee)
+          .valueOf()
+      );
+    });
+
+    it("should be possible to spend locked balance", async function() {
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
+      destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
+
+      await this.escrow.releaseUnlocked(
+        accounts[0],
+        accounts[2],
+        1,
+        0,
+        { from: accounts[1] }
+      );
+
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      authBalanceAfter = await this.token.balanceOf.call(accounts[1]);
+      destBalanceAfter = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
+
+      assert.equal(
+        accountBalanceBefore.valueOf(),
+        accountBalanceAfter.valueOf()
+      );
+      assert.equal(
+        authBalanceAfter.valueOf(),
+        authBalanceBefore.add(fee).valueOf()
+      );
+      assert.equal(
+        destBalanceAfter.valueOf(),
+        destBalanceBefore.add(tokens).valueOf()
+      );
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .sub(fee)
+          .sub(tokens)
+          .valueOf()
+      );
+    });
+  });
+
+
+
+
+  describe("unlcoked escrow rollback", function() {
+    let tokens = 100;
+    let fee = 1;
+    let exchangeRate = 0;
+
+    before(async function() {
+      this.token = await SDT.new(accounts[0]);
+      this.escrow = await Escrow.new(this.token.address);
+      this.token.setEscrow(this.escrow.address);
+    });
+
+    it("should lock amount + fee", async function() {
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
+
+      await this.token.createEscrow(
+        accounts[0],
+        accounts[9],
+        1,
+        tokens,
+        fee,
+        1,
+        {from: accounts[1]}
+      );
+
+      await this.token.fundEscrow(
+        accounts[1],
+        1,
+        tokens,
+        fee
+      )
+
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
+
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .add(tokens)
+          .add(fee)
+          .valueOf()
+      );
+      assert.equal(
+        accountBalanceAfter.valueOf(),
+        accountBalanceBefore
+          .sub(tokens)
+          .sub(fee)
+          .valueOf()
+      );
+    });
+
+    it("should return tokens to owner including fee", async function() {
+      accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
+      authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
+      destBalanceBefore = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceBefore = await this.token.balanceOf.call(
+        this.escrow.address
+      );
+
+      await this.escrow.releaseUnlocked(
+        accounts[0],
+        accounts[0],
+        1,
+        exchangeRate,
+        { from: accounts[1] }
+      );
+
+      accountBalanceAfter = await this.token.balanceOf.call(accounts[0]);
+      authBalanceAfter = await this.token.balanceOf.call(accounts[1]);
+      destBalanceAfter = await this.token.balanceOf.call(accounts[2]);
+      escrowBalanceAfter = await this.token.balanceOf.call(this.escrow.address);
+
+      assert.equal(
+        accountBalanceBefore.add(tokens).add(fee).valueOf(),
+        accountBalanceAfter.valueOf()
+      );
+      assert.equal(
+        authBalanceAfter.valueOf(),
+        authBalanceBefore.valueOf()
+      );
+      assert.equal(destBalanceAfter.valueOf(), destBalanceBefore.valueOf());
+      assert.equal(
+        escrowBalanceAfter.valueOf(),
+        escrowBalanceBefore
+          .sub(fee)
+          .sub(tokens)
+          .valueOf()
+      );
+    });
+  });
+
+
+
+
+
 
   describe("withdraw other tokens", function() {
     let tokens = 100;

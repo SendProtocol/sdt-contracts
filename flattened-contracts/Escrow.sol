@@ -267,14 +267,58 @@ contract Escrow is IEscrow, Ownable {
 
     Lock memory lock = escrows[msg.sender][_transactionId];
 
+    require(lock.expiration != 1);
     require(lock.sender == _sender);
     require(lock.recipient == _recipient || lock.sender == _recipient);
     require(lock.paid);
 
-    token.transfer(_recipient, lock.value);
-
-    if (lock.fee > 0) {
+    if (lock.fee > 0 && lock.recipient == _recipient) {
+      token.transfer(_recipient, lock.value);
       token.transfer(msg.sender, lock.fee);
+    } else {
+      token.transfer(_recipient, lock.value.add(lock.fee));
+    }
+
+    delete escrows[msg.sender][_transactionId];
+
+    token.issueExchangeRate(
+      _sender,
+      _recipient,
+      msg.sender,
+      lock.value,
+      _transactionId,
+      _exchangeRate
+    );
+    Released(msg.sender, _recipient, _transactionId);
+  }
+
+  /**
+   * @dev Transfer a locked amount for timeless escrow
+   * @notice Only authorized address
+   * @notice Exchange rate has 18 decimal places
+   * @param _sender Address with locked amount
+   * @param _recipient Address to send funds to
+   * @param _transactionId App/user internal associated ID
+   * @param _exchangeRate Rate to be reported to the blockchain
+   */
+  function releaseUnlocked(
+      address _sender,
+      address _recipient,
+      uint256 _transactionId,
+      uint256 _exchangeRate
+  ) public {
+
+    Lock memory lock = escrows[msg.sender][_transactionId];
+
+    require(lock.expiration == 1);
+    require(lock.sender == _sender);
+    require(lock.paid);
+
+    if (lock.fee > 0 && lock.sender != _recipient) {
+      token.transfer(_recipient, lock.value);
+      token.transfer(msg.sender, lock.fee);
+    } else {
+      token.transfer(_recipient, lock.value.add(lock.fee));
     }
 
     delete escrows[msg.sender][_transactionId];
@@ -292,7 +336,7 @@ contract Escrow is IEscrow, Ownable {
 
   /**
    * @dev Claim back locked amount after expiration time
-   * @dev Cannot be claimed if expiration == 0
+   * @dev Cannot be claimed if expiration == 0 or expiration == 1
    * @notice Only works after lock expired
    * @param _arbitrator Authorized lock address
    * @param _transactionId transactionId ID from App/user
@@ -307,6 +351,7 @@ contract Escrow is IEscrow, Ownable {
     require(lock.paid);
     require(lock.expiration < block.timestamp);
     require(lock.expiration != 0);
+    require(lock.expiration != 1);
 
     delete escrows[_arbitrator][_transactionId];
 
@@ -329,6 +374,8 @@ contract Escrow is IEscrow, Ownable {
       uint256 _transactionId
   ) public {
     require(escrows[msg.sender][_transactionId].paid);
+    require(escrows[msg.sender][_transactionId].expiration != 0);
+    require(escrows[msg.sender][_transactionId].expiration != 1);
 
     escrows[msg.sender][_transactionId].expiration = 0;
 
