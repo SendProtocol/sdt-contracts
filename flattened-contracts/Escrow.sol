@@ -193,6 +193,10 @@ contract Escrow is IEscrow, Ownable {
     _;
   }
 
+  function isUnlocked(address _arbitrator, uint256 _transactionId) public view returns(bool) {
+    return escrows[_arbitrator][_transactionId].expiration == 1;
+  }
+
   /**
    * @dev Create a record for held tokens
    * @param _arbitrator Address to be authorized to spend locked funds

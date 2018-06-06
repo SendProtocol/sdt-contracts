@@ -78,6 +78,11 @@ contract("SDT", function(accounts) {
       );
     });
 
+    it("Should not be marked as unlocked", async function() {
+      let status = await this.escrow.isUnlocked.call(accounts[1], 1);
+      assert(!status);
+    })
+
     it("should fiail if trying to fund an escrow twice", async function() {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceBefore = await this.token.balanceOf.call(
@@ -721,6 +726,11 @@ contract("SDT", function(accounts) {
       );
     });
 
+    it("Should be marked as unlocked", async function() {
+      let status = await this.escrow.isUnlocked.call(accounts[1], 1);
+      assert(status);
+    })
+
     it("should be possible to spend locked balance", async function() {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       authBalanceBefore = await this.token.balanceOf.call(accounts[1]);
@@ -819,6 +829,11 @@ contract("SDT", function(accounts) {
           .valueOf()
       );
     });
+
+    it("Should be marked as unlocked", async function() {
+      let status = await this.escrow.isUnlocked.call(accounts[1], 1);
+      assert(status);
+    })
 
     it("should return tokens to owner including fee", async function() {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
