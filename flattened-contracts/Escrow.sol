@@ -193,6 +193,18 @@ contract Escrow is IEscrow, Ownable {
     _;
   }
 
+  function getStatus(address _arbitrator, uint256 _transactionId) 
+      public view returns(address, address, uint256, uint256, uint256, bool) {
+    return(
+      escrows[_arbitrator][_transactionId].sender,
+      escrows[_arbitrator][_transactionId].recipient,
+      escrows[_arbitrator][_transactionId].value,
+      escrows[_arbitrator][_transactionId].fee,
+      escrows[_arbitrator][_transactionId].expiration,
+      escrows[_arbitrator][_transactionId].paid
+    );
+  }
+
   function isUnlocked(address _arbitrator, uint256 _transactionId) public view returns(bool) {
     return escrows[_arbitrator][_transactionId].expiration == 1;
   }

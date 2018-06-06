@@ -83,6 +83,17 @@ contract("SDT", function(accounts) {
       assert(!status);
     })
 
+    it("Should return the right values", async function() {
+      let status = await this.escrow.getStatus.call(accounts[1], 1);
+      assert.equal(status[0], accounts[0]);
+      assert.equal(status[1], accounts[2]);
+      assert.equal(status[2], tokens);
+      assert.equal(status[3], fee);
+      assert.equal(status[4], futureDate);
+      assert.equal(status[5], true);
+    })
+
+
     it("should fiail if trying to fund an escrow twice", async function() {
       accountBalanceBefore = await this.token.balanceOf.call(accounts[0]);
       escrowBalanceBefore = await this.token.balanceOf.call(
