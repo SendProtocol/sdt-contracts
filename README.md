@@ -3,8 +3,6 @@
 
 ## SEND (SDT)
 
-Send (SDT) is 7-day price-stable crypto token that discovers a new market price once a week based on cross-border transaction volume and network liquidity. Send (SDT) is on track to use the largest network of decentralized agents to support increased liquidity for migrant corridors starting in the Americas and Africa. SDT will operate as the stable unit of exchange within the Send ecosystem without the daily volatility.
-
 For more information about Send (SDT) check our website: https://www.sendprotocol.com
 
 ---------------------------------
@@ -41,12 +39,10 @@ Contracts for Send Token (SDT) as described in Send's [Token Economics](https://
 - Initialize vesting contract with token and sale addresses
 - Set BTC and ETH exchange rates on sale contract
 - Initialize sale with token, distribution and vesting addresses
-- Add proxy contracts to sale contract proxy list
 - Deploy escrow contract and link on token contract
 
 ## Reviewers and audits
 - Marcio Abreu (Author) - CTO @ Send
 - Klaus Hott (Author) - Blockchain Advisor @ Send
 - CoinFabrik (Auditor) - Blockchain Technologies, FinTech and Smart Contracts Development: [Security audit results](https://blog.coinfabrik.com/security-audit-send-sdt-token-sale-ico-smart-contract/)
-
-Bug bounty program for SDT token TBA.
+- Community review - [Bug bounty program](https://medium.com/sendprotocol/send-sdt-bug-bounty-report-3cfde316f0b7)
